@@ -11,7 +11,7 @@ interface Team {
 
 export default function Index() {
   const router = useRouter();
-  let [team, setTeam] = useState({});
+  let [team, setTeam] = useState({ team_name: null });
 
   const loadTeam = async () => {
     try {

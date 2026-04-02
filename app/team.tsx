@@ -22,12 +22,14 @@ export default function Index() {
       console.error("Error saving team:", error);
     }
   };
+
   return (
     <View
       style={{
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
+        gap: 5,
       }}
     >
       <Text>STEMM Lab Games</Text>
