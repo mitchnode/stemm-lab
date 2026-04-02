@@ -1,7 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { Box, Button, Input, Select, Text } from "re-native-ui";
 import { useState } from "react";
-import { Alert, Button, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
@@ -24,34 +25,47 @@ export default function Index() {
     }
   };
 
+  const handleAddTeamMember = () => {
+    console.log("Add Team Member");
+  };
+
   const [team_name, onChangeTeamName] = useState("");
-  const [year, setYear] = useState(null);
+  const [year, setYear] = useState("");
+  const [members, setMembers] = useState([]);
 
   const yearData = [
-    { label: "Year 4", value: 4 },
-    { label: "Year 5", value: 5 },
-    { label: "Year 6", value: 6 },
-    { label: "Year 7", value: 7 },
-    { label: "Year 8", value: 8 },
-    { label: "Year 9", value: 9 },
+    { label: "Year 4", value: "4" },
+    { label: "Year 5", value: "5" },
+    { label: "Year 6", value: "6" },
+    { label: "Year 7", value: "7" },
+    { label: "Year 8", value: "8" },
+    { label: "Year 9", value: "9" },
   ];
 
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
-        <Text>STEMM Lab Games</Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={onChangeTeamName}
-          value={team_name}
-          placeholder="Enter Team Name"
-        />
+        <Text variant="heading">STEMM Lab Games</Text>
+        <Box p="md" bg="background" style={{ borderRadius: 8 }}>
+          <Input
+            style={styles.input}
+            onChangeText={onChangeTeamName}
+            value={team_name}
+            placeholder="Enter Team Name"
+          />
+          <Select
+            placeholder="Select Year"
+            value={year}
+            onChange={setYear}
+            options={yearData}
+          />
 
-        <View>
-          <TextInput style={styles.input} placeholder="Enter Member Name" />
-          <Button title="Add Member" />
-        </View>
-        <Button title="Create Team" onPress={storeTeam} />
+          <View>
+            <Input style={styles.input} placeholder="Enter Member Name" />
+            <Button onPress={handleAddTeamMember}>Add Member</Button>
+          </View>
+        </Box>
+        <Button onPress={storeTeam}>Create Team</Button>
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -62,11 +76,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    gap: 5,
+    gap: 10,
   },
   input: {
+    minWidth: 200,
     height: 40,
-    margin: 12,
     borderWidth: 1,
     padding: 10,
   },

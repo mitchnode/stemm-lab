@@ -1,7 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { Button, Text } from "re-native-ui";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 interface Team {
@@ -29,6 +30,14 @@ export default function Index() {
     }
   };
 
+  const clearTeam = async () => {
+    try {
+      await AsyncStorage.removeItem("team", () => router.push("/team"));
+    } catch (error) {
+      console.error("Error clearing team:", error);
+    }
+  };
+
   useEffect(() => {
     loadTeam();
   }, []);
@@ -37,6 +46,7 @@ export default function Index() {
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
         <Text>Welcome {team.team_name}</Text>
+        <Button onPress={clearTeam}>Clear</Button>
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -47,6 +57,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    gap: 5,
+    gap: 10,
   },
 });
