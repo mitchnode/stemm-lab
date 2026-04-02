@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { Box, Button, Input, Select, Text } from "re-native-ui";
+import { Box, Button, Container, Input, Select, Text } from "re-native-ui";
 import { useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import { Alert, Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
@@ -44,28 +44,41 @@ export default function Index() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={styles.container}>
-        <Text variant="heading">STEMM Lab Games</Text>
-        <Box p="md" bg="background" style={{ borderRadius: 8 }}>
-          <Input
-            style={styles.input}
-            onChangeText={onChangeTeamName}
-            value={team_name}
-            placeholder="Enter Team Name"
-          />
-          <Select
-            placeholder="Select Year"
-            value={year}
-            onChange={setYear}
-            options={yearData}
-          />
+      <SafeAreaView>
+        <Container maxWidth={600} style={styles.container}>
+          <Text style={styles.title} variant="heading">
+            STEMM Lab Games
+          </Text>
+          <Box p="md" bg="background" style={{ borderRadius: 8 }}>
+            <Input
+              style={styles.input}
+              onChangeText={onChangeTeamName}
+              value={team_name}
+              placeholder="Enter Team Name"
+            />
+            <Select
+              placeholder="Select Year"
+              value={year}
+              onChange={setYear}
+              options={yearData}
+            />
 
-          <View>
-            <Input style={styles.input} placeholder="Enter Member Name" />
-            <Button onPress={handleAddTeamMember}>Add Member</Button>
-          </View>
-        </Box>
-        <Button onPress={storeTeam}>Create Team</Button>
+            <View style={styles.row}>
+              <View style={styles.member_input}>
+                <Input style={styles.input} placeholder="Enter Member Name" />
+              </View>
+              <View style={styles.add_member}>
+                <Pressable
+                  style={styles.add_member_button}
+                  onPress={handleAddTeamMember}
+                >
+                  <Text style={{ color: "#fff" }}>+</Text>
+                </Pressable>
+              </View>
+            </View>
+          </Box>
+          <Button onPress={storeTeam}>Create Team</Button>
+        </Container>
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -73,15 +86,37 @@ export default function Index() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "stretch",
     gap: 10,
+    marginTop: 100,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "stretch",
+    gap: 20,
+  },
+  title: {
+    textAlign: "center",
   },
   input: {
-    minWidth: 200,
-    height: 40,
-    borderWidth: 1,
-    padding: 10,
+    flex: 1,
+  },
+  add_member: {
+    marginBottom: 16,
+  },
+  member_input: {
+    flex: 1,
+    alignItems: "stretch",
+  },
+  add_member_button: {
+    backgroundColor: "black",
+    color: "white",
+    width: 42,
+    height: 42,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 30,
   },
 });
