@@ -13,19 +13,25 @@ export default function Index() {
   };
 
   const router = useRouter();
-  let [team, setTeam] = useState({});
-  const [member_inputs, setMemberInputs] = useState([{ id: Date.now() }]);
+  const [team, setTeam] = useState({
+    id: 0,
+    team_name: "",
+    year: "",
+    members: [""],
+  });
+  const [member_inputs, setMemberInputs] = useState([
+    { id: Date.now(), value: "", disabled: false },
+  ]);
   const MAX_MEMBERS = 5;
 
-  const storeTeam = async () => {
+  const storeTeam = async (teamData: {
+    id: number;
+    team_name: string;
+    year: string;
+    members: string[];
+  }) => {
     try {
-      const teamData = {
-        id: 1,
-        team_name: "Test Team",
-        members: ["Adam", "Brad", "Chris"],
-      };
       await AsyncStorage.setItem("team", JSON.stringify(teamData));
-      setTeam(teamData);
       Alert.alert("Success", "Team saved locally");
       router.push("/");
     } catch (error) {
@@ -33,24 +39,61 @@ export default function Index() {
     }
   };
 
-  const addTeamMember = () => {
-    if (member_inputs.length < MAX_MEMBERS) {
-      setMemberInputs([...member_inputs, { id: Date.now() }]);
+  const createTeam = () => {
+    member_inputs.map((item) => {
+      if (item.value !== "") {
+        members.push(item.value);
+      }
+    });
+    let id = 0;
+    if (team.id == 0) {
+      id = Date.now();
     } else {
-      Alert.alert("Team Full", `Maximum team members is ${MAX_MEMBERS}`);
+      id = team.id;
+    }
+
+    const teamData = {
+      id: id,
+      team_name: team_name,
+      year: year,
+      members: members,
+    };
+    setTeam(teamData);
+    storeTeam(teamData);
+  };
+
+  const updateTeamMemberInput = (value: string) => {
+    member_inputs[member_inputs.length - 1].value = value;
+  };
+
+  const addTeamMember = () => {
+    const value = member_inputs[member_inputs.length - 1].value;
+    if (value != "") {
+      member_inputs.map((item) => (item.disabled = true));
+      if (member_inputs.length < MAX_MEMBERS) {
+        setMemberInputs([
+          ...member_inputs,
+          { id: Date.now(), value: "", disabled: false },
+        ]);
+      } else {
+        Alert.alert("Team Full", `Maximum team members is ${MAX_MEMBERS}`);
+      }
+    } else {
+      Alert.alert("Member Name Required", "Please enter a member name");
     }
   };
 
   const removeTeamMember = () => {
     if (member_inputs.length > 1) {
       member_inputs.pop();
+      member_inputs[member_inputs.length - 1].disabled = false;
       setMemberInputs([...member_inputs]);
     }
   };
 
   const [team_name, onChangeTeamName] = useState("");
   const [year, setYear] = useState("");
-  const [members, setMembers] = useState([]);
+  const [members, setMembers] = useState<string[]>([]);
 
   const yearData = [
     { label: "Year 4", value: "4" },
@@ -88,6 +131,8 @@ export default function Index() {
                   key={item.id}
                   style={styles.input}
                   placeholder="Enter Member Name"
+                  editable={!item.disabled}
+                  onChangeText={(newText) => updateTeamMemberInput(newText)}
                 />
               ))}
             </View>
@@ -123,7 +168,7 @@ export default function Index() {
             </View>
           </View>
         </Box>
-        <Button onPress={storeTeam}>Create Team</Button>
+        <Button onPress={createTeam}>Create Team</Button>
       </View>
       <Button onPress={changeTheme}>Switch theme</Button>
     </View>
