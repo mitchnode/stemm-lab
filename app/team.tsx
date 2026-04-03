@@ -41,6 +41,13 @@ export default function Index() {
     }
   };
 
+  const removeTeamMember = () => {
+    if (member_inputs.length > 1) {
+      member_inputs.pop();
+      setMemberInputs([...member_inputs]);
+    }
+  };
+
   const [team_name, onChangeTeamName] = useState("");
   const [year, setYear] = useState("");
   const [members, setMembers] = useState([]);
@@ -84,16 +91,35 @@ export default function Index() {
                 />
               ))}
             </View>
-            <View style={styles.add_member}>
-              <Pressable
-                style={{
-                  ...styles.add_member_button,
-                  backgroundColor: colors.primary,
-                }}
-                onPress={addTeamMember}
-              >
-                <Ionicons name="add-outline" size={32} color={colors.text} />
-              </Pressable>
+            <View style={styles.member_buttons}>
+              <View style={styles.member_button_view}>
+                <Pressable
+                  style={{
+                    ...styles.member_button,
+                    backgroundColor: colors.primary,
+                  }}
+                  onPress={addTeamMember}
+                >
+                  <Ionicons name="add-outline" size={32} color={colors.text} />
+                </Pressable>
+              </View>
+              {member_inputs.length > 1 ? (
+                <View style={styles.member_button_view}>
+                  <Pressable
+                    style={{
+                      ...styles.member_button,
+                      backgroundColor: colors.secondary,
+                    }}
+                    onPress={removeTeamMember}
+                  >
+                    <Ionicons
+                      name="remove-outline"
+                      size={32}
+                      color={colors.text}
+                    />
+                  </Pressable>
+                </View>
+              ) : null}
             </View>
           </View>
         </Box>
@@ -135,14 +161,19 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
   },
-  add_member: {
-    marginBottom: 16,
-  },
   member_input: {
     flex: 1,
     alignItems: "stretch",
   },
-  add_member_button: {
+  member_buttons: {
+    flexDirection: "column",
+    justifyContent: "space-between",
+  },
+  member_button_view: {
+    marginBottom: 16,
+  },
+
+  member_button: {
     width: 42,
     height: 42,
     alignItems: "center",
