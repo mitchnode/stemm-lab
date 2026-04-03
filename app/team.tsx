@@ -14,6 +14,8 @@ export default function Index() {
 
   const router = useRouter();
   let [team, setTeam] = useState({});
+  const [member_inputs, setMemberInputs] = useState([{ id: Date.now() }]);
+  const MAX_MEMBERS = 5;
 
   const storeTeam = async () => {
     try {
@@ -31,8 +33,12 @@ export default function Index() {
     }
   };
 
-  const handleAddTeamMember = () => {
-    console.log("Add Team Member");
+  const addTeamMember = () => {
+    if (member_inputs.length < MAX_MEMBERS) {
+      setMemberInputs([...member_inputs, { id: Date.now() }]);
+    } else {
+      Alert.alert("Team Full", `Maximum team members is ${MAX_MEMBERS}`);
+    }
   };
 
   const [team_name, onChangeTeamName] = useState("");
@@ -70,7 +76,13 @@ export default function Index() {
           />
           <View style={styles.row}>
             <View style={styles.member_input}>
-              <Input style={styles.input} placeholder="Enter Member Name" />
+              {member_inputs.map((item) => (
+                <Input
+                  key={item.id}
+                  style={styles.input}
+                  placeholder="Enter Member Name"
+                />
+              ))}
             </View>
             <View style={styles.add_member}>
               <Pressable
@@ -78,7 +90,7 @@ export default function Index() {
                   ...styles.add_member_button,
                   backgroundColor: colors.primary,
                 }}
-                onPress={handleAddTeamMember}
+                onPress={addTeamMember}
               >
                 <Ionicons name="add-outline" size={32} color={colors.text} />
               </Pressable>
