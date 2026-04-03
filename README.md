@@ -48,3 +48,32 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+# Using the theme
+
+All colours for Light Mode and Dark Mode are in theme/colors.tsx
+
+To use the theme in the code use:
+
+```javascript
+const { colors } = useTheme();
+
+return (
+<View styles={{backgroundColor: colors.background}}>
+   <Text styles={{color: colors.text}}>
+</View>
+);
+```
+
+To toggle the theme between Dark and Light:
+
+```javascript
+const { colors, setScheme, isDark } = useTheme();
+const changeTheme = () => {
+   isDark ? setScheme("light") : setScheme("dark");
+};
+
+return (
+   <Button onPress={changeTheme}>
+);
+```
