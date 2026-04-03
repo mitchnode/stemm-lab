@@ -2,12 +2,25 @@ import { useTheme } from "@/theme";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { Box, Button, Input, Select, Text } from "re-native-ui";
+import {
+  Box,
+  Button,
+  Input,
+  Select,
+  Text,
+  useTheme as useRETheme,
+} from "re-native-ui";
 import { useState } from "react";
 import { Alert, Pressable, StyleSheet, View } from "react-native";
 
 export default function Index() {
   const { colors } = useTheme();
+  // Override theme from re-native-ui
+  const theme = useRETheme();
+  theme.colors.background = colors.background;
+  theme.colors.primary = colors.primary;
+  theme.colors.text = colors.text;
+  theme.colors.border = colors.border;
 
   const router = useRouter();
   const [team, setTeam] = useState({
@@ -100,17 +113,23 @@ export default function Index() {
     { label: "Year 8", value: "8" },
     { label: "Year 9", value: "9" },
   ];
+
   /*----------------Look at controlledInput and controlledSelect in
             form management in re-native-ui----------------*/
   return (
-    <View style={{ ...styles.screen, backgroundColor: colors.background }}>
+    <View
+      style={{
+        ...styles.screen,
+        backgroundColor: colors.background,
+      }}
+    >
+      <Text style={{ ...styles.title, color: colors.text }} variant="heading">
+        STEMM Lab Games
+      </Text>
       <View style={{ ...styles.container, backgroundColor: colors.background }}>
-        <Text style={{ ...styles.title, color: colors.text }} variant="heading">
-          STEMM Lab Games
-        </Text>
         <Box p="md" style={{ ...styles.box, backgroundColor: colors.surface }}>
           <Input
-            style={styles.input}
+            style={{ ...styles.input, backgroundColor: colors.background }}
             onChangeText={onChangeTeamName}
             value={team_name}
             placeholder="Enter Team Name"
@@ -126,7 +145,10 @@ export default function Index() {
               {member_inputs.map((item) => (
                 <Input
                   key={item.id}
-                  style={styles.input}
+                  style={{
+                    ...styles.input,
+                    backgroundColor: colors.background,
+                  }}
                   placeholder="Enter Member Name"
                   editable={!item.disabled}
                   onChangeText={(newText) => updateTeamMemberInput(newText)}
@@ -198,6 +220,7 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: "center",
+    marginTop: 100,
   },
   input: {
     flex: 1,
