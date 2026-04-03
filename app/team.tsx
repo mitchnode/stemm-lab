@@ -7,10 +7,7 @@ import { useState } from "react";
 import { Alert, Pressable, StyleSheet, View } from "react-native";
 
 export default function Index() {
-  const { colors, setScheme, isDark } = useTheme();
-  const changeTheme = () => {
-    isDark ? setScheme("light") : setScheme("dark");
-  };
+  const { colors } = useTheme();
 
   const router = useRouter();
   const [team, setTeam] = useState({
@@ -170,7 +167,6 @@ export default function Index() {
         </Box>
         <Button onPress={createTeam}>Create Team</Button>
       </View>
-      <Button onPress={changeTheme}>Switch theme</Button>
     </View>
   );
 }

@@ -13,7 +13,11 @@ interface Team {
 }
 
 export default function Index() {
-  const { colors } = useTheme();
+  const { colors, setScheme, isDark } = useTheme();
+  const changeTheme = () => {
+    isDark ? setScheme("light") : setScheme("dark");
+  };
+
   const router = useRouter();
   let [team, setTeam] = useState({ team_name: null });
 
@@ -51,6 +55,8 @@ export default function Index() {
       >
         <Text style={{ color: colors.text }}>Welcome {team.team_name}</Text>
         <Button onPress={clearTeam}>Clear</Button>
+        <Button onPress={changeTheme}>Switch theme</Button>
+        {/* Switch theme button is just for testing, remove once setup in the menu. */}
       </SafeAreaView>
     </SafeAreaProvider>
   );
