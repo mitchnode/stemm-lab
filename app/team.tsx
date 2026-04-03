@@ -1,11 +1,17 @@
+import { useTheme } from "@/theme";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import { Box, Button, Container, Input, Select, Text } from "re-native-ui";
+import { Box, Button, Input, Select, Text } from "re-native-ui";
 import { useState } from "react";
 import { Alert, Pressable, StyleSheet, View } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
+  const { colors, setScheme, isDark } = useTheme();
+  const changeTheme = () => {
+    isDark ? setScheme("light") : setScheme("dark");
+  };
+
   const router = useRouter();
   let [team, setTeam] = useState({});
 
@@ -41,55 +47,69 @@ export default function Index() {
     { label: "Year 8", value: "8" },
     { label: "Year 9", value: "9" },
   ];
-
+  /*----------------Look at controlledInput and controlledSelect in
+            form management in re-native-ui----------------*/
   return (
-    <SafeAreaProvider>
-      <SafeAreaView>
-        <Container maxWidth={600} style={styles.container}>
-          <Text style={styles.title} variant="heading">
-            STEMM Lab Games
-          </Text>
-          <Box p="md" bg="background" style={{ borderRadius: 8 }}>
-            <Input
-              style={styles.input}
-              onChangeText={onChangeTeamName}
-              value={team_name}
-              placeholder="Enter Team Name"
-            />
-            <Select
-              placeholder="Select Year"
-              value={year}
-              onChange={setYear}
-              options={yearData}
-            />
-
-            <View style={styles.row}>
-              <View style={styles.member_input}>
-                <Input style={styles.input} placeholder="Enter Member Name" />
-              </View>
-              <View style={styles.add_member}>
-                <Pressable
-                  style={styles.add_member_button}
-                  onPress={handleAddTeamMember}
-                >
-                  <Text style={{ color: "#fff" }}>+</Text>
-                </Pressable>
-              </View>
+    <View style={{ ...styles.screen, backgroundColor: colors.background }}>
+      <View style={{ ...styles.container, backgroundColor: colors.background }}>
+        <Text style={{ ...styles.title, color: colors.text }} variant="heading">
+          STEMM Lab Games
+        </Text>
+        <Box p="md" style={{ ...styles.box, backgroundColor: colors.surface }}>
+          <Input
+            style={styles.input}
+            onChangeText={onChangeTeamName}
+            value={team_name}
+            placeholder="Enter Team Name"
+          />
+          <Select
+            placeholder="Select Year"
+            value={year}
+            onChange={setYear}
+            options={yearData}
+          />
+          <View style={styles.row}>
+            <View style={styles.member_input}>
+              <Input style={styles.input} placeholder="Enter Member Name" />
             </View>
-          </Box>
-          <Button onPress={storeTeam}>Create Team</Button>
-        </Container>
-      </SafeAreaView>
-    </SafeAreaProvider>
+            <View style={styles.add_member}>
+              <Pressable
+                style={{
+                  ...styles.add_member_button,
+                  backgroundColor: colors.primary,
+                }}
+                onPress={handleAddTeamMember}
+              >
+                <Ionicons name="add-outline" size={32} color={colors.text} />
+              </Pressable>
+            </View>
+          </View>
+        </Box>
+        <Button onPress={storeTeam}>Create Team</Button>
+      </View>
+      <Button onPress={changeTheme}>Switch theme</Button>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   container: {
+    minWidth: 400,
     justifyContent: "center",
     alignItems: "stretch",
-    gap: 10,
-    marginTop: 100,
+    gap: 100,
+    flex: 1,
+    padding: 20,
+  },
+  box: {
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "stretch",
   },
   row: {
     flexDirection: "row",
@@ -111,8 +131,6 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
   },
   add_member_button: {
-    backgroundColor: "black",
-    color: "white",
     width: 42,
     height: 42,
     alignItems: "center",

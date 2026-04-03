@@ -1,3 +1,4 @@
+import { useTheme } from "@/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { Button, Text } from "re-native-ui";
@@ -12,6 +13,7 @@ interface Team {
 }
 
 export default function Index() {
+  const { colors } = useTheme();
   const router = useRouter();
   let [team, setTeam] = useState({ team_name: null });
 
@@ -44,8 +46,10 @@ export default function Index() {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView style={styles.container}>
-        <Text>Welcome {team.team_name}</Text>
+      <SafeAreaView
+        style={{ ...styles.container, backgroundColor: colors.background }}
+      >
+        <Text style={{ color: colors.text }}>Welcome {team.team_name}</Text>
         <Button onPress={clearTeam}>Clear</Button>
       </SafeAreaView>
     </SafeAreaProvider>
