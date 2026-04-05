@@ -56,6 +56,8 @@ All colours for Light Mode and Dark Mode are in theme/colors.tsx
 To use the theme in the code use:
 
 ```javascript
+import { useTheme } from "@/theme";
+
 const { colors } = useTheme();
 
 return (
