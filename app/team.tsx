@@ -165,80 +165,76 @@ export default function Index() {
           />
           <Text style={styles.label}>Member Names</Text>
 
-          <View style={styles.member_input}>
-            <View style={styles.row}>
-              <View style={styles.input_container}>
-                {isMemberEmptyVisible ? (
-                  <Input
-                    style={{
-                      ...styles.input,
-                      borderColor: colors.error,
-                      backgroundColor: colors.background,
-                    }}
-                    placeholder="Enter Member Name"
-                    onChangeText={memberInput}
-                    value={member_input}
-                  />
-                ) : (
-                  <Input
-                    style={{
-                      ...styles.input,
-                      backgroundColor: colors.background,
-                    }}
-                    placeholder="Enter Member Name"
-                    onChangeText={memberInput}
-                    value={member_input}
-                  />
-                )}
-                {isMemberEmptyVisible && (
-                  <Text style={{ ...styles.member_error, color: colors.error }}>
-                    Member name cannot be blank
-                  </Text>
-                )}
-              </View>
-              <View style={styles.member_button_view}>
+          <View style={styles.row}>
+            {isMemberEmptyVisible ? (
+              <Input
+                style={{
+                  ...styles.member_input,
+                  borderColor: colors.error,
+                  backgroundColor: colors.background,
+                }}
+                placeholder="Enter Member Name"
+                onChangeText={memberInput}
+                value={member_input}
+              />
+            ) : (
+              <Input
+                style={{
+                  ...styles.member_input,
+                  backgroundColor: colors.background,
+                }}
+                placeholder="Enter Member Name"
+                onChangeText={memberInput}
+                value={member_input}
+              />
+            )}
+            {isMemberEmptyVisible && (
+              <Text style={{ ...styles.member_error, color: colors.error }}>
+                Member name cannot be blank
+              </Text>
+            )}
+            <View style={styles.member_button_view}>
+              <Pressable
+                style={{
+                  ...styles.member_button,
+                  backgroundColor: colors.primary,
+                }}
+                onPress={addTeamMember}
+              >
+                <Ionicons name="add-outline" size={32} color={colors.text} />
+              </Pressable>
+            </View>
+          </View>
+          <View style={styles.members}>
+            {members_text.map((item) => (
+              <View key={item.id} style={styles.row}>
+                <Text style={styles.member_text}>{item.name}</Text>
                 <Pressable
+                  id={item.id.toString()}
                   style={{
                     ...styles.member_button,
-                    backgroundColor: colors.primary,
+                    backgroundColor: colors.secondary,
                   }}
-                  onPress={addTeamMember}
+                  onPress={() => removeTeamMember(item)}
                 >
-                  <Ionicons name="add-outline" size={32} color={colors.text} />
+                  <Ionicons
+                    name="remove-outline"
+                    size={32}
+                    color={colors.text}
+                  />
                 </Pressable>
               </View>
-            </View>
-            <View style={styles.members}>
-              {members_text.map((item) => (
-                <View key={item.id} style={styles.row}>
-                  <Text style={styles.member_text}>{item.name}</Text>
-                  <Pressable
-                    id={item.id.toString()}
-                    style={{
-                      ...styles.member_button,
-                      backgroundColor: colors.secondary,
-                    }}
-                    onPress={() => removeTeamMember(item)}
-                  >
-                    <Ionicons
-                      name="remove-outline"
-                      size={32}
-                      color={colors.text}
-                    />
-                  </Pressable>
-                </View>
-              ))}
-              {isMemberErrorVisible && (
-                <Text style={{ ...styles.member_error, color: colors.error }}>
-                  Need at least 1 team member
-                </Text>
-              )}
-              {isMemberMaxVisible && (
-                <Text style={{ ...styles.member_error, color: colors.error }}>
-                  {`Maximum team members is ${MAX_MEMBERS}`}
-                </Text>
-              )}
-            </View>
+            ))}
+            {isMemberErrorVisible && (
+              <Text style={{ ...styles.member_error, color: colors.error }}>
+                Need at least 1 team member
+              </Text>
+            )}
+            {isMemberMaxVisible && (
+              <Text style={{ ...styles.member_error, color: colors.error }}>
+                {`Maximum team members is ${MAX_MEMBERS}`}
+              </Text>
+            )}
           </View>
         </Box>
         <Button onPress={handleSubmit(createTeam)}>Create Team</Button>
@@ -267,13 +263,11 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
   },
   row: {
+    borderWidth: 2,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "stretch",
+    alignItems: "center",
     gap: 20,
-  },
-  input_container: {
-    gap: 2,
   },
   title: {
     textAlign: "center",
@@ -287,7 +281,6 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   member_input: {
-    flex: 1,
     alignItems: "stretch",
   },
   member_buttons: {
