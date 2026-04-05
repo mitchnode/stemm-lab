@@ -19,6 +19,7 @@ interface Member {
   id: number;
   name: string;
 }
+
 interface Team {
   id: number;
   team_name: string;
@@ -29,6 +30,7 @@ interface Team {
 export default function Index() {
   const router = useRouter();
   const { colors } = useTheme();
+
   // Override theme from re-native-ui
   const theme = useRETheme();
   theme.colors.background = colors.background;
@@ -36,8 +38,10 @@ export default function Index() {
   theme.colors.text = colors.text;
   theme.colors.border = colors.border;
 
+  // Set the maximum members that are allowed in a team
   const MAX_MEMBERS = 5;
 
+  // Create the object for storing the available years to select fro the ControlledSelect component
   const yearData = [
     { label: "Year 4", value: "4" },
     { label: "Year 5", value: "5" },
@@ -47,16 +51,18 @@ export default function Index() {
     { label: "Year 9", value: "9" },
   ];
 
+  //Set up states for team, members and input errors.
   const [team, setTeam] = useState<Team | null>(null);
   const [members_text, setMembers] = useState<Member[]>([]);
   const [member_input, setMemberInput] = useState("");
   const [isMemberErrorVisible, setMemberError] = useState(false);
   const [isMemberMaxVisible, setMemberMax] = useState(false);
   const [isMemberEmptyVisible, setMemberEmpty] = useState(false);
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit } = useForm<any>({
     defaultValues: { team_name: "", year: "", members: [] },
   });
 
+  // Store the team data in local storage
   const storeTeam = async (teamData: Team) => {
     try {
       await AsyncStorage.setItem("team", JSON.stringify(teamData));
@@ -67,13 +73,16 @@ export default function Index() {
     }
   };
 
+  // Update the member input value
   const memberInput = (value: string) => {
     setMemberEmpty(false);
     setMemberInput(value);
   };
+
+  // Create the team data fro mthe inputs and call storeTeam
   const createTeam = (data: any) => {
     setMemberError(false);
-    console.log(members_text.length);
+
     if (members_text.length > 0) {
       let id = 0;
       if (team == null) {
@@ -102,6 +111,7 @@ export default function Index() {
     }
   };
 
+  // Add a team member to the team members list (members_text)
   const addTeamMember = () => {
     if (member_input != "") {
       setMemberEmpty(false);
@@ -117,6 +127,7 @@ export default function Index() {
     }
   };
 
+  // Remove the memeber from the list
   const removeTeamMember = (item: Member) => {
     setMemberMax(false);
     const updatedMembers = members_text.filter((member) => member !== item);
@@ -145,6 +156,7 @@ export default function Index() {
           />
           <ControlledSelect
             name="year"
+            // @ts-ignore
             label="Year"
             options={yearData}
             control={control}
