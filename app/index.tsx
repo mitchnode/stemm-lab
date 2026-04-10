@@ -1,6 +1,6 @@
 import { useTheme } from "@/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { Button, Text } from "re-native-ui";
 import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
@@ -13,9 +13,27 @@ interface Team {
 }
 
 export default function Index() {
+  const navigation = useNavigation();
+  useEffect(() => {
+    const listener = navigation.addListener("beforeRemove", (e) => {
+      // Prevent back gesture behaviour
+      if (e.data.action.type === "GO_BACK") {
+        e.preventDefault();
+      }
+    });
+
+    return () => {
+      navigation.removeListener("beforeRemove", listener);
+    };
+  }, []);
+
   const { colors, setScheme, isDark } = useTheme();
   const changeTheme = () => {
     isDark ? setScheme("light") : setScheme("dark");
+    navigation.setOptions({
+      headerStyle: { backgroundColor: colors.header },
+      headerTintColor: colors.textSecondary,
+    });
   };
 
   const router = useRouter();

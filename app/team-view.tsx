@@ -14,8 +14,15 @@ export default function TeamView() {
   const router = useRouter();
   const { colors } = useTheme();
 
-  let [team, setTeam] = useState({ team_name: "", year: "", members: [] });
+  // Set up state for team
+  let [team, setTeam] = useState({
+    id: 0,
+    team_name: "",
+    year: "",
+    members: [],
+  });
 
+  // Load team data
   const loadTeam = async () => {
     try {
       const storedTeam = await AsyncStorage.getItem("team");
@@ -31,6 +38,7 @@ export default function TeamView() {
     }
   };
 
+  // call loadTeam to retrieve the team data for displaying in the card
   useEffect(() => {
     loadTeam();
   }, []);
@@ -39,6 +47,12 @@ export default function TeamView() {
     <View style={{ ...styles.screen, backgroundColor: colors.background }}>
       <View style={{ ...styles.box, backgroundColor: colors.surface }}>
         <View style={styles.info}>
+          <View style={styles.row}>
+            <Text style={{ ...styles.bold_text, color: colors.text }}>
+              Team ID:
+            </Text>
+            <Text style={{ color: colors.text }}>{team.id}</Text>
+          </View>
           <View style={styles.row}>
             <Text style={{ ...styles.bold_text, color: colors.text }}>
               Team name:
