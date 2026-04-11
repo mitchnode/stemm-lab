@@ -13,7 +13,7 @@ import {
 } from "re-native-ui";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Alert, Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 
 interface Member {
   id: number;
@@ -66,7 +66,7 @@ export default function Index() {
   const storeTeam = async (teamData: Team) => {
     try {
       await AsyncStorage.setItem("team", JSON.stringify(teamData));
-      Alert.alert("Success", "Team saved locally");
+      //Alert.alert("Success", "Team saved locally");
       router.push("/");
     } catch (error) {
       console.error("Error saving team:", error);
