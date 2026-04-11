@@ -11,7 +11,7 @@ export default function RootLayout() {
           headerShown: true,
           headerBackButtonDisplayMode: "minimal",
           headerStyle: { backgroundColor: colors.header },
-          headerTintColor: colors.textSecondary,
+          headerTintColor: colors.title,
           headerTitle: "STEMM Labs Games",
           headerTitleAlign: "center",
           headerRight: () => (

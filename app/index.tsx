@@ -32,7 +32,6 @@ export default function Index() {
     isDark ? setScheme("light") : setScheme("dark");
     navigation.setOptions({
       headerStyle: { backgroundColor: colors.header },
-      headerTintColor: colors.textSecondary,
     });
   };
 

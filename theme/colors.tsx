@@ -1,6 +1,6 @@
 // Light theme colors
 export const lightColors = {
-  header: "#aaaaaa",
+  header: "#35393e",
   primary: "#4A7FFE",
   secondary: "#e68a00",
   background: "#f2f2f2",
@@ -11,6 +11,8 @@ export const lightColors = {
   error: "#FF5E28",
   success: "#6ACE27",
   warning: "#FFC60C",
+  info: "#64AEFC",
+  title: "#f2f2f2",
 };
 
 // Dark theme colors
@@ -27,4 +29,5 @@ export const darkColors = {
   success: "#6ACE27",
   warning: "#FFC60C",
   info: "#64AEFC",
+  title: "#f2f2f2",
 };
