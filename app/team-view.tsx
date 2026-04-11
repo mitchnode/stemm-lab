@@ -28,7 +28,7 @@ export default function TeamView() {
       const storedTeam = await AsyncStorage.getItem("team");
       if (storedTeam) {
         setTeam(JSON.parse(storedTeam));
-        console.log("Team loaded from storage", storedTeam);
+        //console.log("Team loaded from storage", storedTeam);
       } else {
         console.log("No Team created yet");
         router.push("/team");
