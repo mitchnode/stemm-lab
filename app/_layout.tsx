@@ -1,6 +1,7 @@
 import { ThemeProvider, useTheme } from "@/theme";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Stack } from "expo-router";
-import { Button } from "react-native";
+import { Pressable } from "react-native";
 
 export default function RootLayout() {
   const { colors } = useTheme();
@@ -15,7 +16,9 @@ export default function RootLayout() {
           headerTitle: "STEMM Labs Games",
           headerTitleAlign: "center",
           headerRight: () => (
-            <Button onPress={() => console.log("Menu Pressed")} title="Menu" />
+            <Pressable onPress={() => console.log("Menu Pressed")}>
+              <Ionicons name="menu" size={24} color={colors.title} />
+            </Pressable>
           ),
         }}
       >
