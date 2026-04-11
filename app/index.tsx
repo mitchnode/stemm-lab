@@ -30,9 +30,10 @@ export default function Index() {
   const { colors, setScheme, isDark } = useTheme();
   const changeTheme = () => {
     isDark ? setScheme("light") : setScheme("dark");
-    navigation.setOptions({
+    // Reapply theme color to header *** Not needed at the moment due to heade being the same color for both themes***
+    /* navigation.setOptions({
       headerStyle: { backgroundColor: colors.header },
-    });
+    }); */
   };
 
   const router = useRouter();
