@@ -1,6 +1,7 @@
 import { ThemeProvider, useTheme } from "@/theme";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Stack } from "expo-router";
+
 import { Pressable } from "react-native";
 
 export default function RootLayout() {
@@ -28,7 +29,11 @@ export default function RootLayout() {
         />
         <Stack.Screen
           name="team"
-          options={{ presentation: "pageSheet", headerShown: false }}
+          options={{
+            presentation: "pageSheet",
+            headerShown: false,
+            animation: "slide_from_bottom",
+          }}
         />
         <Stack.Screen name="team-view" />
       </Stack>

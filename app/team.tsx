@@ -2,6 +2,7 @@ import { useTheme } from "@/theme";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import {
   Box,
   Button,
@@ -102,7 +103,7 @@ export default function Index() {
         year: data.year,
         members: members_array,
       };
-      console.log(teamData);
+      //console.log(teamData);
       setTeam(teamData);
       storeTeam(teamData);
     } else {
@@ -239,6 +240,7 @@ export default function Index() {
         </Box>
         <Button onPress={handleSubmit(createTeam)}>Create Team</Button>
       </View>
+      <StatusBar hidden={true} />
     </View>
   );
 }
@@ -263,7 +265,6 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
   },
   row: {
-    borderWidth: 2,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
