@@ -45,13 +45,18 @@ export default function TeamView() {
 
   return (
     <View style={{ ...styles.screen, backgroundColor: colors.background }}>
+      <Text style={{ ...styles.heading, color: colors.text }}>
+        Team Information
+      </Text>
       <View style={{ ...styles.box, backgroundColor: colors.surface }}>
         <View style={styles.info}>
           <View style={styles.row}>
             <Text style={{ ...styles.bold_text, color: colors.text }}>
               Team ID:
             </Text>
-            <Text style={{ color: colors.text }}>{team.id}</Text>
+            <Text style={{ ...styles.large_font, color: colors.text }}>
+              {team.id}
+            </Text>
           </View>
           <View style={styles.row}>
             <Text style={{ ...styles.bold_text, color: colors.text }}>
@@ -65,7 +70,9 @@ export default function TeamView() {
             <Text style={{ ...styles.bold_text, color: colors.text }}>
               Year:
             </Text>
-            <Text style={{ color: colors.text }}>{team.year}</Text>
+            <Text style={{ ...styles.large_font, color: colors.text }}>
+              {team.year}
+            </Text>
           </View>
           <View style={styles.row}>
             <Text style={{ ...styles.bold_text, color: colors.text }}>
@@ -75,7 +82,11 @@ export default function TeamView() {
               {team.members.map((item, index) => (
                 <Text
                   key={index}
-                  style={{ ...styles.members_text, color: colors.text }}
+                  style={{
+                    ...styles.large_font,
+                    ...styles.members_text,
+                    color: colors.text,
+                  }}
                 >
                   {item}
                 </Text>
@@ -91,19 +102,22 @@ export default function TeamView() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "flex-start",
+    flexDirection: "column",
+    justifyContent: "flex-start",
+    alignItems: "center",
   },
   box: {
-    margin: 100,
     justifyContent: "center",
     alignItems: "stretch",
     borderWidth: 2,
     borderRadius: 20,
     padding: 30,
-    gap: 15,
     minWidth: 400,
+  },
+  heading: {
+    padding: 20,
+    fontSize: 20,
+    fontWeight: "bold",
   },
   info: {
     gap: 20,
@@ -118,6 +132,7 @@ const styles = StyleSheet.create({
   },
   bold_text: {
     fontWeight: "bold",
+    fontSize: 20,
   },
   members: {
     gap: 5,
