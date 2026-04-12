@@ -82,6 +82,13 @@ export default function Index() {
         </Button>
         <Button onPress={changeTheme}>Switch theme</Button>
         {/* Switch theme button is just for testing, remove once setup in the menu. */}
+        <Button
+          onPress={() => {
+            router.push("/record");
+          }}
+        >
+          Record result
+        </Button>
       </SafeAreaView>
     </SafeAreaProvider>
   );
