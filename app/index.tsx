@@ -1,6 +1,6 @@
 import { useTheme } from "@/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 import { Button, Text } from "re-native-ui";
 import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
@@ -13,9 +13,27 @@ interface Team {
 }
 
 export default function Index() {
+  const navigation = useNavigation();
+  useEffect(() => {
+    const listener = navigation.addListener("beforeRemove", (e) => {
+      // Prevent back gesture behaviour
+      if (e.data.action.type === "GO_BACK") {
+        e.preventDefault();
+      }
+    });
+
+    return () => {
+      navigation.removeListener("beforeRemove", listener);
+    };
+  }, []);
+
   const { colors, setScheme, isDark } = useTheme();
   const changeTheme = () => {
     isDark ? setScheme("light") : setScheme("dark");
+    // Reapply theme color to header *** Not needed at the moment due to heade being the same color for both themes***
+    /* navigation.setOptions({
+      headerStyle: { backgroundColor: colors.header },
+    }); */
   };
 
   const router = useRouter();
@@ -26,9 +44,9 @@ export default function Index() {
       const storedTeam = await AsyncStorage.getItem("team");
       if (storedTeam) {
         setTeam(JSON.parse(storedTeam));
-        console.log("Team loaded from storage", storedTeam);
+        //console.log("Team loaded from storage", storedTeam);
       } else {
-        console.log("No Team created yet");
+        //console.log("No Team created yet");
         router.push("/team");
       }
     } catch (error) {
@@ -55,6 +73,13 @@ export default function Index() {
       >
         <Text style={{ color: colors.text }}>Welcome {team.team_name}</Text>
         <Button onPress={clearTeam}>Clear</Button>
+        <Button
+          onPress={() => {
+            router.push("/team-view");
+          }}
+        >
+          View Team
+        </Button>
         <Button onPress={changeTheme}>Switch theme</Button>
         {/* Switch theme button is just for testing, remove once setup in the menu. */}
       </SafeAreaView>
