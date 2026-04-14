@@ -1,21 +1,22 @@
 import { useTheme } from "@/theme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-    CameraType,
-    CameraView,
-    useCameraPermissions,
-    useMicrophonePermissions,
+  CameraView,
+  useCameraPermissions,
+  useMicrophonePermissions,
 } from "expo-camera";
+import { router } from "expo-router";
 import { useRef, useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function App() {
   const { colors } = useTheme();
-  const [facing, setFacing] = useState<CameraType>("back");
   const [camPermission, requestCamPermission] = useCameraPermissions();
   const [micPermission, requestMicPermission] = useMicrophonePermissions();
   const ref = useRef<CameraView>(null);
-  const [uri, setUri] = useState<string | null>(null);
   const [isRecording, setRecording] = useState(false);
+  const [recButtonColor, setRecButtonColor] = useState("white");
+  const [recButtonShape, setRecButtonShape] = useState(50);
 
   if (!camPermission || !micPermission) {
     // Camera permissions are still loading.
@@ -46,37 +47,52 @@ export default function App() {
     );
   }
 
+  const storeVideoUri = async (videoUri: string) => {
+    try {
+      const id = "result" + Date.now();
+      await AsyncStorage.setItem(id, videoUri);
+      return id;
+    } catch (error) {
+      console.error("Error saving video uri:", error);
+    }
+  };
+
   const toggleRecord = async () => {
     if (isRecording) {
       setRecording(false);
+      setRecButtonColor("white");
+      setRecButtonShape(50);
       ref.current?.stopRecording();
       return;
     }
     setRecording(true);
+    setRecButtonColor("red");
+    setRecButtonShape(20);
     const video = await ref.current?.recordAsync();
-    console.log(video);
+    if (video) {
+      const videoId = await storeVideoUri(video.uri);
+      router.push({ pathname: "/results", params: { id: videoId } });
+    }
   };
 
   return (
     <View style={styles.container}>
-      <CameraView
-        style={styles.camera}
-        facing={facing}
-        mode="video"
-        ref={ref}
-      />
+      <CameraView style={styles.camera} mode="video" ref={ref} />
       {isRecording && (
         <View style={{ ...styles.record, backgroundColor: "red" }} />
       )}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={{
-            ...styles.button,
-            borderColor: "white",
-            backgroundColor: "red",
-          }}
-          onPress={toggleRecord}
-        />
+      <View style={styles.buttonRow}>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={{
+              ...styles.button,
+              borderColor: "transparent",
+              backgroundColor: recButtonColor,
+              borderRadius: recButtonShape,
+            }}
+            onPress={toggleRecord}
+          />
+        </View>
       </View>
     </View>
   );
@@ -94,20 +110,24 @@ const styles = StyleSheet.create({
   camera: {
     flex: 1,
   },
-  buttonContainer: {
+  buttonRow: {
     position: "absolute",
     bottom: 64,
     flexDirection: "row",
-    backgroundColor: "transparent",
     width: "100%",
     justifyContent: "center",
-    paddingHorizontal: 64,
+  },
+  buttonContainer: {
+    backgroundColor: "transparent",
+    padding: 20,
+    borderWidth: 1,
+    borderRadius: 60,
+    borderColor: "white",
   },
   button: {
-    width: 100,
-    height: 100,
+    width: 70,
+    height: 70,
     borderWidth: 2,
-    borderRadius: 50,
     padding: 5,
     alignItems: "center",
     justifyContent: "center",
