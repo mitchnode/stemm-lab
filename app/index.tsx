@@ -80,6 +80,9 @@ export default function Index() {
         >
           View Team
         </Button>
+        
+         <Button onPress={() => {router.push("/activities"); }}>
+          Activities </Button>
         <Button onPress={changeTheme}>Switch theme</Button>
         {/* Switch theme button is just for testing, remove once setup in the menu. */}
       </SafeAreaView>
