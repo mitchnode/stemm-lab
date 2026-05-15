@@ -13,7 +13,7 @@ interface Results {
   resultValue: String;
 }
 
-export default function App() {
+export default function RecordVideo() {
   const [camPermission, requestCamPermission] = useCameraPermissions();
   const [micPermission, requestMicPermission] = useMicrophonePermissions();
   const ref = useRef<CameraView>(null);

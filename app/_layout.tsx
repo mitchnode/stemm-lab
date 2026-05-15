@@ -37,7 +37,7 @@ export default function RootLayout() {
         />
         <Stack.Screen name="team-view" />
         <Stack.Screen
-          name="record"
+          name="recordvideo"
           options={{
             headerShown: false,
             animation: "slide_from_bottom",

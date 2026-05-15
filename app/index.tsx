@@ -84,7 +84,7 @@ export default function Index() {
         {/* Switch theme button is just for testing, remove once setup in the menu. */}
         <Button
           onPress={() => {
-            router.push("/record");
+            router.push("/recordvideo");
           }}
         >
           Record result
