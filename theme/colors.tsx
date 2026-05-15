@@ -13,6 +13,8 @@ export const lightColors = {
   warning: "#FFC60C",
   info: "#64AEFC",
   title: "#f2f2f2",
+  dark: "#25292e",
+  light: "#f2f2f2",
 };
 
 // Dark theme colors
@@ -30,4 +32,6 @@ export const darkColors = {
   warning: "#FFC60C",
   info: "#64AEFC",
   title: "#f2f2f2",
+  dark: "#25292e",
+  light: "#f2f2f2",
 };

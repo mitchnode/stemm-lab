@@ -5,10 +5,15 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-// Need to get video file location routed ????
-export default function Results() {
-  const { id } = useLocalSearchParams();
+interface Results {
+  resultType: String;
+  resultValue: String;
+}
+
+export default function VideoResults() {
+  const { id, result } = useLocalSearchParams();
   const [videoUri, setVideoUri] = useState("");
+  const [resultJSON, setResultJSON] = useState<Results>();
 
   const loadVideoUri = async () => {
     try {
@@ -21,23 +26,34 @@ export default function Results() {
     }
   };
 
+  const loadResult = async () => {
+    try {
+      const resultString = await AsyncStorage.getItem(result.toString());
+      if (resultString) {
+        setResultJSON(JSON.parse(resultString));
+      } else {
+        setResultJSON({ resultType: "No Result", resultValue: "No Result" });
+      }
+    } catch (error) {
+      console.error("Error loading result:", error);
+    }
+  };
+
   const { colors } = useTheme();
 
   useEffect(() => {
     loadVideoUri();
+    loadResult();
   }, []);
 
-  const player = useVideoPlayer(videoUri, (p) => {
-    p.play();
-  });
+  const player = useVideoPlayer(videoUri);
 
   return (
     <View style={styles.container}>
       <VideoView player={player} style={styles.video} />
       <View style={styles.results}>
-        <Text>Results</Text>
-        <Text>Results</Text>
-        <Text>Results</Text>
+        <Text>{resultJSON?.resultType}</Text>
+        <Text>{resultJSON?.resultValue}</Text>
       </View>
       <View style={styles.buttonRow}>
         <Pressable
@@ -46,13 +62,17 @@ export default function Results() {
             router.dismiss();
           }}
         >
-          <Text style={{ color: colors.header }}>Cancel</Text>
+          <Text style={{ ...styles.buttontext, color: colors.light }}>
+            Cancel
+          </Text>
         </Pressable>
         <Pressable
           style={{ ...styles.button, backgroundColor: colors.success }}
           onPress={() => {}}
         >
-          <Text style={{ color: colors.header }}>Upload</Text>
+          <Text style={{ ...styles.buttontext, color: colors.dark }}>
+            Upload
+          </Text>
         </Pressable>
       </View>
     </View>
@@ -78,12 +98,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   button: {
-    width: 70,
+    width: 150,
     height: 70,
-    borderWidth: 2,
+    borderWidth: 1,
     borderRadius: 60,
     padding: 5,
     alignItems: "center",
     justifyContent: "center",
+  },
+  buttontext: {
+    fontWeight: "bold",
   },
 });

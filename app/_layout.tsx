@@ -44,7 +44,7 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
-          name="results"
+          name="videoresults"
           options={{
             headerShown: false,
             gestureEnabled: false,

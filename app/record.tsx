@@ -1,4 +1,3 @@
-import { useTheme } from "@/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   CameraView,
@@ -6,17 +5,41 @@ import {
   useMicrophonePermissions,
 } from "expo-camera";
 import { router } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+interface Results {
+  resultType: String;
+  resultValue: String;
+}
+
 export default function App() {
-  const { colors } = useTheme();
   const [camPermission, requestCamPermission] = useCameraPermissions();
   const [micPermission, requestMicPermission] = useMicrophonePermissions();
   const ref = useRef<CameraView>(null);
   const [isRecording, setRecording] = useState(false);
   const [recButtonColor, setRecButtonColor] = useState("white");
   const [recButtonShape, setRecButtonShape] = useState(50);
+  const [teamID, setTeamID] = useState("");
+
+  const loadTeam = async () => {
+    try {
+      const storedTeam = await AsyncStorage.getItem("team");
+      if (storedTeam) {
+        setTeamID(JSON.parse(storedTeam).id);
+        //console.log("Team loaded from storage", storedTeam);
+      } else {
+        console.log("No Team created yet");
+        router.push("/team");
+      }
+    } catch (error) {
+      console.error("Error loading team:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadTeam();
+  }, []);
 
   if (!camPermission || !micPermission) {
     // Camera permissions are still loading.
@@ -49,11 +72,21 @@ export default function App() {
 
   const storeVideoUri = async (videoUri: string) => {
     try {
-      const id = "result" + Date.now();
-      await AsyncStorage.setItem(id, videoUri);
-      return id;
+      const videoId = "videoresult" + teamID.toString() + Date.now();
+      await AsyncStorage.setItem(videoId, videoUri);
+      return videoId;
     } catch (error) {
       console.error("Error saving video uri:", error);
+    }
+  };
+
+  const storeResult = async (resultString: string) => {
+    try {
+      const resultId = "result" + teamID.toString() + Date.now();
+      await AsyncStorage.setItem(resultId, resultString);
+      return resultId;
+    } catch (error) {
+      console.error("Error saving result:", error);
     }
   };
 
@@ -70,8 +103,19 @@ export default function App() {
     setRecButtonShape(20);
     const video = await ref.current?.recordAsync();
     if (video) {
+      // Get any processed result here before pusing to the results page
+      // Dummy results for testing
+      const result: Results = {
+        resultType: "Acceleration",
+        resultValue: "10m/s^2",
+      };
+
       const videoId = await storeVideoUri(video.uri);
-      router.push({ pathname: "/results", params: { id: videoId } });
+      const resultId = await storeResult(JSON.stringify(result));
+      router.push({
+        pathname: "/videoresults",
+        params: { id: videoId, result: resultId },
+      });
     }
   };
 
