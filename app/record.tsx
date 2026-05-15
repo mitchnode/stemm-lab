@@ -1,26 +1,28 @@
+/* 
+Generalized record screen
+Use for creating screens for recording different activities sensor recording
+ */
+
+import { useTheme } from "@/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  CameraView,
-  useCameraPermissions,
-  useMicrophonePermissions,
-} from "expo-camera";
 import { router } from "expo-router";
-import { useEffect, useRef, useState } from "react";
-import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useEffect, useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface Results {
   resultType: String;
   resultValue: String;
 }
 
-export default function RecordVideo() {
-  const [camPermission, requestCamPermission] = useCameraPermissions();
-  const [micPermission, requestMicPermission] = useMicrophonePermissions();
-  const ref = useRef<CameraView>(null);
+export default function Record() {
   const [isRecording, setRecording] = useState(false);
-  const [recButtonColor, setRecButtonColor] = useState("white");
+  const [recButtonColor, setRecButtonColor] = useState("green");
   const [recButtonShape, setRecButtonShape] = useState(50);
   const [teamID, setTeamID] = useState("");
+  const [data, setData] = useState("");
+  const [btnName, setBtnName] = useState("Start");
+
+  const { colors } = useTheme();
 
   const loadTeam = async () => {
     try {
@@ -41,45 +43,6 @@ export default function RecordVideo() {
     loadTeam();
   }, []);
 
-  if (!camPermission || !micPermission) {
-    // Camera permissions are still loading.
-    return <View />;
-  }
-
-  if (!camPermission.granted) {
-    // Camera permissions are not granted yet.
-    return (
-      <View style={styles.container}>
-        <Text style={styles.message}>
-          We need your permission to show the camera
-        </Text>
-        <Button onPress={requestCamPermission} title="grant permission" />
-      </View>
-    );
-  }
-
-  if (!micPermission.granted) {
-    // Microphone permissions are not granted yet.
-    return (
-      <View style={styles.container}>
-        <Text style={styles.message}>
-          We need your permission to record audio
-        </Text>
-        <Button onPress={requestMicPermission} title="grant permission" />
-      </View>
-    );
-  }
-
-  const storeVideoUri = async (videoUri: string) => {
-    try {
-      const videoId = "videoresult" + teamID.toString() + Date.now();
-      await AsyncStorage.setItem(videoId, videoUri);
-      return videoId;
-    } catch (error) {
-      console.error("Error saving video uri:", error);
-    }
-  };
-
   const storeResult = async (resultString: string) => {
     try {
       const resultId = "result" + teamID.toString() + Date.now();
@@ -92,36 +55,37 @@ export default function RecordVideo() {
 
   const toggleRecord = async () => {
     if (isRecording) {
+      setBtnName("Start");
       setRecording(false);
-      setRecButtonColor("white");
+      setRecButtonColor(colors.success);
       setRecButtonShape(50);
-      ref.current?.stopRecording();
-      return;
-    }
-    setRecording(true);
-    setRecButtonColor("red");
-    setRecButtonShape(20);
-    const video = await ref.current?.recordAsync();
-    if (video) {
-      // Get any processed result here before passing to the results page
-      // Dummy results for testing
-      const result: Results = {
-        resultType: "Acceleration",
-        resultValue: "10m/s^2",
-      };
+      // Call function to finish recording sensor data <<<<------------------------------
+      if (data) {
+        // Get any processed result here before passing to the results page
+        // Dummy results for testing
+        const result: Results = {
+          resultType: "Acceleration",
+          resultValue: "10m/s^2",
+        };
 
-      const videoId = await storeVideoUri(video.uri);
-      const resultId = await storeResult(JSON.stringify(result));
-      router.push({
-        pathname: "/videoresults",
-        params: { id: videoId, result: resultId },
-      });
+        const resultId = await storeResult(JSON.stringify(result));
+        router.push({
+          pathname: "/results",
+          params: { result: resultId },
+        });
+      }
+    } else {
+      setBtnName("Stop");
+      setRecording(true);
+      setRecButtonColor(colors.error);
+      setRecButtonShape(20);
+      // Call function to begin recording sensor data <<<<---------------------------------
+      setData("Dummy data");
     }
   };
 
   return (
-    <View style={styles.container}>
-      <CameraView style={styles.camera} mode="video" ref={ref} />
+    <View style={{ ...styles.container, backgroundColor: colors.background }}>
       {isRecording && (
         <View style={{ ...styles.record, backgroundColor: "red" }} />
       )}
@@ -135,7 +99,9 @@ export default function RecordVideo() {
               borderRadius: recButtonShape,
             }}
             onPress={toggleRecord}
-          />
+          >
+            <Text style={styles.text}>{btnName}</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>

@@ -87,6 +87,13 @@ export default function Index() {
             router.push("/recordvideo");
           }}
         >
+          Record Video result
+        </Button>
+        <Button
+          onPress={() => {
+            router.push("/record");
+          }}
+        >
           Record result
         </Button>
       </SafeAreaView>

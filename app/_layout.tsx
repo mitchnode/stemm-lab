@@ -48,6 +48,22 @@ export default function RootLayout() {
           options={{
             headerShown: false,
             gestureEnabled: false,
+            animation: "slide_from_bottom",
+          }}
+        />
+        <Stack.Screen
+          name="record"
+          options={{
+            headerShown: false,
+            animation: "slide_from_bottom",
+          }}
+        />
+        <Stack.Screen
+          name="results"
+          options={{
+            headerShown: false,
+            gestureEnabled: false,
+            animation: "slide_from_bottom",
           }}
         />
       </Stack>

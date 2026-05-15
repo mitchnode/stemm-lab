@@ -1,30 +1,18 @@
 import { useTheme } from "@/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
-import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
+// Change to array if recieving multiple results
 interface Results {
   resultType: String;
   resultValue: String;
 }
 
-export default function VideoResults() {
-  const { id, result } = useLocalSearchParams();
-  const [videoUri, setVideoUri] = useState("");
+export default function Results() {
+  const { result } = useLocalSearchParams();
   const [resultJSON, setResultJSON] = useState<Results>();
-
-  const loadVideoUri = async () => {
-    try {
-      const video = await AsyncStorage.getItem(id.toString());
-      if (video) {
-        setVideoUri(video);
-      }
-    } catch (error) {
-      console.error("Error loading video:", error);
-    }
-  };
 
   const loadResult = async () => {
     try {
@@ -54,18 +42,15 @@ export default function VideoResults() {
   const { colors } = useTheme();
 
   useEffect(() => {
-    loadVideoUri();
     loadResult();
   }, []);
 
-  const player = useVideoPlayer(videoUri);
-
   return (
-    <View style={styles.container}>
-      <VideoView player={player} style={styles.video} />
+    <View style={{ ...styles.container, backgroundColor: colors.background }}>
+      <View style={styles.resultdisplay} />
       <View style={styles.results}>
-        <Text>{resultJSON?.resultType}</Text>
-        <Text>{resultJSON?.resultValue}</Text>
+        <Text style={{ color: colors.text }}>{resultJSON?.resultType}</Text>
+        <Text style={{ color: colors.text }}>{resultJSON?.resultValue}</Text>
       </View>
       <View style={styles.buttonRow}>
         <Pressable
@@ -97,7 +82,7 @@ const styles = StyleSheet.create({
     gap: 20,
     marginBottom: 20,
   },
-  video: {
+  resultdisplay: {
     flex: 1,
   },
   results: {
