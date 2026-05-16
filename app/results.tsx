@@ -1,31 +1,14 @@
+import { ResultsModel } from "@/models/ResultsModel";
 import { useTheme } from "@/theme";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
-// Change to array if recieving multiple results
-interface Results {
-  resultType: String;
-  resultValue: String;
-}
-
 export default function Results() {
-  const { result } = useLocalSearchParams();
-  const [resultJSON, setResultJSON] = useState<Results>();
-
-  const loadResult = async () => {
-    try {
-      const resultString = await AsyncStorage.getItem(result.toString());
-      if (resultString) {
-        setResultJSON(JSON.parse(resultString));
-      } else {
-        setResultJSON({ resultType: "No Result", resultValue: "No Result" });
-      }
-    } catch (error) {
-      console.error("Error loading result:", error);
-    }
-  };
+  const { resultID } = useLocalSearchParams();
+  const restoredResult = new ResultsModel();
+  const [resultType, setResultType] = useState("");
+  const [resultValue, setResultValue] = useState("");
 
   const uploadResults = async () => {
     // Upload results to Firebase???
@@ -39,18 +22,24 @@ export default function Results() {
     router.push("/");
   };
 
+  const restoredResults = async () => {
+    await restoredResult.loadResult(resultID.toString());
+    setResultType(restoredResult.resultType);
+    setResultValue(restoredResult.resultValue);
+  };
+
   const { colors } = useTheme();
 
   useEffect(() => {
-    loadResult();
+    restoredResults();
   }, []);
 
   return (
     <View style={{ ...styles.container, backgroundColor: colors.background }}>
       <View style={styles.resultdisplay} />
       <View style={styles.results}>
-        <Text style={{ color: colors.text }}>{resultJSON?.resultType}</Text>
-        <Text style={{ color: colors.text }}>{resultJSON?.resultValue}</Text>
+        <Text style={{ color: colors.text }}>{resultType}</Text>
+        <Text style={{ color: colors.text }}>{resultValue}</Text>
       </View>
       <View style={styles.buttonRow}>
         <Pressable

@@ -3,16 +3,12 @@ Generalized record screen
 Use for creating screens for recording different activities sensor recording
  */
 
+import { ResultsModel } from "@/models/ResultsModel";
 import { useTheme } from "@/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-
-interface Results {
-  resultType: String;
-  resultValue: String;
-}
 
 export default function Record() {
   const [isRecording, setRecording] = useState(false);
@@ -29,7 +25,6 @@ export default function Record() {
       const storedTeam = await AsyncStorage.getItem("team");
       if (storedTeam) {
         setTeamID(JSON.parse(storedTeam).id);
-        //console.log("Team loaded from storage", storedTeam);
       } else {
         console.log("No Team created yet");
         router.push("/team");
@@ -43,15 +38,7 @@ export default function Record() {
     loadTeam();
   }, []);
 
-  const storeResult = async (resultString: string) => {
-    try {
-      const resultId = "result" + teamID.toString() + Date.now();
-      await AsyncStorage.setItem(resultId, resultString);
-      return resultId;
-    } catch (error) {
-      console.error("Error saving result:", error);
-    }
-  };
+  const result = new ResultsModel(teamID);
 
   const toggleRecord = async () => {
     if (isRecording) {
@@ -63,15 +50,18 @@ export default function Record() {
       if (data) {
         // Get any processed result here before passing to the results page
         // Dummy results for testing
-        const result: Results = {
+        const dateTime = new Date(Date.now()).toLocaleString();
+        result.setResultInfo({
+          resultDateTime: dateTime,
           resultType: "Acceleration",
           resultValue: "10m/s^2",
-        };
+          resultData: data,
+        });
 
-        const resultId = await storeResult(JSON.stringify(result));
+        const resultID = await result.storeResult();
         router.push({
           pathname: "/results",
-          params: { result: resultId },
+          params: { resultID: resultID },
         });
       }
     } else {
