@@ -5,42 +5,12 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
-/* interface Results {
-  resultType: String;
-  resultValue: String;
-} */
-
 export default function VideoResults() {
   const { resultID } = useLocalSearchParams();
-  const [videoUri, setVideoUri] = useState("");
-  //const [resultJSON, setResultJSON] = useState<Results>();
   const restoredResult = new ResultsModel();
   const [resultType, setResultType] = useState("");
   const [resultValue, setResultValue] = useState("");
-
-  /* const loadVideoUri = async () => {
-    try {
-      const video = await AsyncStorage.getItem(id.toString());
-      if (video) {
-        setVideoUri(video);
-      }
-    } catch (error) {
-      console.error("Error loading video:", error);
-    }
-  }; */
-
-  /* const loadResult = async () => {
-    try {
-      const resultString = await AsyncStorage.getItem(result.toString());
-      if (resultString) {
-        setResultJSON(JSON.parse(resultString));
-      } else {
-        setResultJSON({ resultType: "No Result", resultValue: "No Result" });
-      }
-    } catch (error) {
-      console.error("Error loading result:", error);
-    }
-  }; */
+  const [videoUri, setVideoUri] = useState("");
 
   const uploadResults = async () => {
     // Upload results to Firebase???
@@ -65,8 +35,6 @@ export default function VideoResults() {
 
   useEffect(() => {
     restoredResults();
-    /* loadVideoUri();
-    loadResult(); */
   }, []);
 
   const player = useVideoPlayer(videoUri);

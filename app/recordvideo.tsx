@@ -9,11 +9,6 @@ import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-interface Results {
-  resultType: String;
-  resultValue: String;
-}
-
 export default function RecordVideo() {
   const [camPermission, requestCamPermission] = useCameraPermissions();
   const [micPermission, requestMicPermission] = useMicrophonePermissions();
@@ -28,7 +23,6 @@ export default function RecordVideo() {
       const storedTeam = await AsyncStorage.getItem("team");
       if (storedTeam) {
         setTeamID(JSON.parse(storedTeam).id);
-        //console.log("Team loaded from storage", storedTeam);
       } else {
         console.log("No Team created yet");
         router.push("/team");
@@ -71,26 +65,6 @@ export default function RecordVideo() {
     );
   }
 
-  const storeVideoUri = async (videoUri: string) => {
-    try {
-      const videoId = "videoresult" + teamID.toString() + Date.now();
-      await AsyncStorage.setItem(videoId, videoUri);
-      return videoId;
-    } catch (error) {
-      console.error("Error saving video uri:", error);
-    }
-  };
-
-  const storeResult = async (resultString: string) => {
-    try {
-      const resultId = "result" + teamID.toString() + Date.now();
-      await AsyncStorage.setItem(resultId, resultString);
-      return resultId;
-    } catch (error) {
-      console.error("Error saving result:", error);
-    }
-  };
-
   const result = new ResultsModel(teamID);
 
   const toggleRecord = async () => {
@@ -121,17 +95,6 @@ export default function RecordVideo() {
         pathname: "/results",
         params: { resultID: resultID },
       });
-      /* const result: Results = {
-        resultType: "Acceleration",
-        resultValue: "10m/s^2",
-      }; */
-
-      //const videoId = await storeVideoUri(video.uri);
-      //const resultId = await storeResult(JSON.stringify(result));
-      /* router.push({
-        pathname: "/videoresults",
-        params: { resultID: resultId },
-      }); */
     }
   };
 
