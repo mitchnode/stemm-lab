@@ -1,21 +1,24 @@
+import { ResultsModel } from "@/models/ResultsModel";
 import { useTheme } from "@/theme";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
-interface Results {
+/* interface Results {
   resultType: String;
   resultValue: String;
-}
+} */
 
 export default function VideoResults() {
-  const { id, result } = useLocalSearchParams();
+  const { resultID } = useLocalSearchParams();
   const [videoUri, setVideoUri] = useState("");
-  const [resultJSON, setResultJSON] = useState<Results>();
+  //const [resultJSON, setResultJSON] = useState<Results>();
+  const restoredResult = new ResultsModel();
+  const [resultType, setResultType] = useState("");
+  const [resultValue, setResultValue] = useState("");
 
-  const loadVideoUri = async () => {
+  /* const loadVideoUri = async () => {
     try {
       const video = await AsyncStorage.getItem(id.toString());
       if (video) {
@@ -24,9 +27,9 @@ export default function VideoResults() {
     } catch (error) {
       console.error("Error loading video:", error);
     }
-  };
+  }; */
 
-  const loadResult = async () => {
+  /* const loadResult = async () => {
     try {
       const resultString = await AsyncStorage.getItem(result.toString());
       if (resultString) {
@@ -37,7 +40,7 @@ export default function VideoResults() {
     } catch (error) {
       console.error("Error loading result:", error);
     }
-  };
+  }; */
 
   const uploadResults = async () => {
     // Upload results to Firebase???
@@ -51,11 +54,19 @@ export default function VideoResults() {
     router.push("/");
   };
 
+  const restoredResults = async () => {
+    await restoredResult.loadResult(resultID.toString());
+    setResultType(restoredResult.resultType);
+    setResultValue(restoredResult.resultValue);
+    setVideoUri(restoredResult.resultData);
+  };
+
   const { colors } = useTheme();
 
   useEffect(() => {
-    loadVideoUri();
-    loadResult();
+    restoredResults();
+    /* loadVideoUri();
+    loadResult(); */
   }, []);
 
   const player = useVideoPlayer(videoUri);
@@ -64,8 +75,8 @@ export default function VideoResults() {
     <View style={styles.container}>
       <VideoView player={player} style={styles.video} />
       <View style={styles.results}>
-        <Text>{resultJSON?.resultType}</Text>
-        <Text>{resultJSON?.resultValue}</Text>
+        <Text>{resultType}</Text>
+        <Text>{resultValue}</Text>
       </View>
       <View style={styles.buttonRow}>
         <Pressable

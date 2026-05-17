@@ -1,3 +1,4 @@
+import { ResultsModel } from "@/models/ResultsModel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   CameraView,
@@ -90,6 +91,8 @@ export default function RecordVideo() {
     }
   };
 
+  const result = new ResultsModel(teamID);
+
   const toggleRecord = async () => {
     if (isRecording) {
       setRecording(false);
@@ -105,17 +108,30 @@ export default function RecordVideo() {
     if (video) {
       // Get any processed result here before passing to the results page
       // Dummy results for testing
-      const result: Results = {
+      const dateTime = new Date(Date.now()).toLocaleString();
+      result.setResultInfo({
+        resultDateTime: dateTime,
         resultType: "Acceleration",
         resultValue: "10m/s^2",
-      };
-
-      const videoId = await storeVideoUri(video.uri);
-      const resultId = await storeResult(JSON.stringify(result));
-      router.push({
-        pathname: "/videoresults",
-        params: { id: videoId, result: resultId },
+        resultData: video.uri,
       });
+
+      const resultID = await result.storeResult();
+      router.push({
+        pathname: "/results",
+        params: { resultID: resultID },
+      });
+      /* const result: Results = {
+        resultType: "Acceleration",
+        resultValue: "10m/s^2",
+      }; */
+
+      //const videoId = await storeVideoUri(video.uri);
+      //const resultId = await storeResult(JSON.stringify(result));
+      /* router.push({
+        pathname: "/videoresults",
+        params: { resultID: resultId },
+      }); */
     }
   };
 
