@@ -96,6 +96,20 @@ export default function Index() {
         >
           Record result
         </Button>
+        <Button
+          onPress={() => {
+            router.push("/resultlist");
+          }}
+        >
+          Result List
+        </Button>
+        <Button
+          onPress={() => {
+            router.push("/playback");
+          }}
+        >
+          Playback result
+        </Button>
       </SafeAreaView>
     </SafeAreaProvider>
   );

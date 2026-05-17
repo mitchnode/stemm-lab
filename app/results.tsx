@@ -2,7 +2,7 @@ import { ResultsModel } from "@/models/ResultsModel";
 import { useTheme } from "@/theme";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function Results() {
   const { resultID } = useLocalSearchParams();
@@ -10,7 +10,7 @@ export default function Results() {
   const [resultType, setResultType] = useState("");
   const [resultValue, setResultValue] = useState("");
 
-  const uploadResults = async () => {
+  /*  const uploadResults = async () => {
     // Upload results to Firebase???
     // include TeamID, Team name, Activity, result. (Video/sensor data stays local)
     // Compare result to existing leaderboard entry, update if better.
@@ -20,7 +20,7 @@ export default function Results() {
       "Your result has been uploaded to the cloud",
     );
     router.push("/");
-  };
+  }; */
 
   const restoredResults = async () => {
     await restoredResult.loadResult(resultID.toString());
@@ -54,7 +54,7 @@ export default function Results() {
         </Pressable>
         <Pressable
           style={{ ...styles.button, backgroundColor: colors.success }}
-          onPress={uploadResults}
+          onPress={restoredResult.uploadResults}
         >
           <Text style={{ ...styles.buttontext, color: colors.dark }}>
             Upload

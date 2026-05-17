@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Record() {
+  const ACTIVITY_ID = 3;
   const [isRecording, setRecording] = useState(false);
   const [recButtonColor, setRecButtonColor] = useState("green");
   const [recButtonShape, setRecButtonShape] = useState(50);
@@ -52,6 +53,7 @@ export default function Record() {
         // Dummy results for testing
         const dateTime = new Date(Date.now()).toLocaleString();
         result.setResultInfo({
+          activityID: ACTIVITY_ID,
           resultDateTime: dateTime,
           resultType: "Acceleration",
           resultValue: "10m/s^2",
