@@ -66,6 +66,7 @@ export default function ResultList() {
               style={{ ...styles.box, backgroundColor: colors.surface }}
             >
               <Pressable
+                style={styles.button}
                 onPress={() => {
                   router.push({
                     pathname: "/playback",
@@ -78,49 +79,50 @@ export default function ResultList() {
                 ) : (
                   <SensorIcon />
                 )}
+
+                <View style={styles.info}>
+                  <View style={styles.row}>
+                    <Text style={{ ...styles.bold_text, color: colors.text }}>
+                      Result ID:
+                    </Text>
+                    <Text style={{ ...styles.large_font, color: colors.text }}>
+                      {result.resultID}
+                    </Text>
+                  </View>
+                  <View style={styles.row}>
+                    <Text style={{ ...styles.bold_text, color: colors.text }}>
+                      Activity ID:
+                    </Text>
+                    <Text style={{ ...styles.large_font, color: colors.text }}>
+                      {result.activityID}
+                    </Text>
+                  </View>
+                  <View style={styles.row}>
+                    <Text style={{ ...styles.bold_text, color: colors.text }}>
+                      Date/Time:
+                    </Text>
+                    <Text style={{ ...styles.large_font, color: colors.text }}>
+                      {result.resultDateTime}
+                    </Text>
+                  </View>
+                  <View style={styles.row}>
+                    <Text style={{ ...styles.bold_text, color: colors.text }}>
+                      Result Type:
+                    </Text>
+                    <Text style={{ ...styles.large_font, color: colors.text }}>
+                      {result.resultType}
+                    </Text>
+                  </View>
+                  <View style={styles.row}>
+                    <Text style={{ ...styles.bold_text, color: colors.text }}>
+                      Result:
+                    </Text>
+                    <Text style={{ ...styles.large_font, color: colors.text }}>
+                      {result.resultValue}
+                    </Text>
+                  </View>
+                </View>
               </Pressable>
-              <View style={styles.info}>
-                <View style={styles.row}>
-                  <Text style={{ ...styles.bold_text, color: colors.text }}>
-                    Result ID:
-                  </Text>
-                  <Text style={{ ...styles.large_font, color: colors.text }}>
-                    {result.resultID}
-                  </Text>
-                </View>
-                <View style={styles.row}>
-                  <Text style={{ ...styles.bold_text, color: colors.text }}>
-                    Activity ID:
-                  </Text>
-                  <Text style={{ ...styles.large_font, color: colors.text }}>
-                    {result.activityID}
-                  </Text>
-                </View>
-                <View style={styles.row}>
-                  <Text style={{ ...styles.bold_text, color: colors.text }}>
-                    Date/Time:
-                  </Text>
-                  <Text style={{ ...styles.large_font, color: colors.text }}>
-                    {result.resultDateTime}
-                  </Text>
-                </View>
-                <View style={styles.row}>
-                  <Text style={{ ...styles.bold_text, color: colors.text }}>
-                    Result Type:
-                  </Text>
-                  <Text style={{ ...styles.large_font, color: colors.text }}>
-                    {result.resultType}
-                  </Text>
-                </View>
-                <View style={styles.row}>
-                  <Text style={{ ...styles.bold_text, color: colors.text }}>
-                    Result:
-                  </Text>
-                  <Text style={{ ...styles.large_font, color: colors.text }}>
-                    {result.resultValue}
-                  </Text>
-                </View>
-              </View>
             </View>
           ),
       )}
@@ -143,7 +145,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     margin: 10,
-    gap: 20,
   },
   heading: {
     padding: 20,
@@ -161,8 +162,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   icon: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  button: {
+    flexDirection: "row",
+    gap: 20,
   },
 });
