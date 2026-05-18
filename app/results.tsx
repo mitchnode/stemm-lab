@@ -10,18 +10,6 @@ export default function Results() {
   const [resultType, setResultType] = useState("");
   const [resultValue, setResultValue] = useState("");
 
-  /*  const uploadResults = async () => {
-    // Upload results to Firebase???
-    // include TeamID, Team name, Activity, result. (Video/sensor data stays local)
-    // Compare result to existing leaderboard entry, update if better.
-    // Give feedback to the user confirming upload complete.
-    Alert.alert(
-      "Result uploaded!",
-      "Your result has been uploaded to the cloud",
-    );
-    router.push("/");
-  }; */
-
   const restoredResults = async () => {
     await restoredResult.loadResult(resultID.toString());
     setResultType(restoredResult.resultType);

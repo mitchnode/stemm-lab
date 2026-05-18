@@ -1,38 +1,18 @@
 import { ResultListModel } from "@/models/ResultListModel";
 import { Results, ResultsModel } from "@/models/ResultsModel";
 import { useTheme } from "@/theme";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export default function ResultList() {
-  //const router = useRouter();
+  const { activity } = useLocalSearchParams();
+  const router = useRouter();
   const { colors } = useTheme();
   const resultList = new ResultListModel();
   const [results, setResults] = useState<Results[]>([]);
-
-  /* // Set up state for team
-  let [team, setTeam] = useState({
-    id: 0,
-    team_name: "",
-    year: "",
-    members: [],
-  });
-
-  // Load team data
-  const loadTeam = async () => {
-    try {
-      const storedTeam = await AsyncStorage.getItem("team");
-      if (storedTeam) {
-        setTeam(JSON.parse(storedTeam));
-        //console.log("Team loaded from storage", storedTeam);
-      } else {
-        console.log("No Team created yet");
-        router.push("/team");
-      }
-    } catch (error) {
-      console.error("Error loading team:", error);
-    }
-  }; */
 
   const addResults = async (result: ResultsModel) => {
     setResults((prevResults) => [...prevResults, result.getResult()]);
@@ -55,6 +35,22 @@ export default function ResultList() {
     });
   };
 
+  const VideoIcon = () => {
+    return (
+      <View style={styles.icon}>
+        <Ionicons name="play" size={70} color={colors.textSecondary} />
+      </View>
+    );
+  };
+
+  const SensorIcon = () => {
+    return (
+      <View style={styles.icon}>
+        <MaterialIcons name="sensors" size={70} color={colors.textSecondary} />
+      </View>
+    );
+  };
+
   useEffect(() => {
     loadResults();
   }, []);
@@ -62,23 +58,72 @@ export default function ResultList() {
   return (
     <View style={{ ...styles.screen, backgroundColor: colors.background }}>
       <Text style={{ ...styles.heading, color: colors.text }}>Results</Text>
-      {results.map((result, index) => (
-        <View
-          key={index}
-          style={{ ...styles.box, backgroundColor: colors.surface }}
-        >
-          <View style={styles.info}>
-            <View style={styles.row}>
-              <Text style={{ ...styles.bold_text, color: colors.text }}>
-                Result ID:
-              </Text>
-              <Text style={{ ...styles.large_font, color: colors.text }}>
-                {result.resultID}
-              </Text>
+      {results.map(
+        (result, index) =>
+          result.activityID.toString() == activity && (
+            <View
+              key={index}
+              style={{ ...styles.box, backgroundColor: colors.surface }}
+            >
+              <Pressable
+                onPress={() => {
+                  router.push({
+                    pathname: "/playback",
+                    params: { resultID: result.resultID },
+                  });
+                }}
+              >
+                {result.activityID == 1 || result.activityID == 3 ? (
+                  <VideoIcon />
+                ) : (
+                  <SensorIcon />
+                )}
+              </Pressable>
+              <View style={styles.info}>
+                <View style={styles.row}>
+                  <Text style={{ ...styles.bold_text, color: colors.text }}>
+                    Result ID:
+                  </Text>
+                  <Text style={{ ...styles.large_font, color: colors.text }}>
+                    {result.resultID}
+                  </Text>
+                </View>
+                <View style={styles.row}>
+                  <Text style={{ ...styles.bold_text, color: colors.text }}>
+                    Activity ID:
+                  </Text>
+                  <Text style={{ ...styles.large_font, color: colors.text }}>
+                    {result.activityID}
+                  </Text>
+                </View>
+                <View style={styles.row}>
+                  <Text style={{ ...styles.bold_text, color: colors.text }}>
+                    Date/Time:
+                  </Text>
+                  <Text style={{ ...styles.large_font, color: colors.text }}>
+                    {result.resultDateTime}
+                  </Text>
+                </View>
+                <View style={styles.row}>
+                  <Text style={{ ...styles.bold_text, color: colors.text }}>
+                    Result Type:
+                  </Text>
+                  <Text style={{ ...styles.large_font, color: colors.text }}>
+                    {result.resultType}
+                  </Text>
+                </View>
+                <View style={styles.row}>
+                  <Text style={{ ...styles.bold_text, color: colors.text }}>
+                    Result:
+                  </Text>
+                  <Text style={{ ...styles.large_font, color: colors.text }}>
+                    {result.resultValue}
+                  </Text>
+                </View>
+              </View>
             </View>
-          </View>
-        </View>
-      ))}
+          ),
+      )}
     </View>
   );
 }
@@ -91,37 +136,33 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   box: {
+    flexDirection: "row",
     justifyContent: "center",
-    alignItems: "stretch",
+    alignItems: "center",
     borderWidth: 2,
     borderRadius: 20,
-    padding: 30,
-    minWidth: 400,
+    padding: 20,
+    margin: 10,
+    gap: 20,
   },
   heading: {
     padding: 20,
     fontSize: 20,
     fontWeight: "bold",
   },
-  info: {
-    gap: 20,
-  },
+  info: {},
   row: {
     flexDirection: "row",
-    gap: 20,
+    gap: 10,
     justifyContent: "space-between",
   },
-  large_font: {
-    fontSize: 20,
-  },
+  large_font: {},
   bold_text: {
     fontWeight: "bold",
-    fontSize: 20,
   },
-  members: {
-    gap: 5,
-  },
-  members_text: {
-    textAlign: "right",
+  icon: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

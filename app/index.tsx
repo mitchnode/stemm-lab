@@ -98,14 +98,14 @@ export default function Index() {
         </Button>
         <Button
           onPress={() => {
-            router.push("/resultlist");
+            router.push({ pathname: "/resultlist", params: { activity: "4" } }); // Pass activity number to filter result list
           }}
         >
           Result List
         </Button>
         <Button
           onPress={() => {
-            router.push("/playback");
+            router.push({ pathname: "/playback", params: { resultID: "" } });
           }}
         >
           Playback result

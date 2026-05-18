@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function Record() {
-  const ACTIVITY_ID = 3;
+  const ACTIVITY_ID = 4;
   const [isRecording, setRecording] = useState(false);
   const [recButtonColor, setRecButtonColor] = useState("green");
   const [recButtonShape, setRecButtonShape] = useState(50);

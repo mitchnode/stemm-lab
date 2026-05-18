@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function RecordVideo() {
+  const ACTIVITY_ID = 1;
   const [camPermission, requestCamPermission] = useCameraPermissions();
   const [micPermission, requestMicPermission] = useMicrophonePermissions();
   const ref = useRef<CameraView>(null);
@@ -84,6 +85,7 @@ export default function RecordVideo() {
       // Dummy results for testing
       const dateTime = new Date(Date.now()).toLocaleString();
       result.setResultInfo({
+        activityID: ACTIVITY_ID,
         resultDateTime: dateTime,
         resultType: "Acceleration",
         resultValue: "10m/s^2",

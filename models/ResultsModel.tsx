@@ -27,18 +27,22 @@ export class ResultsModel {
     teamID ? (this.teamID = teamID) : null;
   }
 
+  // Add result information to an initialized result
   setResultInfo({
+    activityID,
     resultDateTime,
     resultType,
     resultValue,
     resultData,
   }: Results) {
+    this.activityID = activityID;
     this.resultDateTime = resultDateTime;
     this.resultType = resultType;
     this.resultValue = resultValue;
     this.resultData = resultData;
   }
 
+  // Returns the result as a Results object
   getResult() {
     const results: Results = {
       resultID: this.resultID,
@@ -52,10 +56,12 @@ export class ResultsModel {
     return results;
   }
 
+  // Set the resultID for an initialized result
   setResultID(resultID: string) {
     this.resultID = resultID;
   }
 
+  // Upload result, adding to the local result list
   uploadResults = async () => {
     // Save result to a local list in Async Storage
     const resultList = new ResultListModel();
@@ -72,9 +78,14 @@ export class ResultsModel {
     router.push("/");
   };
 
+  // Store the result in Async Storage
   storeResult = async () => {
     try {
-      const resultID = "result" + this.teamID.toString() + Date.now();
+      const resultID =
+        "result-" +
+        this.activityID +
+        "-" +
+        Math.random().toString(36).substring(0, 11);
       this.setResultID(resultID);
       await AsyncStorage.setItem(this.resultID, JSON.stringify(this));
       return this.resultID;
@@ -83,6 +94,7 @@ export class ResultsModel {
     }
   };
 
+  // Load the result from Async Storage
   loadResult = async (resultID: string) => {
     try {
       let resultJSON;
@@ -98,6 +110,7 @@ export class ResultsModel {
           resultType: "No Result",
           resultValue: "No Result",
           resultData: "No Result",
+          resultThumbnail: "No Result",
         };
       }
       this.resultID = resultID;
