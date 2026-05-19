@@ -1,15 +1,13 @@
+import { ResultViewModel } from "@/viewmodel/ResultViewModel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { makeAutoObservable } from "mobx";
 
 export class ResultListModel {
   resultList: string[] = [];
+  populatedList: ResultViewModel[] = [];
 
   constructor() {
-    this.loadResultList();
-  }
-
-  addResult(resultID: string) {
-    this.resultList.push(resultID);
-    this.storeResultList();
+    makeAutoObservable(this);
   }
 
   storeResultList = async () => {
@@ -30,12 +28,17 @@ export class ResultListModel {
         resultListJSON = [];
       }
       this.resultList = resultListJSON;
+      return this.resultList;
     } catch (error) {
       console.error("Error loading result:", error);
     }
   };
 
   getResults = async () => {
-    return this.resultList;
+    this.resultList.map(async (resultID) => {
+      const result = new ResultViewModel();
+      await result.handleRestore(resultID);
+      this.populatedList.push(result);
+    });
   };
 }

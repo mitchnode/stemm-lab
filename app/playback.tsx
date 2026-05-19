@@ -1,5 +1,5 @@
-import { ResultsModel } from "@/models/ResultsModel";
 import { useTheme } from "@/theme";
+import { ResultViewModel } from "@/viewmodel/ResultViewModel";
 import { useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useEffect, useState } from "react";
@@ -7,16 +7,12 @@ import { StyleSheet, Text, View } from "react-native";
 
 export default function PlaybackResults() {
   const { resultID } = useLocalSearchParams();
-  const restoredResult = new ResultsModel();
-  const [resultType, setResultType] = useState("");
-  const [resultValue, setResultValue] = useState("");
+  const [result] = useState(() => new ResultViewModel());
   const [videoUri, setVideoUri] = useState("");
 
   const restoredResults = async () => {
-    await restoredResult.loadResult(resultID.toString());
-    setResultType(restoredResult.resultType);
-    setResultValue(restoredResult.resultValue);
-    setVideoUri(restoredResult.resultData);
+    await result.handleRestore(resultID.toString());
+    setVideoUri(result.resultData);
   };
 
   const { colors } = useTheme();
@@ -38,10 +34,14 @@ export default function PlaybackResults() {
     >
       {resultID && (
         <>
-          <VideoView player={player} style={styles.video} />
+          {result.activityID == 1 || result.activityID == 3 ? (
+            <VideoView player={player} style={styles.video} />
+          ) : (
+            <></>
+          )}
           <View style={styles.results}>
-            <Text style={{ color: colors.text }}>{resultType}</Text>
-            <Text style={{ color: colors.text }}>{resultValue}</Text>
+            <Text style={{ color: colors.text }}>{result.resultType}</Text>
+            <Text style={{ color: colors.text }}>{result.resultValue}</Text>
           </View>
         </>
       )}

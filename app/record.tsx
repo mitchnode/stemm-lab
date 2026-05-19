@@ -3,8 +3,8 @@ Generalized record screen
 Use for creating screens for recording different activities sensor recording
  */
 
-import { ResultsModel } from "@/models/ResultsModel";
 import { useTheme } from "@/theme";
+import { ResultViewModel } from "@/viewmodel/ResultViewModel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -18,6 +18,7 @@ export default function Record() {
   const [teamID, setTeamID] = useState("");
   const [data, setData] = useState("");
   const [btnName, setBtnName] = useState("Start");
+  const [result] = useState(() => new ResultViewModel());
 
   const { colors } = useTheme();
 
@@ -39,8 +40,6 @@ export default function Record() {
     loadTeam();
   }, []);
 
-  const result = new ResultsModel(teamID);
-
   const toggleRecord = async () => {
     if (isRecording) {
       setBtnName("Start");
@@ -52,15 +51,14 @@ export default function Record() {
         // Get any processed result here before passing to the results page
         // Dummy results for testing
         const dateTime = new Date(Date.now()).toLocaleString();
-        result.setResultInfo({
-          activityID: ACTIVITY_ID,
-          resultDateTime: dateTime,
-          resultType: "Acceleration",
-          resultValue: "10m/s^2",
-          resultData: data,
-        });
+        result.setTeamID(teamID);
+        result.setActivityID(ACTIVITY_ID);
+        result.setResultDateTime(dateTime);
+        result.setResultType("Acceleration");
+        result.setResultValue("10m/s^2");
+        result.setResultData(data);
 
-        const resultID = await result.storeResult();
+        const resultID = await result.handleRecord();
         router.push({
           pathname: "/results",
           params: { resultID: resultID },

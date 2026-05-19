@@ -1,38 +1,21 @@
-import { ResultListModel } from "@/models/ResultListModel";
-import { Results, ResultsModel } from "@/models/ResultsModel";
 import { useTheme } from "@/theme";
+import { ResultListViewModel } from "@/viewmodel/ResultListViewModel";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-export default function ResultList() {
+export default observer(() => {
   const { activity } = useLocalSearchParams();
   const router = useRouter();
   const { colors } = useTheme();
-  const resultList = new ResultListModel();
-  const [results, setResults] = useState<Results[]>([]);
-
-  const addResults = async (result: ResultsModel) => {
-    setResults((prevResults) => [...prevResults, result.getResult()]);
-  };
+  const [resultList] = useState(() => new ResultListViewModel());
 
   const loadResults = async () => {
-    await resultList.loadResultList();
-
-    resultList.resultList.forEach(async (resultID) => {
-      const result = new ResultsModel();
-      await result.loadResult(resultID);
-      let match = false;
-      results.map((r) => {
-        if (r.resultID == result.resultID) {
-          match = true;
-          return;
-        }
-      });
-      !match ? await addResults(result) : null;
-    });
+    await resultList.handleRestore();
+    await resultList.handlePopulate();
   };
 
   const VideoIcon = () => {
@@ -58,7 +41,7 @@ export default function ResultList() {
   return (
     <View style={{ ...styles.screen, backgroundColor: colors.background }}>
       <Text style={{ ...styles.heading, color: colors.text }}>Results</Text>
-      {results.map(
+      {resultList.populatedList.map(
         (result, index) =>
           result.activityID.toString() == activity && (
             <View
@@ -67,6 +50,9 @@ export default function ResultList() {
             >
               <Pressable
                 style={styles.button}
+                {...(result.activityID == 1 || result.activityID == 3
+                  ? { disabled: false }
+                  : { disabled: true })}
                 onPress={() => {
                   router.push({
                     pathname: "/playback",
@@ -128,7 +114,7 @@ export default function ResultList() {
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   screen: {

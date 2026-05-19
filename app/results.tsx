@@ -1,33 +1,25 @@
-import { ResultsModel } from "@/models/ResultsModel";
 import { useTheme } from "@/theme";
+import { ResultViewModel } from "@/viewmodel/ResultViewModel";
 import { router, useLocalSearchParams } from "expo-router";
+import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-export default function Results() {
+export default observer(() => {
   const { resultID } = useLocalSearchParams();
-  const restoredResult = new ResultsModel();
-  const [resultType, setResultType] = useState("");
-  const [resultValue, setResultValue] = useState("");
-
-  const restoredResults = async () => {
-    await restoredResult.loadResult(resultID.toString());
-    setResultType(restoredResult.resultType);
-    setResultValue(restoredResult.resultValue);
-  };
-
+  const [result] = useState(() => new ResultViewModel());
   const { colors } = useTheme();
 
   useEffect(() => {
-    restoredResults();
+    result.handleRestore(resultID.toString());
   }, []);
 
   return (
     <View style={{ ...styles.container, backgroundColor: colors.background }}>
       <View style={styles.resultdisplay} />
       <View style={styles.results}>
-        <Text style={{ color: colors.text }}>{resultType}</Text>
-        <Text style={{ color: colors.text }}>{resultValue}</Text>
+        <Text style={{ color: colors.text }}>{result.resultType}</Text>
+        <Text style={{ color: colors.text }}>{result.resultValue}</Text>
       </View>
       <View style={styles.buttonRow}>
         <Pressable
@@ -42,7 +34,7 @@ export default function Results() {
         </Pressable>
         <Pressable
           style={{ ...styles.button, backgroundColor: colors.success }}
-          onPress={restoredResult.uploadResults}
+          onPress={() => result.handleUpload()}
         >
           <Text style={{ ...styles.buttontext, color: colors.dark }}>
             Upload
@@ -51,7 +43,7 @@ export default function Results() {
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

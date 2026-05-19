@@ -1,12 +1,13 @@
+import { ResultListViewModel } from "@/viewmodel/ResultListViewModel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
+import { makeAutoObservable } from "mobx";
 import { Alert } from "react-native";
-import { ResultListModel } from "./ResultListModel";
 
 // Change to array if recieving multiple results
-export interface Results {
-  resultID?: string;
-  teamID?: string;
+export interface Result {
+  resultID: string;
+  teamID: string;
   activityID: number;
   resultDateTime: string;
   resultType: string;
@@ -14,7 +15,7 @@ export interface Results {
   resultData: string;
 }
 
-export class ResultsModel {
+export class ResultModel {
   resultID = "";
   teamID = "";
   activityID: number = 0;
@@ -23,18 +24,22 @@ export class ResultsModel {
   resultValue = "";
   resultData = "";
 
-  constructor(teamID?: string) {
-    teamID ? (this.teamID = teamID) : null;
+  constructor() {
+    makeAutoObservable(this);
   }
 
   // Add result information to an initialized result
-  setResultInfo({
-    activityID,
-    resultDateTime,
-    resultType,
-    resultValue,
-    resultData,
-  }: Results) {
+  setResultInfo(
+    resultID: string,
+    teamID: string,
+    activityID: number,
+    resultDateTime: string,
+    resultType: string,
+    resultValue: string,
+    resultData: string,
+  ) {
+    this.resultID = resultID;
+    this.teamID = teamID;
     this.activityID = activityID;
     this.resultDateTime = resultDateTime;
     this.resultType = resultType;
@@ -42,30 +47,11 @@ export class ResultsModel {
     this.resultData = resultData;
   }
 
-  // Returns the result as a Results object
-  getResult() {
-    const results: Results = {
-      resultID: this.resultID,
-      teamID: this.teamID,
-      activityID: this.activityID,
-      resultDateTime: this.resultDateTime,
-      resultType: this.resultType,
-      resultValue: this.resultValue,
-      resultData: this.resultData,
-    };
-    return results;
-  }
-
-  // Set the resultID for an initialized result
-  setResultID(resultID: string) {
-    this.resultID = resultID;
-  }
-
   // Upload result, adding to the local result list
   uploadResults = async () => {
     // Save result to a local list in Async Storage
-    const resultList = new ResultListModel();
-    await resultList.loadResultList();
+    const resultList = new ResultListViewModel();
+    await resultList.handleRestore();
     resultList.addResult(this.resultID);
     // Upload results to Firebase???
     // include TeamID, Team name, Activity, result. (Video/sensor data stays local)
@@ -81,12 +67,6 @@ export class ResultsModel {
   // Store the result in Async Storage
   storeResult = async () => {
     try {
-      const resultID =
-        "result-" +
-        this.activityID +
-        "-" +
-        Math.random().toString(36).substring(0, 11);
-      this.setResultID(resultID);
       await AsyncStorage.setItem(this.resultID, JSON.stringify(this));
       return this.resultID;
     } catch (error) {
@@ -115,15 +95,15 @@ export class ResultsModel {
       }
       this.resultID = resultID;
       this.teamID = resultJSON.teamID;
-      this.setResultInfo({
-        resultID: resultID,
-        teamID: resultJSON.teamID,
-        activityID: resultJSON.activityID,
-        resultDateTime: resultJSON.resultDateTime,
-        resultType: resultJSON.resultType,
-        resultValue: resultJSON.resultValue,
-        resultData: resultJSON.resultData,
-      });
+      this.setResultInfo(
+        resultID,
+        resultJSON.teamID,
+        resultJSON.activityID,
+        resultJSON.resultDateTime,
+        resultJSON.resultType,
+        resultJSON.resultValue,
+        resultJSON.resultData,
+      );
     } catch (error) {
       console.error("Error loading result:", error);
     }

@@ -1,40 +1,21 @@
-import { ResultsModel } from "@/models/ResultsModel";
 import { useTheme } from "@/theme";
+import { ResultViewModel } from "@/viewmodel/ResultViewModel";
 import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
+import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
-export default function VideoResults() {
+export default observer(() => {
   const { resultID } = useLocalSearchParams();
-  const restoredResult = new ResultsModel();
-  const [resultType, setResultType] = useState("");
-  const [resultValue, setResultValue] = useState("");
+  const [result] = useState(() => new ResultViewModel());
   const [videoUri, setVideoUri] = useState("");
-
-  const uploadResults = async () => {
-    // Upload results to Firebase???
-    // include TeamID, Team name, Activity, result. (Video/sensor data stays local)
-    // Compare result to existing leaderboard entry, update if better.
-    // Give feedback to the user confirming upload complete.
-    Alert.alert(
-      "Result uploaded!",
-      "Your result has been uploaded to the cloud",
-    );
-    router.push("/");
-  };
-
-  const restoredResults = async () => {
-    await restoredResult.loadResult(resultID.toString());
-    setResultType(restoredResult.resultType);
-    setResultValue(restoredResult.resultValue);
-    setVideoUri(restoredResult.resultData);
-  };
 
   const { colors } = useTheme();
 
   useEffect(() => {
-    restoredResults();
+    result.handleRestore(resultID.toString());
+    setVideoUri(result.getResultData());
   }, []);
 
   const player = useVideoPlayer(videoUri);
@@ -43,8 +24,8 @@ export default function VideoResults() {
     <View style={styles.container}>
       <VideoView player={player} style={styles.video} />
       <View style={styles.results}>
-        <Text>{resultType}</Text>
-        <Text>{resultValue}</Text>
+        <Text>{result.resultType}</Text>
+        <Text>{result.resultValue}</Text>
       </View>
       <View style={styles.buttonRow}>
         <Pressable
@@ -59,7 +40,7 @@ export default function VideoResults() {
         </Pressable>
         <Pressable
           style={{ ...styles.button, backgroundColor: colors.success }}
-          onPress={uploadResults}
+          onPress={result.handleUpload}
         >
           <Text style={{ ...styles.buttontext, color: colors.dark }}>
             Upload
@@ -68,7 +49,7 @@ export default function VideoResults() {
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
