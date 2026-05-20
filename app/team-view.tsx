@@ -1,41 +1,17 @@
 import { useTheme } from "@/theme";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { TeamViewModel } from "@/viewmodel/teamViewModel";
+import { observer } from "mobx-react-lite";
+import { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-interface Team {
-  id: number;
-  team_name: string;
-  members: string[];
-}
+const team = new TeamViewModel();
 
-export default function TeamView() {
-  const router = useRouter();
+const TeamView = observer(() => {
   const { colors } = useTheme();
-
-  // Set up state for team
-  let [team, setTeam] = useState({
-    id: 0,
-    team_name: "",
-    year: "",
-    members: [],
-  });
 
   // Load team data
   const loadTeam = async () => {
-    try {
-      const storedTeam = await AsyncStorage.getItem("team");
-      if (storedTeam) {
-        setTeam(JSON.parse(storedTeam));
-        //console.log("Team loaded from storage", storedTeam);
-      } else {
-        console.log("No Team created yet");
-        router.push("/team");
-      }
-    } catch (error) {
-      console.error("Error loading team:", error);
-    }
+    await team.handleRestore();
   };
 
   // call loadTeam to retrieve the team data for displaying in the card
@@ -55,7 +31,7 @@ export default function TeamView() {
               Team ID:
             </Text>
             <Text style={{ ...styles.large_font, color: colors.text }}>
-              {team.id}
+              {team.teamID}
             </Text>
           </View>
           <View style={styles.row}>
@@ -63,7 +39,7 @@ export default function TeamView() {
               Team name:
             </Text>
             <Text style={{ ...styles.large_font, color: colors.text }}>
-              {team.team_name}
+              {team.teamName}
             </Text>
           </View>
           <View style={styles.row}>
@@ -97,7 +73,7 @@ export default function TeamView() {
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   screen: {
@@ -141,3 +117,5 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
 });
+
+export default TeamView;
