@@ -1,6 +1,6 @@
 import { ResultListModel } from "@/models/ResultListModel";
 import { ResultViewModel } from "@/viewmodel/ResultViewModel";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 
 export class ResultListViewModel {
   resultList = new ResultListModel();
@@ -11,20 +11,26 @@ export class ResultListViewModel {
     makeAutoObservable(this);
   }
 
+  // Add a result to the resultList
   addResult(resultID: string) {
     this.list.push(resultID);
     this.resultList.storeResultList();
   }
 
+  // Populate the full results data into  populatedList
   async handlePopulate() {
     await this.resultList.getResults();
-    this.populatedList = this.resultList.populatedList;
+    runInAction(() => {
+      this.populatedList = this.resultList.populatedList;
+    });
   }
 
+  // Save the resultList
   handleSave() {
     this.resultList.storeResultList();
   }
 
+  // Restore the resultList
   async handleRestore() {
     await this.resultList.loadResultList();
     this.list = this.resultList.resultList;

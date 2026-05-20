@@ -1,6 +1,6 @@
 import { ResultViewModel } from "@/viewmodel/ResultViewModel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 
 export class ResultListModel {
   resultList: string[] = [];
@@ -10,6 +10,7 @@ export class ResultListModel {
     makeAutoObservable(this);
   }
 
+  // Store the list in AsyncStorage
   storeResultList = async () => {
     try {
       await AsyncStorage.setItem("resultList", JSON.stringify(this.resultList));
@@ -18,6 +19,7 @@ export class ResultListModel {
     }
   };
 
+  // Load the result list from AsyncStorage
   loadResultList = async () => {
     try {
       let resultListJSON;
@@ -34,11 +36,14 @@ export class ResultListModel {
     }
   };
 
+  // Get the results for each resultID and populate the populatedList for use on the resultlist screen
   getResults = async () => {
     this.resultList.map(async (resultID) => {
       const result = new ResultViewModel();
       await result.handleRestore(resultID);
-      this.populatedList.push(result);
+      runInAction(() => {
+        this.populatedList.push(result);
+      });
     });
   };
 }

@@ -4,17 +4,6 @@ import { router } from "expo-router";
 import { makeAutoObservable } from "mobx";
 import { Alert } from "react-native";
 
-// Change to array if recieving multiple results
-export interface Result {
-  resultID: string;
-  teamID: string;
-  activityID: number;
-  resultDateTime: string;
-  resultType: string;
-  resultValue: string;
-  resultData: string;
-}
-
 export class ResultModel {
   resultID = "";
   teamID = "";

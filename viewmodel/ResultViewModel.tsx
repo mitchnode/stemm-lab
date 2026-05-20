@@ -1,5 +1,5 @@
 import { ResultModel } from "@/models/ResultModel";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 
 export class ResultViewModel {
   result = new ResultModel();
@@ -73,6 +73,7 @@ export class ResultViewModel {
     return this.resultData;
   }
 
+  // Record the result data, generating a new resultID
   handleRecord() {
     this.resultID =
       "result-" +
@@ -91,18 +92,22 @@ export class ResultViewModel {
     return this.result.storeResult();
   }
 
+  // Upload the Result
   handleUpload() {
     this.result.uploadResults();
   }
 
+  // Restore the Result data after instantiating a new Result
   async handleRestore(resultID: string) {
     await this.result.loadResult(resultID);
-    this.resultID = this.result.resultID;
-    this.activityID = this.result.activityID;
-    this.teamID = this.result.teamID;
-    this.resultDateTime = this.result.resultDateTime;
-    this.resultType = this.result.resultType;
-    this.resultValue = this.result.resultValue;
-    this.resultData = this.result.resultData;
+    runInAction(() => {
+      this.resultID = this.result.resultID;
+      this.activityID = this.result.activityID;
+      this.teamID = this.result.teamID;
+      this.resultDateTime = this.result.resultDateTime;
+      this.resultType = this.result.resultType;
+      this.resultValue = this.result.resultValue;
+      this.resultData = this.result.resultData;
+    });
   }
 }
