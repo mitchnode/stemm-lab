@@ -79,3 +79,80 @@ return (
    <Button onPress={changeTheme}>
 );
 ```
+
+# Building a View with ResultViewModel
+
+## Setup
+
+Instantiate `ResultViewModel` at the screen level and wrap your component in MobX's `observer` so it re-renders when observable fields change.
+
+```tsx
+import { observer } from "mobx-react-lite";
+import { ResultViewModel } from "@/viewmodel/ResultViewModel";
+
+const viewModel = new ResultViewModel();
+
+const ResultScreen = observer(() => {
+  return (
+    // Your JSX here
+  );
+});
+```
+
+> Create the ViewModel **outside** the component so it isn't re-instantiated on every render. If using multiple screens, pass it via props or a React context.
+
+---
+
+## Reading State
+
+Bind directly to the ViewModel's observable properties. MobX will re-render the component automatically when they change.
+
+```tsx
+<Text>{viewModel.resultValue}</Text>
+<Text>{viewModel.resultDateTime}</Text>
+<Text>{viewModel.resultType}</Text>
+```
+
+---
+
+## Writing State
+
+Use the setter methods to update individual fields.
+
+```tsx
+result.setTeamID(teamID);
+result.setActivityID(ACTIVITY_ID);
+result.setResultDateTime(new Date().toLocaleString());
+result.setResultType("Acceleration");
+result.setResultValue("10m/s^2");
+result.setResultData(data);
+```
+
+---
+
+## Triggering Actions
+
+Call the `handle` methods to perform operations. These coordinate the Model and handle all storage/navigation internally.
+
+```tsx
+// Save a new result to local storage, returns the resultID to be used to retrieve the result from another screen
+const onRecord = async () => {
+  viewModel.setTeamID("team-123");
+  viewModel.setActivityID(1);
+  viewModel.setResultDateTime(new Date().toLocaleString());
+  viewModel.setResultType("time");
+  viewModel.setResultValue("45.2");
+  const resultID = await viewModel.handleRecord();
+};
+
+// Load an existing result (e.g. from navigation params)
+const onLoad = async (resultID: string) => {
+  await viewModel.handleRestore(resultID);
+  // viewModel fields are now populated — observer() handles the re-render
+};
+
+// Upload result saves the result into a list in local storage list and uploads to firestore
+const onUpload = () => {
+  viewModel.handleUpload(); // shows alert and navigates home on completion
+};
+```

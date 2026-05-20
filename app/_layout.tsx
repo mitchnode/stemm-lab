@@ -36,6 +36,36 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen name="team-view" />
+        <Stack.Screen
+          name="recordvideo"
+          options={{
+            headerShown: false,
+            animation: "slide_from_bottom",
+          }}
+        />
+        <Stack.Screen
+          name="videoresults"
+          options={{
+            headerShown: false,
+            gestureEnabled: false,
+            animation: "slide_from_bottom",
+          }}
+        />
+        <Stack.Screen
+          name="record"
+          options={{
+            headerShown: false,
+            animation: "slide_from_bottom",
+          }}
+        />
+        <Stack.Screen
+          name="results"
+          options={{
+            headerShown: false,
+            gestureEnabled: false,
+            animation: "slide_from_bottom",
+          }}
+        />
       </Stack>
     </ThemeProvider>
   );
