@@ -6,9 +6,10 @@ import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+const result = new ResultViewModel();
+
 export default observer(() => {
   const { resultID } = useLocalSearchParams();
-  const [result] = useState(() => new ResultViewModel());
   const [videoUri, setVideoUri] = useState("");
 
   const { colors } = useTheme();

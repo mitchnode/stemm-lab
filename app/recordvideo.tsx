@@ -9,6 +9,8 @@ import { router } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+const result = new ResultViewModel();
+
 export default function RecordVideo() {
   const ACTIVITY_ID = 1;
   const [camPermission, requestCamPermission] = useCameraPermissions();
@@ -18,7 +20,6 @@ export default function RecordVideo() {
   const [recButtonColor, setRecButtonColor] = useState("white");
   const [recButtonShape, setRecButtonShape] = useState(50);
   const [teamID, setTeamID] = useState("");
-  const [result] = useState(() => new ResultViewModel());
 
   const loadTeam = async () => {
     try {

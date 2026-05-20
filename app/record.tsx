@@ -10,6 +10,8 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+const result = new ResultViewModel();
+
 export default function Record() {
   const ACTIVITY_ID = 4;
   const [isRecording, setRecording] = useState(false);
@@ -18,7 +20,6 @@ export default function Record() {
   const [teamID, setTeamID] = useState("");
   const [data, setData] = useState("");
   const [btnName, setBtnName] = useState("Start");
-  const [result] = useState(() => new ResultViewModel());
 
   const { colors } = useTheme();
 
@@ -50,12 +51,14 @@ export default function Record() {
       if (data) {
         // Get any processed result here before passing to the results page
         // Dummy results for testing
-        const dateTime = new Date(Date.now()).toLocaleString();
+        const dateTime = new Date().toLocaleString();
+        const resultType = "Acceleration";
+        const resultValue = "10m/s^2";
         result.setTeamID(teamID);
         result.setActivityID(ACTIVITY_ID);
         result.setResultDateTime(dateTime);
-        result.setResultType("Acceleration");
-        result.setResultValue("10m/s^2");
+        result.setResultType(resultType);
+        result.setResultValue(resultValue);
         result.setResultData(data);
 
         const resultID = await result.handleRecord();

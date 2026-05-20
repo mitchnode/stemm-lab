@@ -4,20 +4,23 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+
+const resultList = new ResultListViewModel();
 
 export default observer(() => {
   const { activity } = useLocalSearchParams();
   const router = useRouter();
   const { colors } = useTheme();
-  const [resultList] = useState(() => new ResultListViewModel());
 
+  // Load the data into the resultList
   const loadResults = async () => {
     await resultList.handleRestore();
     await resultList.handlePopulate();
   };
 
+  // Video Icon component
   const VideoIcon = () => {
     return (
       <View style={styles.icon}>
@@ -26,6 +29,7 @@ export default observer(() => {
     );
   };
 
+  // Sensor Icon component
   const SensorIcon = () => {
     return (
       <View style={styles.icon}>
