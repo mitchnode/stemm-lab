@@ -36,10 +36,12 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen name="team-view" />
-<<<<<<< HEAD
-        <Stack.Screen name="activity_detail" 
-        options={{ title: "Activity Detail" }}/>
-=======
+
+        {/* Added Activity Detail Screen */}
+        <Stack.Screen 
+          name="activity_detail" 
+          options={{ title: "Activity Detail" }} 
+        />
         <Stack.Screen
           name="recordvideo"
           options={{
@@ -70,7 +72,6 @@ export default function RootLayout() {
             animation: "slide_from_bottom",
           }}
         />
->>>>>>> 6a9af5b8e43267bc5dadd874c0f97d3d6890aa70
       </Stack>
       
     </ThemeProvider>
