@@ -1,8 +1,8 @@
 import { ThemeProvider, useTheme } from "@/theme";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Stack } from "expo-router";
-
 import { Pressable } from "react-native";
+
 
 export default function RootLayout() {
   const { colors } = useTheme();
@@ -36,7 +36,10 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen name="team-view" />
+        <Stack.Screen name="activity_detail" 
+        options={{ title: "Activity Detail" }}/>
       </Stack>
+      
     </ThemeProvider>
   );
 }
