@@ -2,11 +2,10 @@ import { useTheme } from "@/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import { useForm } from "react-hook-form";
 import { ScrollView, StyleSheet, View } from "react-native";
-
-
+import { ALL_LABS } from '../labsData.js';
 
 import {
   Button,
@@ -21,7 +20,9 @@ interface Team {
   members: string[];
 }
 
-export default function activities() {
+export default function activities({  }) {
+
+
   const router = useRouter();
   const { colors, setScheme, isDark } = useTheme();
 
@@ -33,8 +34,7 @@ const [ChangeTeam, setChangeTeam] = useState(false);
 
 
 
-// Set up state for team
-//copied and pasted
+
   let [team, setTeam] = useState({
     id: 0,
     team_name: "",
@@ -44,10 +44,7 @@ const [ChangeTeam, setChangeTeam] = useState(false);
 
   const changeTheme = () => {
     isDark ? setScheme("light") : setScheme("dark");
-    // Reapply theme color to header *** Not needed at the moment due to heade being the same color for both themes***
-    /* navigation.setOptions({
-      headerStyle: { backgroundColor: colors.header },
-    }); */
+ 
   };
 
    const theme = useRETheme();
@@ -58,8 +55,7 @@ const [ChangeTeam, setChangeTeam] = useState(false);
   
 
 
-// copied and pasted and adjusted from original team code
-  // Load team data
+
   const loadTeam = async () => {
     try {
       const storedTeam = await AsyncStorage.getItem("team");
@@ -80,7 +76,6 @@ const [ChangeTeam, setChangeTeam] = useState(false);
   });
   
 
-  // call loadTeam to retrieve the team data for displaying in the card
   useEffect(() => {
     loadTeam();
   }, []);
@@ -95,71 +90,32 @@ const [ChangeTeam, setChangeTeam] = useState(false);
         Activities
       </Text>
         <View style={styles.info}>
-<View style={{ ...styles.box, backgroundColor: colors.surface }}>
-    <View style={styles.info}>
-     <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: 15, columnGap: 75, justifyContent: 'center' }}>
-           
-           
-        <Button 
-         onPress={() => {
-          router.push("/activities");
-         }}>Activities 1:
-
-         </Button>
-    
-
-       <Button 
-         onPress={() => {
-          router.push("/activities");
-         }}>Activities 2:
-
-         </Button>
-     
-               
+          {/* Activities Selection Box */}
+<View style={[styles.box, { backgroundColor: colors.surface }]}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', rowGap: 15, columnGap: 20, justifyContent: 'center' }}>
+              
+              {/* Dynamic Loop through your labsData registry mapping keys automatically */}
+              {Object.keys(ALL_LABS).map((labKey) => {
+                const lab = ALL_LABS[labKey as keyof typeof ALL_LABS];
+                return (
                   <Button 
-         onPress={() => {
-          router.push("/activities");
-         }}>Activities 3:
-
-         </Button>
-        
-
-        <Button 
-         onPress={() => {
-          router.push("/activities");
-         }}>Activities 4:
-
-         </Button>
-               
-     
-                
-         <Button 
-         onPress={() => {
-          router.push("/activities");
-         }}>Activities 5:
-
-         </Button>
-               
-
-        <Button 
-         onPress={() => {
-          router.push("/activities");
-         }}>Activities 6:
-
-         </Button>
-               
-        <Button 
-         onPress={() => {
-          router.push("/activities");
-         }}>Activities 7:
-
-         </Button>
-                </View>
-               
-    </View>
+                    key={lab.id}
+                    onPress={() => {
+                      router.push({
+                        pathname: "/activity_detail",
+                        params: { id: labKey } // ✨ Passing the clean lookup key object directly
+                      });
+                    }}
+                  >
+                   <Text style={{color: '#fff'}}>{lab.title}</Text>
+                  </Button>
+                  );
+                })
+              }
+            </View>
+          </View>
     
-    </View>
-      
+      {/*/team welcome card*/}
  <View style={{ ...styles.box, backgroundColor: colors.surface }}>
         <View style={styles.info}>
      
@@ -173,12 +129,8 @@ const [ChangeTeam, setChangeTeam] = useState(false);
           
           </View>
     
-
-{ChangeTeam && (
-
-
-   <View style={{ ...styles.box, backgroundColor: colors.surface}}>
-
+{/*update team layout*/}  
+{ChangeTeam && (<View style={{ ...styles.box, backgroundColor: colors.surface}}>
           <ControlledInput
             name="team_name"
             label="Team Name"
@@ -190,10 +142,8 @@ const [ChangeTeam, setChangeTeam] = useState(false);
                 <Button onPress={handleSubmit((data) => console.log(data))}>
               Update Team
             </Button>
-   
-      </View>
-      
-          )}
+   </View>
+      )}
 
 
 
@@ -208,11 +158,8 @@ const [ChangeTeam, setChangeTeam] = useState(false);
 
 
 
-
-       {isVisible && (
-     
-         
-      <View style={{ ...styles.box, backgroundColor: colors.surface }}>
+{/* --- TEAM PROFILE DRAWER DETAILS --- */}
+       {isVisible && (<View style={{ ...styles.box, backgroundColor: colors.surface }}>
         <View style={styles.info}>
           <View style={styles.row}>
             <Text style={{ ...styles.bold_text, color: colors.text }}>

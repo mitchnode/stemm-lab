@@ -5,7 +5,6 @@ import { Button, Text } from "re-native-ui";
 import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-
 interface Team {
   id: number;
   team_name: string;
@@ -81,7 +80,7 @@ export default function Index() {
           View Team
         </Button>
         
-         <Button onPress={() => {router.push("/activities"); }}>
+         <Button onPress={() => {router.push("/activities_selection"); }}>
           Activities </Button>
         <Button onPress={changeTheme}>Switch theme</Button>
         {/* Switch theme button is just for testing, remove once setup in the menu. */}
