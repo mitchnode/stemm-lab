@@ -81,7 +81,7 @@ export default function Index() {
             router.push("/(app)/activities_selection");
           }}
         >
-          Activities{" "}
+          Activities
         </Button>
         <Button onPress={changeTheme}>Switch theme</Button>
         {/* Switch theme button is just for testing, remove once setup in the menu. */}
