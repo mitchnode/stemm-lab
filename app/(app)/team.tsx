@@ -1,3 +1,4 @@
+import { useAuth } from "@/context/authContext";
 import { useTheme } from "@/theme";
 import { TeamViewModel } from "@/viewmodel/teamViewModel";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -13,7 +14,7 @@ import {
 } from "re-native-ui";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 
 interface Member {
   id: number;
@@ -23,7 +24,9 @@ interface Member {
 const team = new TeamViewModel();
 
 export default function Index() {
+  const { user } = useAuth();
   const { colors } = useTheme();
+  const [loading, setLoading] = useState(false);
 
   // Override theme from re-native-ui
   const theme = useRETheme();
@@ -49,13 +52,19 @@ export default function Index() {
   };
 
   // Create the team data from the inputs and call storeTeam
-  const createTeam = (data: any) => {
+  const createTeam = async (data: any) => {
+    setLoading(true);
     setMemberError(false);
 
     if (members_text.length > 0) {
-      let teamID = 0;
-      if (team.teamID == 0) {
-        teamID = Date.now();
+      if (!user) return;
+      await team.handleRestore(user.uid);
+      let teamID = "";
+      if (team.teamID == "") {
+        teamID =
+          data.teamName.toLowerCase().replace(/\s/g, "") +
+          "-" +
+          Math.random().toString(36).substring(0, 11);
       } else {
         teamID = team.teamID;
       }
@@ -65,16 +74,18 @@ export default function Index() {
         members_array.push(member.name);
       });
 
-      team.setID(teamID);
+      team.setUserID(user.uid);
+      team.setTeamID(teamID);
       team.setTeamName(data.teamName);
       team.setYear(data.year);
       team.setMembers(members_array);
-      console.log("Team to save:", team);
+      console.log("Team to save:", team.uid);
       team.handleSave();
     } else {
       console.log("Need members");
       setMemberError(true);
     }
+    setLoading(false);
   };
 
   // Add a team member to the team members list (members_text)
@@ -99,6 +110,14 @@ export default function Index() {
     const updatedMembers = members_text.filter((member) => member !== item);
     setMembers(updatedMembers);
   };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <View

@@ -2,18 +2,44 @@ import { useTheme } from "@/theme";
 import { ResultViewModel } from "@/viewmodel/ResultViewModel";
 import { router, useLocalSearchParams } from "expo-router";
 import { observer } from "mobx-react-lite";
-import React, { useEffect } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 const result = new ResultViewModel();
 
 export default observer(() => {
   const { resultID } = useLocalSearchParams();
   const { colors } = useTheme();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     result.handleRestore(resultID.toString());
   }, []);
+
+  const uploadResult = async () => {
+    setLoading(true);
+    await result.handleUpload();
+    setLoading(false);
+  };
+
+  if (loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+        }}
+      >
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <View style={{ ...styles.container, backgroundColor: colors.background }}>
@@ -35,7 +61,7 @@ export default observer(() => {
         </Pressable>
         <Pressable
           style={{ ...styles.button, backgroundColor: colors.success }}
-          onPress={() => result.handleUpload()}
+          onPress={uploadResult}
         >
           <Text style={{ ...styles.buttontext, color: colors.dark }}>
             Upload

@@ -3,7 +3,8 @@ import { makeAutoObservable, runInAction } from "mobx";
 
 export class TeamViewModel {
   team = new TeamModel();
-  teamID: number = 0;
+  uid: string = "";
+  teamID: string = "";
   teamName: string = "";
   year: string = "";
   members: string[] = [];
@@ -26,7 +27,11 @@ export class TeamViewModel {
   ];
 
   // Setter methods
-  setID(teamID: number) {
+  setUserID(uid: string) {
+    this.uid = uid;
+  }
+
+  setTeamID(teamID: string) {
     this.teamID = teamID;
   }
 
@@ -60,12 +65,18 @@ export class TeamViewModel {
   }
 
   handleSave() {
-    this.team.setTeam(this.teamID, this.teamName, this.year, this.members);
+    this.team.setTeam(
+      this.uid,
+      this.teamID,
+      this.teamName,
+      this.year,
+      this.members,
+    );
     this.team.storeTeam();
   }
 
-  async handleRestore() {
-    await this.team.loadTeam();
+  async handleRestore(uid: string) {
+    await this.team.loadTeam(uid);
     runInAction(() => {
       this.teamID = this.team.teamID;
       this.teamName = this.team.teamName;

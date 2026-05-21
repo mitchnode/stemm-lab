@@ -1,22 +1,35 @@
+import { useAuth } from "@/context/authContext";
 import { useTheme } from "@/theme";
 import { ResultListViewModel } from "@/viewmodel/ResultListViewModel";
+import { TeamViewModel } from "@/viewmodel/teamViewModel";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 const resultList = new ResultListViewModel();
+const team = new TeamViewModel();
 
 export default observer(() => {
+  const { user } = useAuth();
   const { activity } = useLocalSearchParams();
   const router = useRouter();
   const { colors } = useTheme();
+  const [loading, setLoading] = useState(false);
 
   // Load the data into the resultList
   const loadResults = async () => {
-    await resultList.handleRestore();
+    setLoading(true);
+    if (user) await team.handleRestore(user.uid);
+    await resultList.handleRestore(team.teamID);
     await resultList.handlePopulate();
   };
 
@@ -40,21 +53,30 @@ export default observer(() => {
 
   useEffect(() => {
     loadResults();
+    setLoading(false);
   }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <View style={{ ...styles.screen, backgroundColor: colors.background }}>
       <Text style={{ ...styles.heading, color: colors.text }}>Results</Text>
       {resultList.populatedList.map(
         (result, index) =>
-          result.activityID.toString() == activity && (
+          result.activityID == activity && (
             <View
               key={index}
               style={{ ...styles.box, backgroundColor: colors.surface }}
             >
               <Pressable
                 style={styles.button}
-                {...(result.activityID == 1 || result.activityID == 3
+                {...(result.activityID == "1" || result.activityID == "3"
                   ? { disabled: false }
                   : { disabled: true })}
                 onPress={() => {
@@ -64,7 +86,7 @@ export default observer(() => {
                   });
                 }}
               >
-                {result.activityID == 1 || result.activityID == 3 ? (
+                {result.activityID == "1" || result.activityID == "3" ? (
                   <VideoIcon />
                 ) : (
                   <SensorIcon />

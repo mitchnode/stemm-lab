@@ -1,5 +1,6 @@
+import { useAuth } from "@/context/authContext";
 import { ResultViewModel } from "@/viewmodel/ResultViewModel";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { TeamViewModel } from "@/viewmodel/teamViewModel";
 import {
   CameraView,
   useCameraPermissions,
@@ -10,9 +11,11 @@ import { useEffect, useRef, useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const result = new ResultViewModel();
+const team = new TeamViewModel();
 
 export default function RecordVideo() {
-  const ACTIVITY_ID = 1;
+  const { user } = useAuth();
+  const ACTIVITY_ID = "1";
   const [camPermission, requestCamPermission] = useCameraPermissions();
   const [micPermission, requestMicPermission] = useMicrophonePermissions();
   const ref = useRef<CameraView>(null);
@@ -22,17 +25,7 @@ export default function RecordVideo() {
   const [teamID, setTeamID] = useState("");
 
   const loadTeam = async () => {
-    try {
-      const storedTeam = await AsyncStorage.getItem("team");
-      if (storedTeam) {
-        setTeamID(JSON.parse(storedTeam).id);
-      } else {
-        console.log("No Team created yet");
-        router.push("/team");
-      }
-    } catch (error) {
-      console.error("Error loading team:", error);
-    }
+    if (user) await team.handleRestore(user.uid);
   };
 
   useEffect(() => {
