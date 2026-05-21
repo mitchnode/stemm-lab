@@ -78,7 +78,7 @@ export default function Index() {
 
         <Button
           onPress={() => {
-            router.push("/(app)/activities");
+            router.push("/(app)/activities_selection");
           }}
         >
           Activities{" "}
