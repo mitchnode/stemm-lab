@@ -1,3 +1,4 @@
+import { getResultList } from "@/services/firestoreService";
 import { ResultViewModel } from "@/viewmodel/ResultViewModel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { makeAutoObservable, runInAction } from "mobx";
@@ -20,10 +21,14 @@ export class ResultListModel {
   };
 
   // Load the result list from AsyncStorage
-  loadResultList = async () => {
+  loadResultList = async (teamID: string) => {
     try {
       let resultListJSON;
-      const resultListString = await AsyncStorage.getItem("resultList");
+      let resultListString = await AsyncStorage.getItem("resultList");
+      if (!resultListString) {
+        resultListString = JSON.stringify(await getResultList(teamID));
+      }
+
       if (resultListString) {
         resultListJSON = await JSON.parse(resultListString);
       } else {
@@ -38,6 +43,7 @@ export class ResultListModel {
 
   // Get the results for each resultID and populate the populatedList for use on the resultlist screen
   getResults = async () => {
+    this.populatedList.length = 0;
     this.resultList.map(async (resultID) => {
       const result = new ResultViewModel();
       await result.handleRestore(resultID);

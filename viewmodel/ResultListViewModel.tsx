@@ -31,8 +31,8 @@ export class ResultListViewModel {
   }
 
   // Restore the resultList
-  async handleRestore() {
-    await this.resultList.loadResultList();
+  async handleRestore(teamID: string) {
+    await this.resultList.loadResultList(teamID);
     this.list = this.resultList.resultList;
   }
 }

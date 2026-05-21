@@ -5,7 +5,7 @@ export class ResultViewModel {
   result = new ResultModel();
   resultID = "";
   teamID = "";
-  activityID: number = 0;
+  activityID = "";
   resultDateTime = "";
   resultType = "";
   resultValue = "";
@@ -20,7 +20,7 @@ export class ResultViewModel {
     this.resultID = resultID;
   }
 
-  setActivityID(activityID: number) {
+  setActivityID(activityID: string) {
     this.activityID = activityID;
   }
 
@@ -93,8 +93,8 @@ export class ResultViewModel {
   }
 
   // Upload the Result
-  handleUpload() {
-    this.result.uploadResults();
+  async handleUpload() {
+    await this.result.uploadResult();
   }
 
   // Restore the Result data after instantiating a new Result

@@ -3,38 +3,30 @@ Generalized record screen
 Use for creating screens for recording different activities sensor recording
  */
 
+import { useAuth } from "@/context/authContext";
 import { useTheme } from "@/theme";
 import { ResultViewModel } from "@/viewmodel/ResultViewModel";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { TeamViewModel } from "@/viewmodel/teamViewModel";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const result = new ResultViewModel();
+const team = new TeamViewModel();
 
 export default function Record() {
-  const ACTIVITY_ID = 4;
+  const { user } = useAuth();
+  const ACTIVITY_ID = "6";
   const [isRecording, setRecording] = useState(false);
   const [recButtonColor, setRecButtonColor] = useState("green");
   const [recButtonShape, setRecButtonShape] = useState(50);
-  const [teamID, setTeamID] = useState("");
   const [data, setData] = useState("");
   const [btnName, setBtnName] = useState("Start");
 
   const { colors } = useTheme();
 
   const loadTeam = async () => {
-    try {
-      const storedTeam = await AsyncStorage.getItem("team");
-      if (storedTeam) {
-        setTeamID(JSON.parse(storedTeam).id);
-      } else {
-        console.log("No Team created yet");
-        router.push("/team");
-      }
-    } catch (error) {
-      console.error("Error loading team:", error);
-    }
+    if (user) await team.handleRestore(user.uid);
   };
 
   useEffect(() => {
@@ -54,7 +46,7 @@ export default function Record() {
         const dateTime = new Date().toLocaleString();
         const resultType = "Acceleration";
         const resultValue = "10m/s^2";
-        result.setTeamID(teamID);
+        result.setTeamID(team.teamID);
         result.setActivityID(ACTIVITY_ID);
         result.setResultDateTime(dateTime);
         result.setResultType(resultType);

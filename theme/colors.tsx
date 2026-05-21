@@ -35,3 +35,5 @@ export const darkColors = {
   dark: "#25292e",
   light: "#f2f2f2",
 };
+
+//'#4F46E5'

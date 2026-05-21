@@ -1,3 +1,4 @@
+import { createResult, getResult, Result } from "@/services/firestoreService";
 import { ResultListViewModel } from "@/viewmodel/ResultListViewModel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
@@ -7,7 +8,7 @@ import { Alert } from "react-native";
 export class ResultModel {
   resultID = "";
   teamID = "";
-  activityID: number = 0;
+  activityID = "";
   resultDateTime = "";
   resultType = "";
   resultValue = "";
@@ -21,7 +22,7 @@ export class ResultModel {
   setResultInfo(
     resultID: string,
     teamID: string,
-    activityID: number,
+    activityID: string,
     resultDateTime: string,
     resultType: string,
     resultValue: string,
@@ -36,16 +37,29 @@ export class ResultModel {
     this.resultData = resultData;
   }
 
+  objectifyResult = () => {
+    return {
+      resultID: this.resultID,
+      teamID: this.teamID,
+      activityID: this.activityID,
+      resultDateTime: this.resultDateTime,
+      resultType: this.resultType,
+      resultValue: this.resultValue,
+      resultData: this.resultData,
+    } as Result;
+  };
+
   // Upload result, adding to the local result list
-  uploadResults = async () => {
+  uploadResult = async () => {
+    console.log("Result Data: ", this.objectifyResult());
     // Save result to a local list in Async Storage
     const resultList = new ResultListViewModel();
-    await resultList.handleRestore();
+    await resultList.handleRestore(this.teamID);
     resultList.addResult(this.resultID);
-    // Upload results to Firebase???
-    // include TeamID, Team name, Activity, result. (Video/sensor data stays local)
+    // Upload results to Firebase
+    await createResult(this.objectifyResult());
     // Compare result to existing leaderboard entry, update if better.
-    // Give feedback to the user confirming upload complete.
+    // Give feedback to the user confirming upload complete. COnvert to a Toast later if we have time.
     Alert.alert(
       "Result uploaded!",
       "Your result has been uploaded to the cloud",
@@ -53,7 +67,7 @@ export class ResultModel {
     router.push("/");
   };
 
-  // Store the result in Async Storage
+  // Store the result in local storage
   storeResult = async () => {
     try {
       await AsyncStorage.setItem(this.resultID, JSON.stringify(this));
@@ -63,11 +77,14 @@ export class ResultModel {
     }
   };
 
-  // Load the result from Async Storage
+  // Load the result from local storage or Firestore if there is no local data
   loadResult = async (resultID: string) => {
     try {
       let resultJSON;
-      const resultString = await AsyncStorage.getItem(resultID);
+      let resultString = await AsyncStorage.getItem(resultID);
+      if (!resultString) {
+        resultString = JSON.stringify(await getResult(resultID));
+      }
       if (resultString) {
         resultJSON = JSON.parse(resultString);
       } else {
