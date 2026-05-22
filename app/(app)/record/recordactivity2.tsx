@@ -76,7 +76,6 @@ const RecordActivity2 = observer(() => {
 
   useEffect(() => {
     if (data) {
-      console.log("Recording Result");
       // Get any processed result here before passing to the results page
       const dateTime = new Date().toLocaleString();
       const resultType = "Volume"; // <---------------------------------------------------- Modifiy resultType to suit sensor

@@ -51,7 +51,6 @@ export class ResultModel {
 
   // Upload result, adding to the local result list
   uploadResult = async () => {
-    console.log("Result Data: ", this.objectifyResult());
     // Save result to a local list in Async Storage
     const resultList = new ResultListViewModel();
     await resultList.handleRestore(this.teamID);
