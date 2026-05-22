@@ -8,7 +8,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 const result = new ResultViewModel();
 
-export default observer(() => {
+export const VideoResult = observer(() => {
   const { resultID } = useLocalSearchParams();
   const [videoUri, setVideoUri] = useState("");
 

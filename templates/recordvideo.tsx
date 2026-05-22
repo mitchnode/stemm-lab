@@ -13,7 +13,7 @@ import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 const result = new ResultViewModel();
 const team = new TeamViewModel();
 
-export default function RecordVideo() {
+export function RecordVideo() {
   const { user } = useAuth();
   const ACTIVITY_ID = "1";
   const [camPermission, requestCamPermission] = useCameraPermissions();

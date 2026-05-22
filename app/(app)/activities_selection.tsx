@@ -78,7 +78,7 @@ export default function activities({}) {
                     onPress={() => {
                       router.push({
                         pathname: "/activity_detail",
-                        params: { id: labKey }, // ✨ Passing the clean lookup key object directly
+                        params: { id: lab.id }, // ✨ Passing the clean lookup key object directly
                       });
                     }}
                   >

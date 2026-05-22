@@ -336,12 +336,9 @@ export default function ActivityDetail() {
 
       <TouchableOpacity
         style={styles.fab}
-        onPress={() =>
-          router.push({
-            pathname: "/(app)/activity-sensor-screen",
-            params: { activityId: activity.id },
-          })
-        }
+        onPress={() => {
+          router.push(`./record/recordactivity${activity.id}`);
+        }}
       >
         <MaterialIcons name="add" size={30} color="#fff" />
       </TouchableOpacity>
