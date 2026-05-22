@@ -64,7 +64,10 @@ export class ResultModel {
       "Result uploaded!",
       "Your result has been uploaded to the cloud",
     );
-    router.push("/");
+    router.dismissTo({
+      pathname: "/activity_detail",
+      params: { id: this.activityID },
+    });
   };
 
   // Store the result in local storage

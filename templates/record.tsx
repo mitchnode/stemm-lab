@@ -14,7 +14,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 const result = new ResultViewModel();
 const team = new TeamViewModel();
 
-export default function Record() {
+export function Record() {
   const { user } = useAuth();
   const ACTIVITY_ID = "6";
   const [isRecording, setRecording] = useState(false);

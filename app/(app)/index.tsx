@@ -15,6 +15,8 @@ export default function Index() {
   const navigation = useNavigation();
   const router = useRouter();
 
+  const activityid = "2";
+
   useEffect(() => {
     const listener = navigation.addListener("beforeRemove", (e) => {
       // Prevent back gesture behaviour
@@ -87,23 +89,9 @@ export default function Index() {
         {/* Switch theme button is just for testing, remove once setup in the menu. */}
         <Button
           onPress={() => {
-            router.push("/(app)/recordvideo");
-          }}
-        >
-          Record Video result
-        </Button>
-        <Button
-          onPress={() => {
-            router.push("/(app)/record");
-          }}
-        >
-          Record result
-        </Button>
-        <Button
-          onPress={() => {
             router.push({
               pathname: "/(app)/resultlist",
-              params: { activity: "6" },
+              params: { activity: "2" },
             }); // Pass activity number to filter result list
           }}
         >
