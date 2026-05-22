@@ -79,7 +79,8 @@ export default function Index() {
         >
           View Team
         </Button>
-        
+              <Button onPress={() => {router.push("/accelarometer"); }}>
+          Accelearometer</Button>
          <Button onPress={() => {router.push("/activities_selection"); }}>
           Activities </Button>
         <Button onPress={changeTheme}>Switch theme</Button>
