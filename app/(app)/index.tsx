@@ -1,18 +1,18 @@
+import { useAuth } from "@/context/authContext";
 import { useTheme } from "@/theme";
+import { TeamViewModel } from "@/viewmodel/teamViewModel";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRouter } from "expo-router";
 import { Button, Text } from "re-native-ui";
-import { useEffect, useState } from "react";
-import { StyleSheet } from "react-native";
+import { useEffect } from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-interface Team {
-  id: number;
-  team_name: string;
-  members: string[];
-}
-
+const team = new TeamViewModel();
 export default function Index() {
+  const { user } = useAuth();
   const navigation = useNavigation();
+  const router = useRouter();
+
   useEffect(() => {
     const listener = navigation.addListener("beforeRemove", (e) => {
       // Prevent back gesture behaviour
@@ -35,22 +35,8 @@ export default function Index() {
     }); */
   };
 
-  const router = useRouter();
-  let [team, setTeam] = useState({ team_name: null });
-
   const loadTeam = async () => {
-    try {
-      const storedTeam = await AsyncStorage.getItem("team");
-      if (storedTeam) {
-        setTeam(JSON.parse(storedTeam));
-        //console.log("Team loaded from storage", storedTeam);
-      } else {
-        //console.log("No Team created yet");
-        router.push("/team");
-      }
-    } catch (error) {
-      console.error("Error loading team:", error);
-    }
+    if (user) await team.handleRestore(user.uid);
   };
 
   const clearTeam = async () => {
@@ -65,16 +51,24 @@ export default function Index() {
     loadTeam();
   }, []);
 
+  if (!user) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaProvider>
       <SafeAreaView
         style={{ ...styles.container, backgroundColor: colors.background }}
       >
-        <Text style={{ color: colors.text }}>Welcome {team.team_name}</Text>
+        <Text style={{ color: colors.text }}>Welcome {team.teamName}</Text>
         <Button onPress={clearTeam}>Clear</Button>
         <Button
           onPress={() => {
-            router.push("/team-view");
+            router.push("/(app)/team-view");
           }}
         >
           View Team
@@ -84,6 +78,30 @@ export default function Index() {
           Activities </Button>
         <Button onPress={changeTheme}>Switch theme</Button>
         {/* Switch theme button is just for testing, remove once setup in the menu. */}
+        <Button
+          onPress={() => {
+            router.push("/(app)/recordvideo");
+          }}
+        >
+          Record Video result
+        </Button>
+        <Button
+          onPress={() => {
+            router.push("/(app)/record");
+          }}
+        >
+          Record result
+        </Button>
+        <Button
+          onPress={() => {
+            router.push({
+              pathname: "/(app)/resultlist",
+              params: { activity: "6" },
+            }); // Pass activity number to filter result list
+          }}
+        >
+          Result List
+        </Button>
       </SafeAreaView>
     </SafeAreaProvider>
   );

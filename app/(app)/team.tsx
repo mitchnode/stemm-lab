@@ -1,7 +1,7 @@
+import { useAuth } from "@/context/authContext";
 import { useTheme } from "@/theme";
+import { TeamViewModel } from "@/viewmodel/teamViewModel";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import {
   Box,
@@ -14,23 +14,19 @@ import {
 } from "re-native-ui";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Pressable, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
 
 interface Member {
   id: number;
   name: string;
 }
 
-interface Team {
-  id: number;
-  team_name: string;
-  year: string;
-  members: string[];
-}
+const team = new TeamViewModel();
 
 export default function Index() {
-  const router = useRouter();
+  const { user } = useAuth();
   const { colors } = useTheme();
+  const [loading, setLoading] = useState(false);
 
   // Override theme from re-native-ui
   const theme = useRETheme();
@@ -39,21 +35,7 @@ export default function Index() {
   theme.colors.text = colors.text;
   theme.colors.border = colors.border;
 
-  // Set the maximum members that are allowed in a team
-  const MAX_MEMBERS = 5;
-
-  // Create the object for storing the available years to select fro the ControlledSelect component
-  const yearData = [
-    { label: "Year 4", value: "4" },
-    { label: "Year 5", value: "5" },
-    { label: "Year 6", value: "6" },
-    { label: "Year 7", value: "7" },
-    { label: "Year 8", value: "8" },
-    { label: "Year 9", value: "9" },
-  ];
-
   //Set up states for team, members and input errors.
-  const [team, setTeam] = useState<Team | null>(null);
   const [members_text, setMembers] = useState<Member[]>([]);
   const [member_input, setMemberInput] = useState("");
   const [isMemberErrorVisible, setMemberError] = useState(false);
@@ -63,53 +45,47 @@ export default function Index() {
     defaultValues: { team_name: "", year: "", members: [] },
   });
 
-  // Store the team data in local storage
-  const storeTeam = async (teamData: Team) => {
-    try {
-      await AsyncStorage.setItem("team", JSON.stringify(teamData));
-      //Alert.alert("Success", "Team saved locally");
-      router.push("/");
-    } catch (error) {
-      console.error("Error saving team:", error);
-    }
-  };
-
   // Update the member input value
   const memberInput = (value: string) => {
     setMemberEmpty(false);
     setMemberInput(value);
   };
 
-  // Create the team data fro mthe inputs and call storeTeam
-  const createTeam = (data: any) => {
+  // Create the team data from the inputs and call storeTeam
+  const createTeam = async (data: any) => {
+    setLoading(true);
     setMemberError(false);
 
     if (members_text.length > 0) {
-      let id = 0;
-      if (team == null) {
-        id = Date.now();
+      if (!user) return;
+      await team.handleRestore(user.uid);
+      let teamID = "";
+      if (team.teamID == "") {
+        teamID =
+          data.teamName.toLowerCase().replace(/\s/g, "") +
+          "-" +
+          Math.random().toString(36).substring(0, 11);
       } else {
-        id = team.id;
+        teamID = team.teamID;
       }
 
       const members_array: string[] = [];
-      members_text.map((items) => {
-        members_array.push(items.name);
+      members_text.map((member) => {
+        members_array.push(member.name);
       });
 
-      const teamData = {
-        id: id,
-        team_name: data.team_name,
-        year: data.year,
-        members: members_array,
-      };
-      //console.log(teamData);
-      setTeam(teamData);
-      storeTeam(teamData);
+      team.setUserID(user.uid);
+      team.setTeamID(teamID);
+      team.setTeamName(data.teamName);
+      team.setYear(data.year);
+      team.setMembers(members_array);
+      console.log("Team to save:", team.uid);
+      team.handleSave();
     } else {
       console.log("Need members");
       setMemberError(true);
     }
+    setLoading(false);
   };
 
   // Add a team member to the team members list (members_text)
@@ -117,7 +93,7 @@ export default function Index() {
     if (member_input != "") {
       setMemberEmpty(false);
       setMemberError(false);
-      if (members_text.length < MAX_MEMBERS) {
+      if (members_text.length < team.MAX_MEMBERS) {
         setMembers([...members_text, { id: Date.now(), name: member_input }]);
         setMemberInput("");
       } else {
@@ -128,12 +104,20 @@ export default function Index() {
     }
   };
 
-  // Remove the memeber from the list
+  // Remove the member from the list
   const removeTeamMember = (item: Member) => {
     setMemberMax(false);
     const updatedMembers = members_text.filter((member) => member !== item);
     setMembers(updatedMembers);
   };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <View
@@ -148,7 +132,7 @@ export default function Index() {
       <View style={{ ...styles.container, backgroundColor: colors.background }}>
         <Box p="md" style={{ ...styles.box, backgroundColor: colors.surface }}>
           <ControlledInput
-            name="team_name"
+            name="teamName"
             label="Team Name"
             control={control}
             rules={{ required: "Team Name is required" }}
@@ -159,7 +143,7 @@ export default function Index() {
             name="year"
             // @ts-ignore
             label="Year"
-            options={yearData}
+            options={team.yearData}
             control={control}
             rules={{ required: "Year is required" }}
             placeholder="Select Year"
@@ -233,7 +217,7 @@ export default function Index() {
             )}
             {isMemberMaxVisible && (
               <Text style={{ ...styles.member_error, color: colors.error }}>
-                {`Maximum team members is ${MAX_MEMBERS}`}
+                {`Maximum team members is ${team.MAX_MEMBERS}`}
               </Text>
             )}
           </View>
