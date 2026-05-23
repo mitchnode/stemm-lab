@@ -98,7 +98,7 @@ export default function activities({}) {
                     onPress={() => {
                       router.push({
                         pathname: "/(app)/activity_detail",
-                        params: { id: labKey }, // ✨ Passing the clean lookup key object directly
+                        params: { id: labKey },
                       });
                     }}
                   >
@@ -218,7 +218,6 @@ const styles = StyleSheet.create({
     width: "95%",
     minWidth: 400,
   },
-  // second box added as i will need to add different parameters for the acvities box
   box2: {
     justifyContent: "center",
     alignItems: "stretch",
