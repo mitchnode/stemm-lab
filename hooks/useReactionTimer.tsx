@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useWindowDimensions } from "react-native";
 
 interface ReactionTimerReturn {
-  BUTTON_SIZE: number;
+  R_BUTTON_SIZE: number;
   reactionTime: number | null;
   buttonPosition: { x: number; y: number };
   bestTime: number | null;
@@ -11,7 +11,7 @@ interface ReactionTimerReturn {
   handlePress: () => void;
 }
 
-const BUTTON_SIZE = 80;
+const R_BUTTON_SIZE = 80;
 const MIN_DELAY = 3000;
 const MAX_DELAY = 12000;
 
@@ -27,9 +27,11 @@ export function useReactionTimer(): ReactionTimerReturn {
 
   const getButtonPosition = useCallback(() => {
     const padding = 60;
-    const x = Math.random() * (width - BUTTON_SIZE - padding * 2) + padding;
+    const x = Math.random() * (width - R_BUTTON_SIZE - padding * 2) + padding;
     const y =
-      Math.random() * (height - BUTTON_SIZE - padding * 2 - 120) + padding + 60;
+      Math.random() * (height - R_BUTTON_SIZE - padding * 2 - 120) +
+      padding +
+      60;
     return { x, y };
   }, []);
 
@@ -52,12 +54,6 @@ export function useReactionTimer(): ReactionTimerReturn {
     setReactionTime(elapsed);
     setBestTime((prev) => (prev === null || elapsed < prev ? elapsed : prev));
 
-    /* Animated.spring(resultAnim, {
-      toValue: 1,
-      friction: 6,
-      tension: 100,
-      useNativeDriver: true,
-    }).start(); */
     setReady(false);
   }, []);
 
@@ -70,7 +66,7 @@ export function useReactionTimer(): ReactionTimerReturn {
   }, []);
 
   return {
-    BUTTON_SIZE,
+    R_BUTTON_SIZE,
     reactionTime,
     buttonPosition,
     bestTime,
