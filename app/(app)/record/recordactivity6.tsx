@@ -4,60 +4,32 @@ Use for creating screens for recording different activities sensor recording
  */
 
 import { useAuth } from "@/context/authContext";
-import { useSoundLevel } from "@/hooks/useSoundLevel"; // <------------------------- Import hook for the sensor
+import { useReactionTimer } from "@/hooks/useReactionTimer";
 import { useTheme } from "@/theme";
 import { ResultViewModel } from "@/viewmodel/ResultViewModel";
 import { TeamViewModel } from "@/viewmodel/teamViewModel";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
+import Animated from "react-native-reanimated";
 
 const result = new ResultViewModel();
 const team = new TeamViewModel();
 
 export default function RecordActivity6() {
-  // <---------------------------------------- Set to Activity number
   const { user } = useAuth();
-  const ACTIVITY_ID = "6"; // <---------------------------------------- Set to Activity number
-  const [recButtonColor, setRecButtonColor] = useState("green");
-  const [recButtonShape, setRecButtonShape] = useState(50);
+  const ACTIVITY_ID = "6";
   const [data, setData] = useState("");
-  const [btnName, setBtnName] = useState("Start");
 
-  // Call hook for sensor <----------------------------------------------
   const {
-    db,
-    maxdb,
-    percent,
-    isSoundRecording,
-    hasAudioPermission,
+    BUTTON_SIZE,
+    reactionTime,
+    buttonPosition,
+    bestTime,
+    ready,
     start,
-    stop,
-  } = useSoundLevel();
-  // <---------------------------------------------------------------- Add other required functions for updating the View
-  if (hasAudioPermission === false) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center" }}>
-        <Text>Microphone permission denied.</Text>
-      </View>
-    );
-  }
-
-  const animatedStyle = useAnimatedStyle(() => {
-    if (db != undefined) {
-      return {
-        height: withSpring(percent),
-      };
-    }
-    return {
-      height: 100,
-    };
-  }, [db, percent]);
-  // ^--------------^-----------^--------------^------------^----------^--------^
+    handlePress,
+  } = useReactionTimer();
 
   const { colors } = useTheme();
 
@@ -75,8 +47,8 @@ export default function RecordActivity6() {
     if (data) {
       // Get any processed result here before passing to the results page
       const dateTime = new Date().toLocaleString();
-      const resultType = "Volume"; // <---------------------------------------------------- Modifiy resultType to suit sensor
-      const resultValue = maxdb.toString(); // <------------------------------------------- Modify resultValue
+      const resultType = "Time (ms)";
+      const resultValue = bestTime!.toString();
       result.setTeamID(team.teamID);
       result.setActivityID(ACTIVITY_ID);
       result.setResultDateTime(dateTime);
@@ -99,70 +71,99 @@ export default function RecordActivity6() {
     };
   });
 
-  const toggleRecord = async () => {
-    if (isSoundRecording) {
-      setBtnName("Start");
-      setRecButtonColor(colors.success);
-      setRecButtonShape(50);
-      const returnedData = await stop(); // <---------------------------------------- Call stop function from the sensor hook -> Returned data is the sensor data, not the final value. e.g Audio file location.
-      returnedData ? setData(returnedData) : setData("No Data");
-    } else {
-      setBtnName("Stop");
-      setRecButtonColor(colors.error);
-      setRecButtonShape(20);
-      await start(); // <-----------------------------------------------------------Call function to begin recording sensor data
+  const record = async () => {
+    if (bestTime) {
+      setData("No Data");
     }
   };
 
   return (
     <View style={{ ...styles.container, backgroundColor: colors.background }}>
-      {/* <--------------------------------------------------------------------------------------------Modify to suit sensor display */}
-      <View style={styles.sensor}>
+      <View style={styles.header}>
+        <Text style={{ ...styles.title, color: colors.text }}>
+          REACTION TIMER
+        </Text>
+        {bestTime !== null && (
+          <View style={[styles.statsRow]}>
+            <Text style={{ ...styles.statLabel, color: colors.text }}>
+              High Score:
+            </Text>
+            <Text style={{ ...styles.statValue, color: colors.text }}>
+              {bestTime}ms
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {ready && (
         <Animated.View
           style={[
-            { ...styles.box, backgroundColor: colors.secondary },
-            animatedStyle,
+            styles.targetWrapper,
+            {
+              position: "absolute",
+              left: buttonPosition.x,
+              top: buttonPosition.y,
+            },
           ]}
-        />
-      </View>
-
-      {isSoundRecording ? (
-        <View style={styles.data}>
-          <Text style={{ ...styles.text, color: colors.text }}>Recording</Text>
-          <Text style={{ ...styles.text, color: colors.text }}>
-            dB: {db?.toFixed(2)}
-          </Text>
-          <Text style={{ ...styles.text, color: colors.text }}>
-            Max dB: {maxdb.toFixed(2)}
-          </Text>
-          <Text style={{ ...styles.text, color: colors.text }}>
-            Percent: {percent}
-          </Text>
-        </View>
-      ) : (
-        <></>
-      )}
-
-      {isSoundRecording && (
-        <View style={{ ...styles.record, backgroundColor: "red" }} />
-      )}
-
-      {/* <^--------------------^---------------------^--------------------------------^----------------------------^------------------------^ */}
-      <View style={styles.buttonRow}>
-        <View style={styles.buttonContainer}>
+        >
           <TouchableOpacity
+            onPress={handlePress}
             style={{
-              ...styles.button,
-              borderColor: "transparent",
-              backgroundColor: recButtonColor,
-              borderRadius: recButtonShape,
+              ...styles.target,
+              width: BUTTON_SIZE,
+              height: BUTTON_SIZE,
+              borderRadius: BUTTON_SIZE / 2,
             }}
-            onPress={toggleRecord}
+            activeOpacity={0.7}
           >
-            <Text style={styles.text}>{btnName}</Text>
+            <Text style={{ ...styles.text, color: colors.text }}>Press Me</Text>
           </TouchableOpacity>
+        </Animated.View>
+      )}
+
+      {!ready && reactionTime !== null && (
+        <View style={styles.resultContainer}>
+          <Text style={{ ...styles.text, color: colors.text }}>
+            {reactionTime}
+          </Text>
+          <Text style={{ ...styles.text, color: colors.text }}>
+            milliseconds
+          </Text>
+
+          {bestTime !== null && reactionTime === bestTime && (
+            <Text style={{ ...styles.text, color: colors.text }}>
+              High Score!
+            </Text>
+          )}
+
+          {/* <TouchableOpacity style={styles.retryButton} onPress={start}>
+            <Text style={styles.retryText}>TRY AGAIN</Text>
+          </TouchableOpacity> */}
+
+          <View style={{ ...styles.buttonRow, borderColor: colors.text }}>
+            <TouchableOpacity
+              style={{
+                ...styles.button,
+                backgroundColor: colors.primary,
+              }}
+              onPress={start}
+            >
+              <Text style={{ ...styles.text, color: colors.text }}>Retry</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                ...styles.button,
+                backgroundColor: colors.success,
+              }}
+              onPress={record}
+            >
+              <Text style={{ ...styles.text, color: colors.text }}>
+                Record Result
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      )}
     </View>
   );
 }
@@ -172,6 +173,48 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  header: {
+    alignItems: "center",
+    paddingTop: 24,
+    paddingBottom: 12,
+  },
+  title: {
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 8,
+  },
+  statsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 12,
+  },
+  statLabel: {
+    fontSize: 18,
+    fontWeight: "800",
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: "800",
+  },
+  targetWrapper: {
+    zIndex: 10,
+  },
+  target: {
+    backgroundColor: "#FF2D55",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#FF2D55",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.9,
+    shadowRadius: 20,
+    elevation: 12,
+  },
+  resultContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 32,
   },
   sensor: {
     flexDirection: "row",
@@ -195,35 +238,26 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 64,
     flexDirection: "row",
-    width: "100%",
     justifyContent: "center",
-  },
-  buttonContainer: {
     backgroundColor: "transparent",
     padding: 20,
     borderWidth: 1,
-    borderRadius: 60,
-    borderColor: "white",
+    borderRadius: 50,
+    gap: 20,
   },
   button: {
-    width: 70,
+    width: 140,
     height: 70,
     borderWidth: 2,
     padding: 5,
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: 50,
+    borderColor: "transparent",
   },
   text: {
     fontSize: 12,
     fontWeight: "bold",
     color: "white",
-  },
-  record: {
-    position: "absolute",
-    top: 64,
-    left: 32,
-    width: 10,
-    height: 10,
-    borderRadius: 50,
   },
 });

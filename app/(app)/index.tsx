@@ -75,16 +75,21 @@ export default function Index() {
         >
           View Team
         </Button>
-        
-         <Button onPress={() => {router.push("/activities_selection"); }}>
-          Activities </Button>
+
+        <Button
+          onPress={() => {
+            router.push("/activities_selection");
+          }}
+        >
+          Activities{" "}
+        </Button>
         <Button onPress={changeTheme}>Switch theme</Button>
         {/* Switch theme button is just for testing, remove once setup in the menu. */}
         <Button
           onPress={() => {
             router.push({
               pathname: "/(app)/resultlist",
-              params: { activity: "2" },
+              params: { activity: "6" },
             }); // Pass activity number to filter result list
           }}
         >
