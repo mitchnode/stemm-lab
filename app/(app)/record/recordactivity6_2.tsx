@@ -23,40 +23,6 @@ import Svg, { Polyline } from "react-native-svg";
 const result = new ResultViewModel();
 const team = new TeamViewModel();
 
-/* function useLiveMissTime(totalMissTime: number, isMissing: boolean): number {
-  const [display, setDisplay] = useState(totalMissTime);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const missStartRef = useRef<number | null>(null);
-  const baseRef = useRef(totalMissTime);
-
-  useEffect(() => {
-    baseRef.current = totalMissTime;
-    if (!isMissing) {
-      setDisplay(totalMissTime);
-    }
-  }, [totalMissTime, isMissing]);
-
-  useEffect(() => {
-    if (isMissing) {
-      missStartRef.current = Date.now();
-      intervalRef.current = setInterval(() => {
-        if (missStartRef.current !== null) {
-          setDisplay(baseRef.current + (Date.now() - missStartRef.current));
-        }
-      }, 50);
-    } else {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      intervalRef.current = null;
-      missStartRef.current = null;
-    }
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [isMissing]);
-
-  return display;
-} */
-
 export default function RecordActivity6_2() {
   const { user } = useAuth();
   const ACTIVITY_ID = "6";
@@ -86,7 +52,6 @@ export default function RecordActivity6_2() {
     gesture,
   } = usePathTracer();
 
-  //const liveMissTime = useLiveMissTime(totalMissTime, isMissing);
   const { width, height } = Dimensions.get("window");
 
   const waypointPoints = waypointCoords

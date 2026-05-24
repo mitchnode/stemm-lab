@@ -73,7 +73,6 @@ export function usePathTracer(): PathTracerReturn {
 
   const recordMiss = useCallback(() => {
     if (isMissingRef.current) return;
-    console.log("Miss");
     isMissingRef.current = true;
     missStartRef.current = Date.now();
     setIsMissing(true);
@@ -81,7 +80,6 @@ export function usePathTracer(): PathTracerReturn {
 
   const recordHit = useCallback(() => {
     if (!isMissingRef.current) return;
-    console.log("Hit");
     isMissingRef.current = false;
     if (missStartRef.current !== null) {
       accumulatedMissRef.current += Date.now() - missStartRef.current;
@@ -93,7 +91,6 @@ export function usePathTracer(): PathTracerReturn {
 
   const isOnButton = useCallback((touchX: number, touchY: number): boolean => {
     const { x, y } = buttonPositionRef.current;
-    console.log("X:", touchX - (x + 40), "Y:", touchY - (y + 40));
     const centerX = x + BUTTON_RADIUS;
     const centerY = y + BUTTON_RADIUS;
     const dist = Math.sqrt(
