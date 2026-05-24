@@ -6,10 +6,12 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+
 import {
   ActivityIndicator,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -21,6 +23,8 @@ const team = new TeamViewModel();
 export default observer(() => {
   const { user } = useAuth();
   const { activity } = useLocalSearchParams();
+
+  console.log("Current Activity Filter:", activity);
   const router = useRouter();
   const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
@@ -31,6 +35,11 @@ export default observer(() => {
     if (user) await team.handleRestore(user.uid);
     await resultList.handleRestore(team.teamID);
     await resultList.handlePopulate();
+
+    console.log(
+      "Full Result List Data:",
+      JSON.stringify(resultList.populatedList, null, 2),
+    );
   };
 
   // Video Icon component
@@ -64,81 +73,110 @@ export default observer(() => {
     );
   }
 
-  return (
-    <View style={{ ...styles.screen, backgroundColor: colors.background }}>
-      <Text style={{ ...styles.heading, color: colors.text }}>Results</Text>
-      {resultList.populatedList.map(
-        (result, index) =>
-          result.activityID == activity && (
-            <View
-              key={index}
-              style={{ ...styles.box, backgroundColor: colors.surface }}
-            >
-              <Pressable
-                style={styles.button}
-                {...(result.activityID == "1" || result.activityID == "3"
-                  ? { disabled: false }
-                  : { disabled: true })}
-                onPress={() => {
-                  router.push({
-                    pathname: "/playback",
-                    params: { resultID: result.resultID },
-                  });
-                }}
-              >
-                {result.activityID == "1" || result.activityID == "3" ? (
-                  <VideoIcon />
-                ) : (
-                  <SensorIcon />
-                )}
+  const isClickable = (res: any) => {
+    const id = res.activityID.toString();
+    return ["1", "3", "5"].includes(id);
+  };
 
-                <View style={styles.info}>
-                  <View style={styles.row}>
-                    <Text style={{ ...styles.bold_text, color: colors.text }}>
-                      Result ID:
-                    </Text>
-                    <Text style={{ ...styles.large_font, color: colors.text }}>
-                      {result.resultID}
-                    </Text>
+  const allowedList = React.useMemo(() => {
+    if (Array.isArray(activity)) return activity; // arrives as an array
+    if (typeof activity === "string") return activity.split(","); // If it arrives as a string
+    return []; // Default fallback
+  }, [activity]);
+  //debugging command
+  useEffect(() => {
+    console.log("Current Filter List:", allowedList);
+  }, [allowedList]);
+
+  return (
+    <ScrollView>
+      <View style={{ ...styles.screen, backgroundColor: colors.background }}>
+        <Text style={{ ...styles.heading, color: colors.text }}>Results</Text>
+        {resultList.populatedList.map((result, index) => {
+          // We check if the result's ID is in allowed list
+          const isinList = allowedList.includes(result.activityID.toString());
+
+          return (
+            isinList && (
+              <View
+                key={index}
+                style={{ ...styles.box, backgroundColor: colors.surface }}
+              >
+                <Pressable
+                  style={styles.button}
+                  disabled={!isClickable(result)}
+                  onPress={() => {
+                    router.push({
+                      pathname: "/playback",
+                      params: { resultID: result.resultID },
+                    });
+                  }}
+                >
+                  {result.activityID == "1" || result.activityID == "3" ? (
+                    <VideoIcon />
+                  ) : (
+                    <SensorIcon />
+                  )}
+
+                  <View style={styles.info}>
+                    <View style={styles.row}>
+                      <Text style={{ ...styles.bold_text, color: colors.text }}>
+                        Result ID:
+                      </Text>
+                      <Text
+                        style={{ ...styles.large_font, color: colors.text }}
+                      >
+                        {result.resultID}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={{ ...styles.bold_text, color: colors.text }}>
+                        Activity ID:
+                      </Text>
+                      <Text
+                        style={{ ...styles.large_font, color: colors.text }}
+                      >
+                        {result.activityID}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={{ ...styles.bold_text, color: colors.text }}>
+                        Date/Time:
+                      </Text>
+                      <Text
+                        style={{ ...styles.large_font, color: colors.text }}
+                      >
+                        {result.resultDateTime}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={{ ...styles.bold_text, color: colors.text }}>
+                        Result Type:
+                      </Text>
+                      <Text
+                        style={{ ...styles.large_font, color: colors.text }}
+                      >
+                        {result.resultType}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={{ ...styles.bold_text, color: colors.text }}>
+                        Result:
+                      </Text>
+                      <Text
+                        style={{ ...styles.large_font, color: colors.text }}
+                      >
+                        {result.resultValue}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.row}>
-                    <Text style={{ ...styles.bold_text, color: colors.text }}>
-                      Activity ID:
-                    </Text>
-                    <Text style={{ ...styles.large_font, color: colors.text }}>
-                      {result.activityID}
-                    </Text>
-                  </View>
-                  <View style={styles.row}>
-                    <Text style={{ ...styles.bold_text, color: colors.text }}>
-                      Date/Time:
-                    </Text>
-                    <Text style={{ ...styles.large_font, color: colors.text }}>
-                      {result.resultDateTime}
-                    </Text>
-                  </View>
-                  <View style={styles.row}>
-                    <Text style={{ ...styles.bold_text, color: colors.text }}>
-                      Result Type:
-                    </Text>
-                    <Text style={{ ...styles.large_font, color: colors.text }}>
-                      {result.resultType}
-                    </Text>
-                  </View>
-                  <View style={styles.row}>
-                    <Text style={{ ...styles.bold_text, color: colors.text }}>
-                      Result:
-                    </Text>
-                    <Text style={{ ...styles.large_font, color: colors.text }}>
-                      {result.resultValue}
-                    </Text>
-                  </View>
-                </View>
-              </Pressable>
-            </View>
-          ),
-      )}
-    </View>
+                </Pressable>
+              </View>
+            )
+          );
+        })}
+      </View>
+    </ScrollView>
   );
 });
 

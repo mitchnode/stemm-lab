@@ -73,6 +73,15 @@ export class ResultViewModel {
     return this.resultData;
   }
 
+  getResultDataParsed(): { timestamp: number; magnitude: number }[] {
+    try {
+      return this.resultData ? JSON.parse(this.resultData) : [];
+    } catch (error) {
+      console.error("Failed to parse result data:", error);
+      return [];
+    }
+  }
+
   // Record the result data, generating a new resultID
   handleRecord() {
     this.resultID =

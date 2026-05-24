@@ -69,7 +69,7 @@ export default function activities({}) {
                 justifyContent: "center",
               }}
             >
-              {/* Dynamic Loop through your labsData registry mapping keys automatically */}
+              {/* Dynamic Loop through labsData registry mapping keys automatically */}
               {Object.keys(ALL_LABS).map((labKey) => {
                 const lab = ALL_LABS[labKey as keyof typeof ALL_LABS];
                 return (
@@ -78,7 +78,7 @@ export default function activities({}) {
                     onPress={() => {
                       router.push({
                         pathname: "/activity_detail",
-                        params: { id: lab.id }, // ✨ Passing the clean lookup key object directly
+                        params: { id: lab.id },
                       });
                     }}
                   >
@@ -198,7 +198,6 @@ const styles = StyleSheet.create({
     width: "95%",
     minWidth: 400,
   },
-  // second box added as i will need to add different parameters for the acvities box
   box2: {
     justifyContent: "center",
     alignItems: "stretch",
