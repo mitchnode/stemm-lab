@@ -87,9 +87,10 @@ export default function Index() {
         {/* Switch theme button is just for testing, remove once setup in the menu. */}
         <Button
           onPress={() => {
+            const activityArray = ["1", "2", "3", "4", "5", "6", "7"];
             router.push({
               pathname: "/(app)/resultlist",
-              params: { activity: "6" },
+              params: { activity: activityArray.join(",") },
             }); // Pass activity number to filter result list
           }}
         >
