@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Animated, Dimensions, PanResponder } from "react-native";
+import { Animated, Dimensions } from "react-native";
+import { Gesture } from "react-native-gesture-handler";
 
 export const BUTTON_RADIUS = 40;
 const HIT_RADIUS = BUTTON_RADIUS + 10;
@@ -20,7 +21,7 @@ interface PathTracerReturn {
   buttonAnim: Animated.ValueXY;
   waypointCoords: { x: number; y: number }[];
   start: () => void;
-  panHandlers: ReturnType<typeof PanResponder.create>["panHandlers"];
+  gesture: ReturnType<typeof Gesture.Pan>;
 }
 
 const generateWaypoints = (count: number): { x: number; y: number }[] => {
@@ -35,7 +36,7 @@ const generateWaypoints = (count: number): { x: number; y: number }[] => {
   for (let i = 1; i < count; i++) {
     points.push({
       x: Math.random() * (width - PADDING * 2) + PADDING,
-      y: Math.random() * (height - PADDING * 2 - 120) + PADDING + 60,
+      y: Math.random() * (height - PADDING * 2 - 120) + PADDING,
     });
   }
   return points;
@@ -55,16 +56,20 @@ export function usePathTracer(): PathTracerReturn {
   const missStartRef = useRef<number | null>(null);
   const accumulatedMissRef = useRef(0);
   const isMissingRef = useRef(false);
-  const isTouchingRef = useRef(false);
   const motionRef = useRef<Motion>("idle");
   const animationRef = useRef<Animated.CompositeAnimation | null>(null);
 
   useEffect(() => {
+    motionRef.current = motion;
+  }, [motion]);
+
+  useEffect(() => {
+    console.log("buttonAnim is updated");
     const id = buttonAnim.addListener(({ x, y }) => {
       buttonPositionRef.current = { x, y };
     });
     return () => buttonAnim.removeListener(id);
-  }, [buttonAnim]);
+  }, [waypointCoords]);
 
   const recordMiss = useCallback(() => {
     if (isMissingRef.current) return;
@@ -88,6 +93,7 @@ export function usePathTracer(): PathTracerReturn {
 
   const isOnButton = useCallback((touchX: number, touchY: number): boolean => {
     const { x, y } = buttonPositionRef.current;
+    console.log("X:", touchX - (x + 40), "Y:", touchY - (y + 40));
     const centerX = x + BUTTON_RADIUS;
     const centerY = y + BUTTON_RADIUS;
     const dist = Math.sqrt(
@@ -96,44 +102,28 @@ export function usePathTracer(): PathTracerReturn {
     return dist <= HIT_RADIUS;
   }, []);
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => motionRef.current === "moving",
-      onMoveShouldSetPanResponder: () => motionRef.current === "moving",
-      onPanResponderGrant: (event) => {
-        if (motionRef.current !== "moving") return;
-        console.log("Touching");
-        isTouchingRef.current = true;
-        const { pageX, pageY } = event.nativeEvent;
-        if (isOnButton(pageX, pageY)) {
-          recordHit();
-        } else {
-          recordMiss();
-        }
-      },
-      onPanResponderMove: (event) => {
-        if (motionRef.current !== "moving") return;
-        const { pageX, pageY } = event.nativeEvent;
-        if (isOnButton(pageX, pageY)) {
-          recordHit();
-        } else {
-          recordMiss();
-        }
-      },
-      onPanResponderRelease: () => {
-        isTouchingRef.current = false;
-        if (motionRef.current === "moving") {
-          recordMiss();
-        }
-      },
-      onPanResponderTerminate: () => {
-        isTouchingRef.current = false;
-        if (motionRef.current === "moving") {
-          recordMiss();
-        }
-      },
-    }),
-  ).current;
+  const gesture = Gesture.Pan()
+    .runOnJS(true)
+    .onBegin((event) => {
+      if (motionRef.current !== "moving") return;
+      if (isOnButton(event.x, event.y)) {
+        recordHit();
+      } else {
+        recordMiss();
+      }
+    })
+    .onUpdate((event) => {
+      if (motionRef.current !== "moving") return;
+      if (isOnButton(event.x, event.y)) {
+        recordHit();
+      } else {
+        recordMiss();
+      }
+    })
+    .onFinalize(() => {
+      if (motionRef.current !== "moving") return;
+      recordMiss();
+    });
 
   const start = useCallback(() => {
     if (animationRef.current) {
@@ -143,15 +133,14 @@ export function usePathTracer(): PathTracerReturn {
 
     accumulatedMissRef.current = 0;
     missStartRef.current = null;
-    isMissingRef.current = false;
-    isTouchingRef.current = false;
+    isMissingRef.current = true;
     setTotalMissTime(0);
-    setIsMissing(false);
+    setIsMissing(true);
 
     const waypoints = generateWaypoints(WAYPOINT_COUNT);
+    buttonAnim.setValue(waypoints[0]);
     setWaypointCoords(waypoints);
 
-    buttonAnim.setValue(waypoints[0]);
     setMotion("ready");
 
     const startDelayTimer = setTimeout(() => {
@@ -161,12 +150,16 @@ export function usePathTracer(): PathTracerReturn {
         Animated.timing(buttonAnim, {
           toValue: wp,
           duration: SEGMENT_DURATION_MS,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
       );
 
       const sequence = Animated.sequence(segments);
       animationRef.current = sequence;
+
+      if (isMissingRef.current) {
+        missStartRef.current = Date.now();
+      }
 
       sequence.start(({ finished }) => {
         if (finished) {
@@ -206,6 +199,6 @@ export function usePathTracer(): PathTracerReturn {
     buttonAnim,
     waypointCoords,
     start,
-    panHandlers: panResponder.panHandlers,
+    gesture,
   };
 }

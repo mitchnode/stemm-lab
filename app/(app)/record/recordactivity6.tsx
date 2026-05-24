@@ -26,20 +26,16 @@ export default function RecordActivity6() {
           }}
           onPress={() => router.push("/(app)/record/recordactivity6_1")}
         >
-          <Text style={{ ...styles.buttonText, color: colors.text }}>
-            Reaction Timer
-          </Text>
+          <Text style={{ ...styles.buttonText }}>Reaction Timer</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={{
             ...styles.button,
-            backgroundColor: colors.success,
+            backgroundColor: colors.primary,
           }}
           onPress={() => router.push("/(app)/record/recordactivity6_2")}
         >
-          <Text style={{ ...styles.buttonText, color: colors.text }}>
-            Path Tracing
-          </Text>
+          <Text style={{ ...styles.buttonText }}>Path Tracing</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -78,7 +74,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   buttonText: {
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: "bold",
     color: "white",
   },

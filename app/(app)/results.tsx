@@ -34,6 +34,7 @@ export default observer(() => {
         style={{
           flex: 1,
           justifyContent: "center",
+          backgroundColor: colors.background,
         }}
       >
         <ActivityIndicator size="large" />
@@ -43,10 +44,17 @@ export default observer(() => {
 
   return (
     <View style={{ ...styles.container, backgroundColor: colors.background }}>
+      <View style={styles.header}>
+        <Text style={{ ...styles.title, color: colors.text }}>RESULTS</Text>
+      </View>
       <View style={styles.resultdisplay} />
       <View style={styles.results}>
-        <Text style={{ color: colors.text }}>{result.resultType}</Text>
-        <Text style={{ color: colors.text }}>{result.resultValue}</Text>
+        <Text style={{ ...styles.resultText, color: colors.text }}>
+          {result.resultType}
+        </Text>
+        <Text style={{ ...styles.resultText, color: colors.text }}>
+          {result.resultValue}
+        </Text>
       </View>
       <View style={styles.buttonRow}>
         <Pressable
@@ -55,17 +63,13 @@ export default observer(() => {
             router.dismiss();
           }}
         >
-          <Text style={{ ...styles.buttontext, color: colors.light }}>
-            Cancel
-          </Text>
+          <Text style={{ ...styles.buttonText }}>Cancel</Text>
         </Pressable>
         <Pressable
           style={{ ...styles.button, backgroundColor: colors.success }}
           onPress={uploadResult}
         >
-          <Text style={{ ...styles.buttontext, color: colors.dark }}>
-            Upload
-          </Text>
+          <Text style={{ ...styles.buttonText }}>Upload</Text>
         </Pressable>
       </View>
     </View>
@@ -77,29 +81,54 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 20,
     marginBottom: 20,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  resultdisplay: {
-    flex: 1,
+  header: {
+    alignItems: "center",
+    paddingTop: 50,
+    paddingBottom: 12,
   },
+  title: {
+    fontSize: 24,
+    fontWeight: "700",
+    letterSpacing: 8,
+  },
+  resultdisplay: {},
   results: {
     flexDirection: "row",
     justifyContent: "space-around",
+    gap: 50,
   },
   buttonRow: {
+    position: "absolute",
+    bottom: 32,
     flexDirection: "row",
-    gap: 70,
     justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "transparent",
+    padding: 20,
+    borderWidth: 1,
+    borderRadius: 50,
+    gap: 20,
   },
   button: {
-    width: 150,
+    width: 140,
     height: 70,
-    borderWidth: 1,
-    borderRadius: 60,
+    borderWidth: 2,
     padding: 5,
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: 50,
+    borderColor: "transparent",
   },
-  buttontext: {
+  buttonText: {
+    color: "white",
+    fontSize: 16,
     fontWeight: "bold",
+  },
+  resultText: {
+    fontSize: 16,
+    fontWeight: "500",
   },
 });

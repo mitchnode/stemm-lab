@@ -4,8 +4,9 @@ import { useTheme } from "@/theme";
 import { ResultViewModel } from "@/viewmodel/ResultViewModel";
 import { TeamViewModel } from "@/viewmodel/teamViewModel";
 import { router } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
+    ActivityIndicator,
     Animated,
     Dimensions,
     StyleSheet,
@@ -13,12 +14,16 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import {
+    GestureDetector,
+    GestureHandlerRootView,
+} from "react-native-gesture-handler";
 import Svg, { Polyline } from "react-native-svg";
 
 const result = new ResultViewModel();
 const team = new TeamViewModel();
 
-function useLiveMissTime(totalMissTime: number, isMissing: boolean): number {
+/* function useLiveMissTime(totalMissTime: number, isMissing: boolean): number {
   const [display, setDisplay] = useState(totalMissTime);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const missStartRef = useRef<number | null>(null);
@@ -50,7 +55,7 @@ function useLiveMissTime(totalMissTime: number, isMissing: boolean): number {
   }, [isMissing]);
 
   return display;
-}
+} */
 
 export default function RecordActivity6_2() {
   const { user } = useAuth();
@@ -78,10 +83,10 @@ export default function RecordActivity6_2() {
     buttonAnim,
     waypointCoords,
     start,
-    panHandlers,
+    gesture,
   } = usePathTracer();
 
-  const liveMissTime = useLiveMissTime(totalMissTime, isMissing);
+  //const liveMissTime = useLiveMissTime(totalMissTime, isMissing);
   const { width, height } = Dimensions.get("window");
 
   const waypointPoints = waypointCoords
@@ -121,142 +126,150 @@ export default function RecordActivity6_2() {
   };
 
   return (
-    <View style={{ ...styles.container, backgroundColor: colors.background }}>
-      <View style={[styles.field, { width, height }]} {...panHandlers}>
-        {motion === "done" && waypointCoords.length > 1 && (
-          <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
-            <Polyline
-              points={waypointPoints}
-              fill="none"
-              stroke={colors.error}
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeDasharray="6 10"
-            />
-          </Svg>
-        )}
+    <GestureHandlerRootView
+      style={{ ...styles.container, backgroundColor: colors.background }}
+    >
+      <GestureDetector gesture={gesture}>
+        <View style={[styles.field, { width, height }]}>
+          {motion === "done" && waypointCoords.length > 1 && (
+            <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
+              <Polyline
+                points={waypointPoints}
+                fill="none"
+                stroke={colors.error}
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeDasharray="6 10"
+              />
+            </Svg>
+          )}
 
-        <View style={styles.header}>
-          <Text style={{ ...styles.title, color: colors.text }}>
-            PATH TRACING
-          </Text>
-          {bestTime !== null && (
-            <View style={[styles.statsRow]}>
-              <Text style={{ ...styles.statLabel, color: colors.text }}>
-                High Score:
-              </Text>
-              <Text style={{ ...styles.statValue, color: colors.text }}>
-                {bestTime}ms
+          <View style={styles.header}>
+            <Text style={{ ...styles.title, color: colors.text }}>
+              PATH TRACING
+            </Text>
+            {bestTime !== null && (
+              <View style={[styles.statsRow]}>
+                <Text style={{ ...styles.statLabel, color: colors.text }}>
+                  High Score:
+                </Text>
+                <Text style={{ ...styles.statValue, color: colors.text }}>
+                  {bestTime}ms
+                </Text>
+              </View>
+            )}
+          </View>
+
+          {motion === "idle" && (
+            <View style={styles.centreOverlay}>
+              <Text style={{ ...styles.text, color: colors.text }}>
+                <ActivityIndicator size="large" />
               </Text>
             </View>
           )}
-        </View>
 
-        {motion === "idle" && (
-          <View style={styles.centreOverlay}>
-            <Text style={{ ...styles.text, color: colors.text }}>Loading…</Text>
-          </View>
-        )}
+          {motion === "ready" && (
+            <View style={styles.centreOverlay} pointerEvents="none">
+              <Text style={{ ...styles.text, color: colors.text }}>
+                PRESS & HOLD
+              </Text>
+              <Text style={{ ...styles.text, color: colors.text }}>
+                Keep your finger on the button{"\n"}as it moves around the
+                screen.
+              </Text>
+            </View>
+          )}
 
-        {motion === "ready" && (
-          <View style={styles.centreOverlay} pointerEvents="none">
-            <Text style={{ ...styles.text, color: colors.text }}>
-              PRESS & HOLD
-            </Text>
-            <Text style={{ ...styles.text, color: colors.text }}>
-              Keep your finger on the button{"\n"}as it moves around the screen.
-            </Text>
-          </View>
-        )}
-
-        {(motion === "ready" || motion === "moving") && (
-          <Animated.View
-            style={[
-              styles.buttonWrapper,
-              { width: PT_BUTTON_SIZE, height: PT_BUTTON_SIZE },
-              {
-                transform: [
-                  { translateX: buttonAnim.x },
-                  { translateY: buttonAnim.y },
-                ],
-              },
-            ]}
-            pointerEvents="none"
-          >
-            <View
+          {(motion === "ready" || motion === "moving") && (
+            <Animated.View
               style={[
-                styles.ptButton,
+                styles.buttonWrapper,
+                { width: PT_BUTTON_SIZE, height: PT_BUTTON_SIZE },
                 {
-                  width: PT_BUTTON_SIZE,
-                  height: PT_BUTTON_SIZE,
-                  borderRadius: BUTTON_RADIUS,
-                  backgroundColor: colors.success,
-                  shadowColor: colors.success,
+                  transform: [
+                    { translateX: buttonAnim.x },
+                    { translateY: buttonAnim.y },
+                  ],
                 },
-                motion === "moving" &&
-                  isMissing && {
-                    backgroundColor: colors.error,
-                    shadowColor: colors.error,
-                  },
               ]}
+              pointerEvents="none"
             >
               <View
-                style={{
-                  width: PT_BUTTON_SIZE * 0.4,
-                  height: PT_BUTTON_SIZE * 0.4,
-                  borderRadius: PT_BUTTON_SIZE * 0.2,
-                  backgroundColor: colors.header,
-                }}
-              />
-            </View>
-          </Animated.View>
-        )}
+                style={[
+                  styles.ptButton,
+                  {
+                    width: PT_BUTTON_SIZE,
+                    height: PT_BUTTON_SIZE,
+                    borderRadius: BUTTON_RADIUS,
+                    backgroundColor: colors.primary,
+                    shadowColor: colors.primary,
+                  },
+                  motion === "moving" &&
+                    !isMissing && {
+                      backgroundColor: colors.success,
+                      shadowColor: colors.success,
+                    },
+                  motion === "moving" &&
+                    isMissing && {
+                      backgroundColor: colors.error,
+                      shadowColor: colors.error,
+                    },
+                ]}
+              >
+                {/* <View
+                    style={{
+                      width: PT_BUTTON_SIZE * 0.4,
+                      height: PT_BUTTON_SIZE * 0.4,
+                      borderRadius: PT_BUTTON_SIZE * 0.2,
+                      backgroundColor: colors.header,
+                    }}
+                  /> */}
+              </View>
+            </Animated.View>
+          )}
 
-        {motion === "done" && (
-          <View style={styles.resultOverlay}>
-            <Text style={{ ...styles.text, color: colors.text }}>
-              TOTAL TIME OFF PATH
-            </Text>
-            <Text style={{ ...styles.text, color: colors.text }}>
-              {totalMissTime}
-            </Text>
-            <Text style={{ ...styles.text, color: colors.text }}>
-              milliseconds
-            </Text>
-            {bestTime !== null && totalMissTime === bestTime && (
+          {motion === "done" && (
+            <View style={styles.resultOverlay}>
               <Text style={{ ...styles.text, color: colors.text }}>
-                High Score!
+                TOTAL TIME OFF PATH
               </Text>
-            )}
-            <View style={{ ...styles.buttonRow, borderColor: colors.text }}>
-              <TouchableOpacity
-                style={{
-                  ...styles.button,
-                  backgroundColor: colors.primary,
-                }}
-                onPress={start}
-              >
+              <Text style={{ ...styles.text, color: colors.text }}>
+                {totalMissTime}
+              </Text>
+              <Text style={{ ...styles.text, color: colors.text }}>
+                milliseconds
+              </Text>
+              {bestTime !== null && totalMissTime === bestTime && (
                 <Text style={{ ...styles.text, color: colors.text }}>
-                  Retry
+                  High Score!
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={{
-                  ...styles.button,
-                  backgroundColor: colors.success,
-                }}
-                onPress={record}
-              >
-                <Text style={{ ...styles.text, color: colors.text }}>
-                  Record Result
-                </Text>
-              </TouchableOpacity>
+              )}
+              <View style={{ ...styles.buttonRow, borderColor: colors.text }}>
+                <TouchableOpacity
+                  style={{
+                    ...styles.button,
+                    backgroundColor: colors.primary,
+                  }}
+                  onPress={start}
+                >
+                  <Text style={{ ...styles.buttonText }}>Retry</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{
+                    ...styles.button,
+                    backgroundColor: colors.success,
+                  }}
+                  onPress={record}
+                >
+                  <Text style={{ ...styles.buttonText }}>Record Result</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
-      </View>
-    </View>
+          )}
+        </View>
+      </GestureDetector>
+    </GestureHandlerRootView>
   );
 }
 
@@ -275,7 +288,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   title: {
-    fontSize: 13,
+    fontSize: 24,
     fontWeight: "700",
     letterSpacing: 8,
   },
@@ -293,8 +306,6 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   centreOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: "center",
     alignItems: "center",
     paddingTop: 80,
   },
@@ -338,9 +349,13 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     borderColor: "transparent",
   },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   text: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "white",
   },
 });

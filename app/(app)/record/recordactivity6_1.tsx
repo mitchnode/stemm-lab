@@ -153,7 +153,7 @@ export default function RecordActivity6_1() {
             }}
             onPress={start}
           >
-            <Text style={{ ...styles.text, color: colors.text }}>Retry</Text>
+            <Text style={{ ...styles.buttonText }}>Retry</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
@@ -162,9 +162,7 @@ export default function RecordActivity6_1() {
             }}
             onPress={record}
           >
-            <Text style={{ ...styles.text, color: colors.text }}>
-              Record Result
-            </Text>
+            <Text style={{ ...styles.buttonText }}>Record Result</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -241,9 +239,13 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     borderColor: "transparent",
   },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   text: {
     fontSize: 12,
     fontWeight: "bold",
-    color: "white",
   },
 });
