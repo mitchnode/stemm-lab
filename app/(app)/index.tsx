@@ -5,7 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRouter } from "expo-router";
 import { Button, Text } from "re-native-ui";
 import { useEffect } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Alert, StyleSheet, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 const team = new TeamViewModel();
 export default function Index() {
@@ -49,6 +49,34 @@ export default function Index() {
     }
   };
 
+  const clearAll = async () => {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      if (keys.length > 0) {
+        Alert.alert(
+          "Clear all Keys",
+          "Are you sure you would like to clear all local storage keys?",
+          [
+            {
+              text: "Yes",
+              style: "destructive",
+              onPress: async () => {
+                await AsyncStorage.multiRemove(keys, () =>
+                  router.push("/team"),
+                );
+              },
+            },
+            { text: "No", style: "cancel" },
+          ],
+        );
+      } else {
+        Alert.alert("No Keys", "No keys found!");
+      }
+    } catch (error) {
+      console.error("Error clearing team:", error);
+    }
+  };
+
   useEffect(() => {
     loadTeam();
   }, []);
@@ -67,7 +95,8 @@ export default function Index() {
         style={{ ...styles.container, backgroundColor: colors.background }}
       >
         <Text style={{ color: colors.text }}>Welcome {team.teamName}</Text>
-        <Button onPress={clearTeam}>Clear</Button>
+        <Button onPress={clearTeam}>Clear Team</Button>
+        <Button onPress={clearAll}>Clear All</Button>
         <Button
           onPress={() => {
             router.push("/(app)/team-view");
