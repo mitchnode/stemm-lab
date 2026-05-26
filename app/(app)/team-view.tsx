@@ -1,23 +1,41 @@
+import { useAuth } from "@/context/authContext";
 import { useTheme } from "@/theme";
 import { TeamViewModel } from "@/viewmodel/teamViewModel";
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 const team = new TeamViewModel();
 
 const TeamView = observer(() => {
+  const { user } = useAuth();
   const { colors } = useTheme();
+  const [loading, setLoading] = useState(true);
 
   // Load team data
   const loadTeam = async () => {
-    await team.handleRestore();
+    setLoading(true);
+    try {
+      if (user) await team.handleRestore(user.uid);
+    } catch (error) {
+      console.error("Error loading team:", error);
+    }
+    setLoading(false);
   };
 
   // call loadTeam to retrieve the team data for displaying in the card
   useEffect(() => {
     loadTeam();
   }, []);
+
+  if (loading) {
+    return (
+      <ActivityIndicator
+        size="large"
+        style={{ flex: 1, backgroundColor: colors.background }}
+      />
+    );
+  }
 
   return (
     <View style={{ ...styles.screen, backgroundColor: colors.background }}>

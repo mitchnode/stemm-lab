@@ -27,19 +27,26 @@ export default observer(() => {
   console.log("Current Activity Filter:", activity);
   const router = useRouter();
   const { colors } = useTheme();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Load the data into the resultList
   const loadResults = async () => {
-    setLoading(true);
-    if (user) await team.handleRestore(user.uid);
-    await resultList.handleRestore(team.teamID);
-    await resultList.handlePopulate();
-
-    console.log(
-      "Full Result List Data:",
-      JSON.stringify(resultList.populatedList, null, 2),
-    );
+    //setLoading(true);
+    try {
+      if (user) await team.handleRestore(user.uid);
+      if (team) {
+        await resultList.handleRestore(team.teamID);
+        await resultList.handlePopulate();
+        console.log(
+          "Full Result List Data:",
+          JSON.stringify(resultList.populatedList, null, 2),
+        );
+      }
+    } catch (error) {
+      console.error("Could not load result:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Video Icon component
@@ -62,16 +69,7 @@ export default observer(() => {
 
   useEffect(() => {
     loadResults();
-    setLoading(false);
   }, []);
-
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center" }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
 
   const isClickable = (res: any) => {
     const id = res.activityID.toString();
@@ -88,105 +86,101 @@ export default observer(() => {
     console.log("Current Filter List:", allowedList);
   }, []);
 
+  if (loading) {
+    return (
+      <ActivityIndicator
+        size="large"
+        style={{ flex: 1, backgroundColor: colors.background }}
+      />
+    );
+  }
+
   return (
-    <View>
+    <View style={{ ...styles.screen, backgroundColor: colors.background }}>
       <ScrollView>
-        <View style={{ ...styles.screen, backgroundColor: colors.background }}>
-          <Text style={{ ...styles.heading, color: colors.text }}>Results</Text>
-          {resultList.populatedList.map((result, index) => {
-            // We check if the result's ID is in allowed list
-            const isinList = allowedList.includes(result.activityID.toString());
-
-            return (
-              isinList && (
-                <View
-                  key={index}
-                  style={{ ...styles.box, backgroundColor: colors.surface }}
+        <Text style={{ ...styles.heading, color: colors.text }}>Results</Text>
+        {resultList.populatedList.map((result, index) => {
+          // We check if the result's ID is in allowed list
+          const isinList = allowedList.includes(result.activityID.toString());
+          return (
+            isinList && (
+              <View
+                key={index}
+                style={{ ...styles.box, backgroundColor: colors.surface }}
+              >
+                <Pressable
+                  style={styles.button}
+                  disabled={!isClickable(result)}
+                  onPress={() => {
+                    router.push({
+                      pathname: "/playback",
+                      params: { resultID: result.resultID },
+                    });
+                  }}
                 >
-                  <Pressable
-                    style={styles.button}
-                    disabled={!isClickable(result)}
-                    onPress={() => {
-                      router.push({
-                        pathname: "/playback",
-                        params: { resultID: result.resultID },
-                      });
-                    }}
-                  >
-                    {result.activityID == "1" || result.activityID == "3" ? (
-                      <VideoIcon />
-                    ) : (
-                      <SensorIcon />
-                    )}
+                  {result.activityID == "1" || result.activityID == "3" ? (
+                    <VideoIcon />
+                  ) : (
+                    <SensorIcon />
+                  )}
 
-                    <View style={styles.info}>
-                      <View style={styles.row}>
-                        <Text
-                          style={{ ...styles.bold_text, color: colors.text }}
-                        >
-                          Result ID:
-                        </Text>
-                        <Text
-                          style={{ ...styles.large_font, color: colors.text }}
-                        >
-                          {result.resultID}
-                        </Text>
-                      </View>
-                      <View style={styles.row}>
-                        <Text
-                          style={{ ...styles.bold_text, color: colors.text }}
-                        >
-                          Activity ID:
-                        </Text>
-                        <Text
-                          style={{ ...styles.large_font, color: colors.text }}
-                        >
-                          {result.activityID}
-                        </Text>
-                      </View>
-                      <View style={styles.row}>
-                        <Text
-                          style={{ ...styles.bold_text, color: colors.text }}
-                        >
-                          Date/Time:
-                        </Text>
-                        <Text
-                          style={{ ...styles.large_font, color: colors.text }}
-                        >
-                          {result.resultDateTime}
-                        </Text>
-                      </View>
-                      <View style={styles.row}>
-                        <Text
-                          style={{ ...styles.bold_text, color: colors.text }}
-                        >
-                          Result Type:
-                        </Text>
-                        <Text
-                          style={{ ...styles.large_font, color: colors.text }}
-                        >
-                          {result.resultType}
-                        </Text>
-                      </View>
-                      <View style={styles.row}>
-                        <Text
-                          style={{ ...styles.bold_text, color: colors.text }}
-                        >
-                          Result:
-                        </Text>
-                        <Text
-                          style={{ ...styles.large_font, color: colors.text }}
-                        >
-                          {result.resultValue}
-                        </Text>
-                      </View>
+                  <View style={styles.info}>
+                    <View style={styles.row}>
+                      <Text style={{ ...styles.bold_text, color: colors.text }}>
+                        Result ID:
+                      </Text>
+                      <Text
+                        style={{ ...styles.large_font, color: colors.text }}
+                      >
+                        {result.resultID}
+                      </Text>
                     </View>
-                  </Pressable>
-                </View>
-              )
-            );
-          })}
-        </View>
+                    <View style={styles.row}>
+                      <Text style={{ ...styles.bold_text, color: colors.text }}>
+                        Activity ID:
+                      </Text>
+                      <Text
+                        style={{ ...styles.large_font, color: colors.text }}
+                      >
+                        {result.activityID}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={{ ...styles.bold_text, color: colors.text }}>
+                        Date/Time:
+                      </Text>
+                      <Text
+                        style={{ ...styles.large_font, color: colors.text }}
+                      >
+                        {result.resultDateTime}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={{ ...styles.bold_text, color: colors.text }}>
+                        Result Type:
+                      </Text>
+                      <Text
+                        style={{ ...styles.large_font, color: colors.text }}
+                      >
+                        {result.resultType}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={{ ...styles.bold_text, color: colors.text }}>
+                        Result:
+                      </Text>
+                      <Text
+                        style={{ ...styles.large_font, color: colors.text }}
+                      >
+                        {result.resultValue}
+                      </Text>
+                    </View>
+                  </View>
+                </Pressable>
+              </View>
+            )
+          );
+        })}
       </ScrollView>
     </View>
   );

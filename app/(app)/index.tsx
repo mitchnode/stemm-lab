@@ -7,13 +7,13 @@ import { Button, Text } from "re-native-ui";
 import { useEffect } from "react";
 import { ActivityIndicator, Alert, StyleSheet, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+
 const team = new TeamViewModel();
+
 export default function Index() {
   const { user } = useAuth();
   const navigation = useNavigation();
   const router = useRouter();
-
-  const activityid = "2";
 
   useEffect(() => {
     const listener = navigation.addListener("beforeRemove", (e) => {
