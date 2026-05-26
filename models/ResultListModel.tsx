@@ -37,7 +37,7 @@ export class ResultListModel {
       this.resultList = resultListJSON;
       return this.resultList;
     } catch (error) {
-      console.error("Error loading result:", error);
+      console.error("Error loading resultlist:", error);
     }
   };
 
