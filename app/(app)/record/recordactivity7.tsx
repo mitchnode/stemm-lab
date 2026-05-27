@@ -163,7 +163,6 @@ export default function RecordActivity7() {
     const subscription = Accelerometer.addListener((data) => {
       accLiveRef.current = data;
 
-      // High-Pass/Baseline Filter
       const gravityAlpha = 0.95;
       smoothedZRef.current =
         gravityAlpha * smoothedZRef.current + (1 - gravityAlpha) * data.z;
@@ -203,7 +202,7 @@ export default function RecordActivity7() {
       console.log("DEBUG: Current TeamID is:", team.teamID);
 
       playSound();
-      // Use the ref for the alert/upload
+
       const points = forcedPoints || dataPointsRef.current;
       if (points.length === 0) return;
 
@@ -277,7 +276,6 @@ export default function RecordActivity7() {
     let interval: ReturnType<typeof setInterval> | null = null;
     if (isActive) {
       interval = setInterval(() => {
-        // Calculate deviation (Breathing signal)
         const { z } = accLiveRef.current;
         let breathingWave = (z - smoothedZRef.current) * 500;
 
@@ -291,7 +289,7 @@ export default function RecordActivity7() {
 
         if (dataPointsRef.current.length > 50) dataPointsRef.current.shift();
 
-        tickRef.current += 0.2; // Increment by interval duration (e.g., 500ms / 1000)
+        tickRef.current += 0.2;
 
         setSeconds(Math.floor(tickRef.current));
         setChartPoints([...dataPointsRef.current]);

@@ -149,16 +149,15 @@ export default function RecordActivity5() {
   }, []);
 
   useEffect(() => {
-    isActiveRef.current = isActive; // Keep the ref in sync with the state
+    isActiveRef.current = isActive;
   }, [isActive]);
 
   const handleToggleRecording = async (forcedPoints?: DataPoint[]) => {
     if (isActive) {
       setIsActive(false);
-      // STOPPING
+
       console.log("DEBUG: Current TeamID is:", team.teamID);
 
-      // Use the ref for the alert/upload
       const points = forcedPoints || dataPointsRef.current;
       if (points.length === 0) return;
 
@@ -239,8 +238,6 @@ export default function RecordActivity5() {
             currentAcc.x ** 2 + currentAcc.y ** 2 + currentAcc.z ** 2,
           );
 
-          // 2. Subtract gravity (1g) and convert to mm/s²
-          // We use Math.max(0, ...) so that a stationary device shows 0 instead of negative
           const magnitude = Math.max(0, (totalAcc - 1) * 9806.65);
 
           const roundedMagnitude = parseFloat(magnitude.toFixed(2));
@@ -250,7 +247,7 @@ export default function RecordActivity5() {
               magnitude: roundedMagnitude,
             };
             dataPointsRef.current = [...dataPointsRef.current, newPoint];
-            setChartPoints([...dataPointsRef.current]); // Update chart
+            setChartPoints([...dataPointsRef.current]);
           }
           if (nextSecond >= targetSeconds) {
             clearInterval(timerRef.current!);
