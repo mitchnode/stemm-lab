@@ -1,5 +1,6 @@
 import { useTheme } from "@/theme";
 import { ResultViewModel } from "@/viewmodel/ResultViewModel";
+import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
@@ -17,9 +18,19 @@ export default observer(() => {
   const { resultID } = useLocalSearchParams();
   const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
+  const [resultImage, setResultImage] = useState("");
+
+  const loadImage = async (imageUri: string) => {
+    setResultImage(imageUri);
+  };
 
   useEffect(() => {
     result.handleRestore(resultID.toString());
+    if (result.resultData.split(":").at(-1) == "jpg" || "png") {
+      console.log("Data:", result.resultData);
+      loadImage(result.resultData);
+      console.log("Image:", resultImage);
+    }
   }, []);
 
   const uploadResult = async () => {
@@ -42,7 +53,9 @@ export default observer(() => {
       <View style={styles.header}>
         <Text style={{ ...styles.title, color: colors.text }}>RESULTS</Text>
       </View>
-      <View style={styles.resultdisplay} />
+
+      {resultImage && <Image style={styles.image} source={resultImage} />}
+
       <View style={styles.results}>
         <Text style={{ ...styles.resultText, color: colors.text }}>
           {result.resultType}
@@ -51,7 +64,7 @@ export default observer(() => {
           {result.resultValue}
         </Text>
       </View>
-      <View style={styles.buttonRow}>
+      <View style={{ ...styles.buttonRow, borderColor: colors.border }}>
         <Pressable
           style={{ ...styles.button, backgroundColor: colors.error }}
           onPress={() => {
@@ -75,13 +88,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     gap: 20,
-    marginBottom: 20,
     justifyContent: "center",
     alignItems: "center",
   },
   header: {
     alignItems: "center",
-    paddingTop: 50,
+    paddingTop: 80,
     paddingBottom: 12,
   },
   title: {
@@ -89,8 +101,18 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 8,
   },
-  resultdisplay: {},
+  resultdisplay: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  image: {
+    //flex: 1,
+    height: "60%",
+    width: "100%",
+  },
   results: {
+    flex: 1,
     flexDirection: "row",
     justifyContent: "space-around",
     gap: 50,
