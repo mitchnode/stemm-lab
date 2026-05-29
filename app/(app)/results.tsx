@@ -24,13 +24,20 @@ export default observer(() => {
     setResultImage(imageUri);
   };
 
-  useEffect(() => {
-    result.handleRestore(resultID.toString());
+  const restoreResult = async () => {
+    setLoading(true);
+    await result.handleRestore(resultID.toString());
     if (result.resultData.split(".").at(-1) == "jpg") {
-      console.log("Data:", result.resultData);
       loadImage(result.resultData);
-      console.log("Image:", resultImage);
     }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    restoreResult();
+    return () => {
+      setResultImage("");
+    };
   }, []);
 
   const uploadResult = async () => {
