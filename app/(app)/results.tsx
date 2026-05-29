@@ -26,7 +26,7 @@ export default observer(() => {
 
   useEffect(() => {
     result.handleRestore(resultID.toString());
-    if (result.resultData.split(":").at(-1) == "jpg" || "png") {
+    if (result.resultData.split(".").at(-1) == "jpg") {
       console.log("Data:", result.resultData);
       loadImage(result.resultData);
       console.log("Image:", resultImage);

@@ -1,8 +1,10 @@
 import Slider from "@react-native-community/slider"; // Possibly change to Slider from expo/ui - need to upgrade expo SDK version
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
+import { Image } from "expo-image";
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import ViewShot from "react-native-view-shot";
 
 import { AngleOverlay } from "@/components/AngleOverlay";
 import { useAuth } from "@/context/authContext";
@@ -22,6 +24,9 @@ export default function RecordActivity3() {
   const { colors } = useTheme();
   const [data, setData] = useState("");
   const cameraRef = useRef<CameraView>(null);
+  const viewShotRef = useRef<ViewShot>(null);
+  const [isCaptured, setIsCaptured] = useState(false);
+  const [snappedImage, setCapturedImage] = useState<string>("");
   const [permission, requestPermission] = useCameraPermissions();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -43,6 +48,21 @@ export default function RecordActivity3() {
       loadTeam();
     }
   }, []);
+
+  const captureImage = async () => {
+    const photo = await cameraRef.current?.takePictureAsync();
+    if (photo?.uri) setCapturedImage(photo.uri);
+  };
+
+  useEffect(() => {
+    if (snappedImage) setIsCaptured(true);
+  }, [snappedImage]);
+
+  const handleReset = () => {
+    setCapturedImage("");
+    setIsCaptured(false);
+    reset();
+  };
 
   useEffect(() => {
     if (data) {
@@ -68,12 +88,19 @@ export default function RecordActivity3() {
     }
     return () => {
       setData("");
+      handleReset();
     };
-  });
+  }, [data]);
 
   const record = async () => {
-    const photo = await cameraRef.current?.takePictureAsync();
-    if (photo?.uri) setData(photo.uri);
+    if (!viewShotRef.current) return;
+
+    try {
+      const uri = await viewShotRef.current.capture!();
+      setData(uri);
+    } catch (error) {
+      console.error("Error capturing the screen:", error);
+    }
   };
 
   if (!permission) {
@@ -114,25 +141,31 @@ export default function RecordActivity3() {
 
   return (
     <View style={{ ...styles.root, backgroundColor: colors.background }}>
-      <View
+      <ViewShot
+        ref={viewShotRef}
         style={{
           ...styles.cameraContainer,
           height: cameraHeight,
           backgroundColor: colors.background,
         }}
+        options={{ format: "jpg" }}
       >
-        <CameraView
-          ref={cameraRef}
-          style={StyleSheet.absoluteFill}
-          facing={facing}
-        />
+        {snappedImage ? (
+          <Image style={StyleSheet.absoluteFill} source={snappedImage} />
+        ) : (
+          <CameraView
+            ref={cameraRef}
+            style={StyleSheet.absoluteFill}
+            facing={facing}
+          />
+        )}
         <AngleOverlay
           width={screenWidth}
           height={cameraHeight}
           currentAngleDeg={currentAngleDeg}
           baselineAngleDeg={baselineAngleDeg}
         />
-      </View>
+      </ViewShot>
       <View style={styles.resultContainer}>
         <View style={styles.angleBlock}>
           <Text style={{ ...styles.angleLabel, color: colors.text }}>
@@ -170,19 +203,31 @@ export default function RecordActivity3() {
               ...styles.button,
               backgroundColor: colors.primary,
             }}
-            onPress={reset}
+            onPress={handleReset}
           >
             <Text style={{ ...styles.buttonText }}>Reset</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              ...styles.button,
-              backgroundColor: colors.success,
-            }}
-            onPress={record}
-          >
-            <Text style={{ ...styles.buttonText }}>Record Result</Text>
-          </TouchableOpacity>
+          {isCaptured ? (
+            <TouchableOpacity
+              style={{
+                ...styles.button,
+                backgroundColor: colors.success,
+              }}
+              onPress={record}
+            >
+              <Text style={{ ...styles.buttonText }}>Record Result</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={{
+                ...styles.button,
+                backgroundColor: colors.success,
+              }}
+              onPress={captureImage}
+            >
+              <Text style={{ ...styles.buttonText }}>Capture</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </View>
