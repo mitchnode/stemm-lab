@@ -58,6 +58,24 @@ export default observer(() => {
     );
   };
 
+  // Image Icon component
+  const ImageIcon = () => {
+    return (
+      <View style={styles.icon}>
+        <Ionicons name="image" size={70} color={colors.textSecondary} />
+      </View>
+    );
+  };
+
+  // Audio Icon component
+  const AudioIcon = () => {
+    return (
+      <View style={styles.icon}>
+        <Ionicons name="volume-medium" size={70} color={colors.textSecondary} />
+      </View>
+    );
+  };
+
   // Sensor Icon component
   const SensorIcon = () => {
     return (
@@ -73,7 +91,7 @@ export default observer(() => {
 
   const isClickable = (res: any) => {
     const id = res.activityID.toString();
-    return ["1", "3", "5"].includes(id);
+    return ["1", "2", "3", "5"].includes(id);
   };
 
   const allowedList = React.useMemo(() => {
@@ -118,11 +136,12 @@ export default observer(() => {
                     });
                   }}
                 >
-                  {result.activityID == "1" || result.activityID == "3" ? (
-                    <VideoIcon />
-                  ) : (
-                    <SensorIcon />
-                  )}
+                  {result.activityID == "1" && <VideoIcon />}
+                  {result.activityID == "2" && <AudioIcon />}
+                  {result.activityID == "3" && <ImageIcon />}
+                  {result.activityID != "1" &&
+                    result.activityID != "2" &&
+                    result.activityID != "3" && <SensorIcon />}
 
                   <View style={styles.info}>
                     <View style={styles.row}>

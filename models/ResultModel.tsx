@@ -79,6 +79,16 @@ export class ResultModel {
     }
   };
 
+  // Remove the result from local storage
+  removeResult = async () => {
+    try {
+      await AsyncStorage.removeItem(this.resultID);
+      console.log((await AsyncStorage.getAllKeys()).length);
+    } catch (error) {
+      console.error("Error removing result", error);
+    }
+  };
+
   // Load the result from local storage or Firestore if there is no local data
   loadResult = async (resultID: string) => {
     try {

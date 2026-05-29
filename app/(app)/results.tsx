@@ -24,6 +24,7 @@ export default observer(() => {
     setResultImage(imageUri);
   };
 
+  // Restore the result to the new ResultViewModel, loading the resultData as an image or video
   const restoreResult = async () => {
     setLoading(true);
     await result.handleRestore(resultID.toString());
@@ -35,15 +36,24 @@ export default observer(() => {
 
   useEffect(() => {
     restoreResult();
+
+    // Clean up resets the image state
     return () => {
       setResultImage("");
     };
   }, []);
 
+  // Uplaod the result to Firestore
   const uploadResult = async () => {
     setLoading(true);
     await result.handleUpload();
     setLoading(false);
+  };
+
+  // Delete the result and return to the record screen
+  const cancelResult = async () => {
+    await result.handleDelete();
+    router.dismiss();
   };
 
   if (loading) {
@@ -74,9 +84,7 @@ export default observer(() => {
       <View style={{ ...styles.buttonRow, borderColor: colors.border }}>
         <Pressable
           style={{ ...styles.button, backgroundColor: colors.error }}
-          onPress={() => {
-            router.dismiss();
-          }}
+          onPress={cancelResult}
         >
           <Text style={{ ...styles.buttonText }}>Cancel</Text>
         </Pressable>
