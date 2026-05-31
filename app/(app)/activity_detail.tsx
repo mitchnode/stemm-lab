@@ -346,6 +346,17 @@ export default function ActivityDetail() {
         <MaterialIcons name="list" size={30} color="#fff" />
       </TouchableOpacity>
       <TouchableOpacity
+        style={styles.leaderboard}
+        onPress={() => {
+          router.push({
+            pathname: "/(app)/leaderboard",
+            params: { activityId: activity.id },
+          });
+        }}
+      >
+        <MaterialIcons name="leaderboard" size={30} color="#fff" />
+      </TouchableOpacity>
+      <TouchableOpacity
         style={styles.fab}
         onPress={() => {
           router.push(`./record/recordactivity${activity.id}`);
@@ -457,6 +468,22 @@ const styles = StyleSheet.create({
     left: 20,
     bottom: 20,
     backgroundColor: "#179742",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 6,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 3 },
+  },
+  leaderboard: {
+    position: "absolute",
+    left: 20,
+    bottom: 96,
+    backgroundColor: "#c4a600",
     width: 56,
     height: 56,
     borderRadius: 28,

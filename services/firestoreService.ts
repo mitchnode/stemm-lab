@@ -4,6 +4,8 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit,
+  orderBy,
   query,
   serverTimestamp,
   setDoc,
@@ -68,6 +70,11 @@ export const updateTeam = async (teamID: string, data: Partial<Team>) => {
   await updateDoc(doc(db, "teams", teamID), data);
 };
 
+export const getAllTeams = async () => {
+  const teams = await getDocs(collection(db, "teams"));
+  return !teams.empty ? teams.docs.map((doc) => doc.data() as Team) : [];
+};
+
 export const createResult = async (result: Result) => {
   await setDoc(doc(db, "results", result.resultID), {
     ...result,
@@ -87,4 +94,29 @@ export const getResultList = async (teamID: string) => {
     query(collection(db, "results"), where("teamID", "==", teamID)),
   );
   return !resultList.empty ? resultList.docs.map((doc) => doc.id) : [];
+};
+
+export const getActivityResults = async (activityID: string) => {
+  console.log("Fetching all results for activity", activityID);
+  const results = await getDocs(
+    query(collection(db, "results"), where("activityID", "==", activityID)),
+  );
+  return !results.empty
+    ? (results.docs.map((doc) => doc.data()) as Result[])
+    : [];
+};
+
+export const getTop10ActivityResults = async (activityID: string) => {
+  console.log("Fetching sorted results for actvitiy", activityID);
+  const results = await getDocs(
+    query(
+      collection(db, "results"),
+      where("activityID", "==", activityID),
+      orderBy("resultValue"),
+      limit(10),
+    ),
+  );
+  return !results.empty
+    ? (results.docs.map((doc) => doc.data()) as Result[])
+    : [];
 };

@@ -1,7 +1,17 @@
-import { createTeam, getTeam, Team } from "@/services/firestoreService";
+import {
+  createTeam,
+  getAllTeams,
+  getTeam,
+  Team,
+} from "@/services/firestoreService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { makeAutoObservable } from "mobx";
+
+export interface TeamName {
+  teamID: string;
+  teamName: string;
+}
 
 export class TeamModel {
   uid: string = "";
@@ -9,6 +19,7 @@ export class TeamModel {
   teamName: string = "";
   year: string = "";
   members: string[] = [];
+  teamNames: { [key: string]: string } = {};
 
   constructor() {
     makeAutoObservable(this);
@@ -69,6 +80,19 @@ export class TeamModel {
       }
     } catch (error) {
       console.error("Error loading team:", error);
+    }
+  };
+
+  loadAllTeamNames = async () => {
+    try {
+      const allTeams = await getAllTeams();
+      if (allTeams) {
+        allTeams.map((team) => {
+          this.teamNames[team.teamID] = team.teamName;
+        });
+      }
+    } catch (error) {
+      console.error("Error loading team names", error);
     }
   };
 }
