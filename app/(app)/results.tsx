@@ -17,6 +17,7 @@ import {
   View,
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const result = new ResultViewModel();
 
@@ -118,7 +119,9 @@ export default observer(() => {
   }
 
   return (
-    <View style={{ ...styles.container, backgroundColor: colors.background }}>
+    <SafeAreaView
+      style={{ ...styles.container, backgroundColor: colors.background }}
+    >
       <View style={styles.header}>
         <Text style={{ ...styles.title, color: colors.text }}>RESULTS</Text>
       </View>
@@ -126,9 +129,10 @@ export default observer(() => {
         <>
           {videoUri && <VideoView player={videoPlayer} style={styles.video} />}
           {imageUri && <Image style={styles.image} source={imageUri} />}
-          <View style={styles.resultData}>
-            {audioUri &&
-              (!audioPlayerStatus.playing ? (
+
+          {audioUri && (
+            <View style={styles.resultData}>
+              {!audioPlayerStatus.playing ? (
                 <TouchableOpacity onPress={() => audioPlayer.play()}>
                   <Ionicons
                     name="play"
@@ -144,8 +148,10 @@ export default observer(() => {
                     color={colors.textSecondary}
                   />
                 </TouchableOpacity>
-              ))}
-          </View>
+              )}
+            </View>
+          )}
+
           {graphData.length > 0 && (
             <>
               <LineChart
@@ -196,20 +202,19 @@ export default observer(() => {
           <Text style={{ ...styles.buttonText }}>Upload</Text>
         </Pressable>
       </View>
-    </View>
+    </SafeAreaView>
   );
 });
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 20,
-    justifyContent: "center",
+    gap: 10,
     alignItems: "center",
   },
   header: {
     alignItems: "center",
-    paddingTop: 80,
+    paddingTop: 20,
     paddingBottom: 12,
   },
   title: {
@@ -227,8 +232,9 @@ const styles = StyleSheet.create({
   results: {
     flex: 1,
     flexDirection: "row",
-    justifyContent: "space-around",
     gap: 50,
+    marginBottom: 150,
+    alignItems: "flex-end",
   },
   buttonRow: {
     position: "absolute",
