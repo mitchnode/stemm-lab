@@ -9,7 +9,7 @@ import {
   useCameraPermissions,
   useMicrophonePermissions,
 } from "expo-camera";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
   GestureResponderEvent,
@@ -19,6 +19,11 @@ import {
   View,
 } from "react-native";
 import Video, { VideoRef } from "react-native-video";
+
+import { useAuth } from "@/context/authContext";
+import { ResultViewModel } from "@/viewmodel/ResultViewModel";
+import { TeamViewModel } from "@/viewmodel/teamViewModel";
+import { useRouter } from "expo-router";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -35,9 +40,17 @@ interface Coordinate {
   y: number;
 }
 
+const result = new ResultViewModel();
+const team = new TeamViewModel();
+
 export default function MeasureDropScreen() {
+  const router = useRouter();
+  const { user } = useAuth();
+  const ACTIVITY_ID = "1";
+  const [data, setData] = useState("");
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [isRecordingMode, setIsRecordingMode] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Hardware Ref & Status Hooks
   const cameraRef = useRef<CameraView>(null);
@@ -64,13 +77,25 @@ export default function MeasureDropScreen() {
   >("RULER_TOP");
   const PHYSICAL_RULER_CM = 30; // Your reference physical ruler size
 
+  //team loading logic
+
+  const loadTeam = async () => {
+    if (user) await team.handleRestore(user.uid);
+  };
+
+  useEffect(() => {
+    if (!team.teamID) {
+      loadTeam();
+    }
+  }, []);
+
   // Camera  Actions
   const startRecording = async () => {
     if (cameraRef.current && !isRecording) {
       try {
         setIsRecording(true);
         const video = await cameraRef.current.recordAsync({
-          maxDuration: 15,
+          maxDuration: 30,
         });
         if (video?.uri) {
           setVideoUri(video.uri);
@@ -93,6 +118,39 @@ export default function MeasureDropScreen() {
     if (cameraRef.current && isRecording) {
       cameraRef.current.stopRecording();
       setIsRecording(false);
+    }
+  };
+
+  const handleSaveVideo = async () => {
+    if (!videoUri) return;
+    try {
+      setIsUploading(true);
+
+      const dateTime = new Date().toLocaleString();
+      const resultType = "Parachute drop distance";
+
+      const resultValue = `Drop: ${metrics.drop} | Bounce: ${metrics.bounce}`;
+
+      // 3. Configure your ViewModel with the local URI and metrics
+      result.setTeamID(team.teamID || "local_user");
+      result.setActivityID(ACTIVITY_ID);
+      result.setResultDateTime(dateTime);
+      result.setResultType(resultType);
+      result.setResultValue(resultValue);
+
+      result.setResultData(videoUri);
+
+      const resultID = await result.handleRecord();
+
+      router.push({
+        pathname: "/results",
+        params: { resultID: resultID },
+      });
+    } catch (error) {
+      console.error("Failed handling local video save pipeline:", error);
+      alert("Failed to save video layout.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -399,6 +457,12 @@ export default function MeasureDropScreen() {
               {metrics.drop}
             </Text>
           </View>
+          <TouchableOpacity
+            style={[styles.utilityBtn, { backgroundColor: "green" }]}
+            onPress={handleSaveVideo}
+          >
+            <Text style={styles.btnText}>Save</Text>
+          </TouchableOpacity>
           <View style={styles.metricColumn}>
             <Text style={styles.resultLabel}>BOUNCE HEIGHT</Text>
             <Text style={[styles.resultValue, { color: colors.accent }]}>
