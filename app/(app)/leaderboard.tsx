@@ -1,10 +1,11 @@
 import { ALL_LABS } from "@/labsData.js";
 import { Result } from "@/services/firestoreService";
+import { useTheme } from "@/theme";
 import { LeaderboardViewModel } from "@/viewmodel/LeaderboardViewModel";
 import { TeamViewModel } from "@/viewmodel/teamViewModel";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const leaderboard = new LeaderboardViewModel();
@@ -12,11 +13,9 @@ const team = new TeamViewModel();
 
 export default function Leaderbaord() {
   const { activityId } = useLocalSearchParams();
+  const { colors } = useTheme();
+  const [loading, setLoading] = useState(false);
   const [top10, setTop10] = useState<Result[]>([]);
-
-  const getTeamNames = async () => {
-    await team.handleTeamNames();
-  };
 
   const activity = useMemo(() => {
     return activityId && activityId.toString() in ALL_LABS
@@ -24,41 +23,102 @@ export default function Leaderbaord() {
       : null;
   }, [activityId]);
 
-  const topResults = async () => {
+  const loadLeaderboard = async () => {
+    setLoading(true);
+    leaderboard.setActivityId(activityId.toString());
     await leaderboard.handleTopResults();
+    setTop10(leaderboard.topResults);
+    await team.handleTeamNames();
+    setLoading(false);
   };
 
   useEffect(() => {
-    leaderboard.setActivityId(activityId.toString());
-    topResults();
-    getTeamNames();
-  });
+    loadLeaderboard();
+  }, []);
+
+  if (loading) {
+    return (
+      <ActivityIndicator
+        size="large"
+        style={{ flex: 1, backgroundColor: colors.background }}
+      />
+    );
+  }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={{ ...styles.container, backgroundColor: colors.background }}
+    >
       <View style={styles.title}>
-        <Text>{activity?.title}</Text>
-        <Text>Leaderboard</Text>
+        <Text style={{ ...styles.titleText, color: colors.text }}>
+          {activity?.title}
+        </Text>
+        <Text style={{ ...styles.titleText, color: colors.text }}>
+          Leaderboard
+        </Text>
       </View>
-      <View style={styles.table}>
-        <View style={styles.tableRow}>
-          <View style={styles.tableHeader}>
-            <Text>Team Name</Text>
+      <View style={styles.tableContainer}>
+        <View style={{ ...styles.table, borderColor: colors.border }}>
+          <View style={{ ...styles.tableRow, borderColor: colors.border }}>
+            <View
+              style={{
+                ...styles.rankCell,
+                borderColor: colors.border,
+                backgroundColor: colors.primary + 80,
+              }}
+            >
+              <Text style={{ ...styles.headerText, color: colors.text }}>
+                Rank
+              </Text>
+            </View>
+            <View
+              style={{
+                ...styles.teamCell,
+                borderColor: colors.border,
+                backgroundColor: colors.primary + 80,
+              }}
+            >
+              <Text style={{ ...styles.headerText, color: colors.text }}>
+                Team Name
+              </Text>
+            </View>
+            <View
+              style={{
+                ...styles.resultCell,
+                borderColor: colors.border,
+                backgroundColor: colors.primary + 80,
+              }}
+            >
+              <Text style={{ ...styles.headerText, color: colors.text }}>
+                Result
+              </Text>
+            </View>
           </View>
-          <View style={styles.tableHeader}>
-            <Text>Result</Text>
-          </View>
+          {top10.map((result, index) => (
+            <View
+              key={index}
+              style={{ ...styles.tableRow, borderColor: colors.border }}
+            >
+              <View style={{ ...styles.rankCell, borderColor: colors.border }}>
+                <Text style={{ ...styles.cellText, color: colors.text }}>
+                  {index + 1}
+                </Text>
+              </View>
+              <View style={{ ...styles.teamCell, borderColor: colors.border }}>
+                <Text style={{ ...styles.cellText, color: colors.text }}>
+                  {team.teamNames[result.teamID]}
+                </Text>
+              </View>
+              <View
+                style={{ ...styles.resultCell, borderColor: colors.border }}
+              >
+                <Text style={{ ...styles.cellText, color: colors.text }}>
+                  {result.resultValue}
+                </Text>
+              </View>
+            </View>
+          ))}
         </View>
-        {leaderboard.topResults.map((result, index) => (
-          <View key={index} style={styles.tableRow}>
-            <View style={styles.tableHeader}>
-              <Text>{team.teamNames[result.teamID]}</Text>
-            </View>
-            <View style={styles.tableHeader}>
-              <Text>{result.resultValue}</Text>
-            </View>
-          </View>
-        ))}
       </View>
     </SafeAreaView>
   );
@@ -68,25 +128,45 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "stretch",
     gap: 20,
   },
   title: {
     flexDirection: "column",
     gap: 10,
+    alignItems: "center",
+  },
+  titleText: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  tableContainer: {
+    padding: 20,
+    flex: 1,
   },
   table: {
-    flex: 1,
     borderWidth: 1,
   },
-  tableHeader: {
+  tableCell: {
     borderWidth: 1,
+  },
+  rankCell: {
+    flex: 1,
+    paddingLeft: 20,
+  },
+  teamCell: {
+    flex: 2,
+  },
+  resultCell: {
+    flex: 1,
   },
   tableRow: {
+    justifyContent: "space-evenly",
     flexDirection: "row",
     borderWidth: 1,
   },
   headerText: {
     fontWeight: "bold",
   },
+  cellText: {},
 });
