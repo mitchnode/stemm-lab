@@ -5,7 +5,7 @@ import { makeAutoObservable } from "mobx";
 export class LeaderboardViewModel {
   leaderboard = new LeaderboardModel();
   activityId = "";
-  topResults: Result[] = [];
+  topResults: { [key: string]: Result[] } = {};
 
   constructor() {
     makeAutoObservable(this);

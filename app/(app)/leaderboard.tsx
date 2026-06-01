@@ -15,7 +15,7 @@ export default function Leaderbaord() {
   const { activityId } = useLocalSearchParams();
   const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
-  const [top10, setTop10] = useState<Result[]>([]);
+  const [topResults, setTopResults] = useState<Record<string, Result[]>>({});
 
   const activity = useMemo(() => {
     return activityId && activityId.toString() in ALL_LABS
@@ -27,7 +27,7 @@ export default function Leaderbaord() {
     setLoading(true);
     leaderboard.setActivityId(activityId.toString());
     await leaderboard.handleTopResults();
-    setTop10(leaderboard.topResults);
+    setTopResults(leaderboard.topResults);
     await team.handleTeamNames();
     setLoading(false);
   };
@@ -58,67 +58,89 @@ export default function Leaderbaord() {
         </Text>
       </View>
       <View style={styles.tableContainer}>
-        <View style={{ ...styles.table, borderColor: colors.border }}>
-          <View style={{ ...styles.tableRow, borderColor: colors.border }}>
-            <View
-              style={{
-                ...styles.rankCell,
-                borderColor: colors.border,
-                backgroundColor: colors.primary + 80,
-              }}
-            >
-              <Text style={{ ...styles.headerText, color: colors.text }}>
-                Rank
-              </Text>
-            </View>
-            <View
-              style={{
-                ...styles.teamCell,
-                borderColor: colors.border,
-                backgroundColor: colors.primary + 80,
-              }}
-            >
-              <Text style={{ ...styles.headerText, color: colors.text }}>
-                Team Name
-              </Text>
-            </View>
-            <View
-              style={{
-                ...styles.resultCell,
-                borderColor: colors.border,
-                backgroundColor: colors.primary + 80,
-              }}
-            >
-              <Text style={{ ...styles.headerText, color: colors.text }}>
-                Result
-              </Text>
-            </View>
-          </View>
-          {top10.map((result, index) => (
-            <View
-              key={index}
-              style={{ ...styles.tableRow, borderColor: colors.border }}
-            >
-              <View style={{ ...styles.rankCell, borderColor: colors.border }}>
-                <Text style={{ ...styles.cellText, color: colors.text }}>
-                  {index + 1}
+        {Object.entries(topResults).map(([key, results]) => (
+          <View
+            key={key}
+            style={{ ...styles.table, borderColor: colors.border }}
+          >
+            <View style={{ ...styles.tableRow, borderColor: colors.border }}>
+              <View
+                style={{
+                  ...styles.headerCell,
+                  borderColor: colors.border,
+                  backgroundColor: colors.primary + 80,
+                }}
+              >
+                <Text style={{ ...styles.headerText, color: colors.text }}>
+                  {key}
                 </Text>
               </View>
-              <View style={{ ...styles.teamCell, borderColor: colors.border }}>
-                <Text style={{ ...styles.cellText, color: colors.text }}>
-                  {team.teamNames[result.teamID]}
+            </View>
+            <View style={{ ...styles.tableRow, borderColor: colors.border }}>
+              <View
+                style={{
+                  ...styles.rankCell,
+                  borderColor: colors.border,
+                  backgroundColor: colors.primary + 80,
+                }}
+              >
+                <Text style={{ ...styles.headerText, color: colors.text }}>
+                  Rank
                 </Text>
               </View>
               <View
-                style={{ ...styles.resultCell, borderColor: colors.border }}
+                style={{
+                  ...styles.teamCell,
+                  borderColor: colors.border,
+                  backgroundColor: colors.primary + 80,
+                }}
               >
-                <Text style={{ ...styles.cellText, color: colors.text }}>
-                  {result.resultValue}
+                <Text style={{ ...styles.headerText, color: colors.text }}>
+                  Team Name
+                </Text>
+              </View>
+              <View
+                style={{
+                  ...styles.resultCell,
+                  borderColor: colors.border,
+                  backgroundColor: colors.primary + 80,
+                }}
+              >
+                <Text style={{ ...styles.headerText, color: colors.text }}>
+                  Result
                 </Text>
               </View>
             </View>
-          ))}
-        </View>
+            {results.map((result, index) => (
+              <View
+                key={index}
+                style={{ ...styles.tableRow, borderColor: colors.border }}
+              >
+                <View
+                  style={{ ...styles.rankCell, borderColor: colors.border }}
+                >
+                  <Text style={{ ...styles.cellText, color: colors.text }}>
+                    {index + 1}
+                  </Text>
+                </View>
+                <View
+                  style={{ ...styles.teamCell, borderColor: colors.border }}
+                >
+                  <Text style={{ ...styles.cellText, color: colors.text }}>
+                    {team.teamNames[result.teamID]}
+                  </Text>
+                </View>
+                <View
+                  style={{ ...styles.resultCell, borderColor: colors.border }}
+                >
+                  <Text style={{ ...styles.cellText, color: colors.text }}>
+                    {result.resultValue}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        ))}
       </View>
     </SafeAreaView>
   );
@@ -143,12 +165,14 @@ const styles = StyleSheet.create({
   tableContainer: {
     padding: 20,
     flex: 1,
+    gap: 20,
   },
   table: {
     borderWidth: 1,
   },
-  tableCell: {
-    borderWidth: 1,
+  headerCell: {
+    flex: 1,
+    alignItems: "center",
   },
   rankCell: {
     flex: 1,

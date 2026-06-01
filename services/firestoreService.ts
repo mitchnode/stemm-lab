@@ -4,7 +4,6 @@ import {
   doc,
   getDoc,
   getDocs,
-  limit,
   orderBy,
   query,
   serverTimestamp,
@@ -113,7 +112,6 @@ export const getTop10ActivityResults = async (activityID: string) => {
       collection(db, "results"),
       where("activityID", "==", activityID),
       orderBy("resultValue"),
-      limit(10),
     ),
   );
   return !results.empty
