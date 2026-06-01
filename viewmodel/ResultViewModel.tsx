@@ -119,4 +119,8 @@ export class ResultViewModel {
       this.resultData = this.result.resultData;
     });
   }
+
+  async handleDelete() {
+    await this.result.removeResult();
+  }
 }
