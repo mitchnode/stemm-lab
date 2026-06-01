@@ -24,8 +24,6 @@ import { CameraView } from "expo-camera";
 
 import Video, { VideoRef } from "react-native-video";
 
-
-
 //imported from record activity 1/////////////////
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -434,7 +432,6 @@ export default observer(function PlaybackResults() {
           </View>
         </>
       )}
-      {/* THIS IS THE PLAYBACK MENU FOR ACTIVITY 1 */}
 
       {(result.activityID === "5" ||
         result.activityID === "4" ||
