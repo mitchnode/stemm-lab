@@ -129,7 +129,7 @@ export default function MeasureDropScreen() {
       const dateTime = new Date().toLocaleString();
       const resultType = "Parachute drop distance";
 
-      const resultValue = `Drop: ${metrics.drop} | Bounce: ${metrics.bounce}`;
+      const resultValue = `Video url`;
 
       // 3. Configure your ViewModel with the local URI and metrics
       result.setTeamID(team.teamID || "local_user");
