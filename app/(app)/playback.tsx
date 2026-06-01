@@ -91,21 +91,24 @@ export default observer(function PlaybackResults() {
           </View>
         </>
       )}
-      {result.activityID === "5" && graphData.length > 0 && (
-        <LineChart
-          data={chartData}
-          width={Dimensions.get("window").width - 32}
-          height={220}
-          chartConfig={{
-            backgroundColor: colors.background,
-            backgroundGradientFrom: colors.background,
-            backgroundGradientTo: colors.surface || colors.background,
-            color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
-            labelColor: (opacity = 1) => colors.text,
-          }}
-          style={styles.chart}
-        />
-      )}
+      {(result.activityID === "5" ||
+        result.activityID === "4" ||
+        result.activityID === "7") &&
+        graphData.length > 0 && (
+          <LineChart
+            data={chartData}
+            width={Dimensions.get("window").width - 32}
+            height={220}
+            chartConfig={{
+              backgroundColor: colors.background,
+              backgroundGradientFrom: colors.background,
+              backgroundGradientTo: colors.surface || colors.background,
+              color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
+              labelColor: (opacity = 1) => colors.text,
+            }}
+            style={styles.chart}
+          />
+        )}
       <View style={styles.resultData}>
         {graphData.map((point, index) => (
           <Text key={index} style={{ color: colors.text }}>

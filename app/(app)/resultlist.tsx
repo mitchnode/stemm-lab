@@ -73,7 +73,7 @@ export default observer(() => {
 
   const isClickable = (res: any) => {
     const id = res.activityID.toString();
-    return ["1", "3", "5"].includes(id);
+    return ["1", "3", "5", "4", "7"].includes(id);
   };
 
   const allowedList = React.useMemo(() => {
