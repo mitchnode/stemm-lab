@@ -105,7 +105,7 @@ export default function AppLayout() {
       {isTeamVisible && (
         <View style={styles.floatingCardContainer}>
           <View style={[styles.box, { backgroundColor: colors.surface }]}>
-            {/* Header with Close Button for better Polish / UX */}
+            {/* Header with Close Button for UI */}
             <View style={styles.cardHeaderRow}>
               <Text
                 style={[
@@ -218,7 +218,7 @@ export default function AppLayout() {
               style={[styles.separator, { backgroundColor: colors.border }]}
             />
 
-            {/* NEW: Navigation Back to Main/Index Screen */}
+            {/* NEW: Navigation Back to Main */}
             <TouchableOpacity
               style={[styles.menuItem, { backgroundColor: colors.background }]}
               onPress={handleNavigateHome}
