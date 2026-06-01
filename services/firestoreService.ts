@@ -28,7 +28,7 @@ export interface Result {
   activityID: string;
   resultDateTime: string;
   resultType: string;
-  resultValue: string;
+  resultValue: number;
   resultData: string;
 }
 
