@@ -88,7 +88,7 @@ export class ResultModel {
         resultString = JSON.stringify(await getResult(resultID));
       }
       if (resultString) {
-        resultJSON = JSON.parse(resultString);
+        resultJSON = await JSON.parse(resultString);
       } else {
         resultJSON = {
           resultID: this.resultID,
@@ -113,7 +113,7 @@ export class ResultModel {
         resultJSON.resultData,
       );
     } catch (error) {
-      console.error("Error loading result:", error);
+      console.error("Error loading result:", error, "resultID:", resultID);
     }
   };
 }

@@ -1,14 +1,14 @@
 import {
-    addDoc,
-    collection,
-    doc,
-    getDoc,
-    getDocs,
-    query,
-    serverTimestamp,
-    setDoc,
-    updateDoc,
-    where,
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -39,6 +39,7 @@ export const debug = async (tag: String, str: String) => {
     const docRef = await addDoc(collection(db, "Debug"), {
       Tag: tag + "No. " + n.toString(),
       Str: str,
+      Date: new Date().toLocaleString(),
     });
   } catch (e) {
     console.error();

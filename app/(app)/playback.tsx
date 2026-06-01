@@ -61,8 +61,14 @@ export default observer(function PlaybackResults() {
       restoredResults();
     }
   }, []);
+
   if (loading) {
-    return <ActivityIndicator size="large" style={{ flex: 1 }} />;
+    return (
+      <ActivityIndicator
+        size="large"
+        style={{ flex: 1, backgroundColor: colors.background }}
+      />
+    );
   }
 
   return (
@@ -103,16 +109,13 @@ export default observer(function PlaybackResults() {
             style={styles.chart}
           />
         )}
-      <View style={{ marginTop: 20 }}>
+      <View style={styles.resultData}>
         {graphData.map((point, index) => (
           <Text key={index} style={{ color: colors.text }}>
             Point {index + 1}: {point.magnitude} mm/s² (Time: {point.timestamp})
           </Text>
         ))}
       </View>
-      <Text style={{ ...styles.text, color: colors.text }}>
-        No Result Found!
-      </Text>
     </View>
   );
 });
@@ -122,6 +125,7 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 20,
     marginBottom: 20,
+    alignItems: "center",
   },
   video: {
     flex: 1,
@@ -129,6 +133,7 @@ const styles = StyleSheet.create({
   results: {
     flexDirection: "row",
     justifyContent: "space-around",
+    gap: 50,
   },
   text: {
     flex: 1,
@@ -138,5 +143,8 @@ const styles = StyleSheet.create({
   chart: {
     marginVertical: 8,
     borderRadius: 16,
+  },
+  resultData: {
+    marginTop: 20,
   },
 });

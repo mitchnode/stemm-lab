@@ -27,19 +27,26 @@ export default observer(() => {
   console.log("Current Activity Filter:", activity);
   const router = useRouter();
   const { colors } = useTheme();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Load the data into the resultList
   const loadResults = async () => {
-    setLoading(true);
-    if (user) await team.handleRestore(user.uid);
-    await resultList.handleRestore(team.teamID);
-    await resultList.handlePopulate();
-
-    console.log(
-      "Full Result List Data:",
-      JSON.stringify(resultList.populatedList, null, 2),
-    );
+    //setLoading(true);
+    try {
+      if (user) await team.handleRestore(user.uid);
+      if (team) {
+        await resultList.handleRestore(team.teamID);
+        await resultList.handlePopulate();
+        console.log(
+          "Full Result List Data:",
+          JSON.stringify(resultList.populatedList, null, 2),
+        );
+      }
+    } catch (error) {
+      console.error("Could not load result:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Video Icon component
@@ -62,16 +69,7 @@ export default observer(() => {
 
   useEffect(() => {
     loadResults();
-    setLoading(false);
   }, []);
-
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center" }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
 
   const isClickable = (res: any) => {
     const id = res.activityID.toString();
@@ -86,16 +84,24 @@ export default observer(() => {
   //debugging command
   useEffect(() => {
     console.log("Current Filter List:", allowedList);
-  }, [allowedList]);
+  }, []);
+
+  if (loading) {
+    return (
+      <ActivityIndicator
+        size="large"
+        style={{ flex: 1, backgroundColor: colors.background }}
+      />
+    );
+  }
 
   return (
-    <ScrollView>
-      <View style={{ ...styles.screen, backgroundColor: colors.background }}>
+    <View style={{ ...styles.screen, backgroundColor: colors.background }}>
+      <ScrollView>
         <Text style={{ ...styles.heading, color: colors.text }}>Results</Text>
         {resultList.populatedList.map((result, index) => {
           // We check if the result's ID is in allowed list
           const isinList = allowedList.includes(result.activityID.toString());
-
           return (
             isinList && (
               <View
@@ -175,8 +181,8 @@ export default observer(() => {
             )
           );
         })}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 });
 

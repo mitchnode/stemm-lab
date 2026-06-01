@@ -335,6 +335,17 @@ export default function ActivityDetail() {
       </Tab.Navigator>
 
       <TouchableOpacity
+        style={styles.list}
+        onPress={() => {
+          router.push({
+            pathname: "/(app)/resultlist",
+            params: { activity: activity.id },
+          }); // Pass activity number to filter result list
+        }}
+      >
+        <MaterialIcons name="list" size={30} color="#fff" />
+      </TouchableOpacity>
+      <TouchableOpacity
         style={styles.fab}
         onPress={() => {
           router.push(`./record/recordactivity${activity.id}`);
@@ -430,6 +441,22 @@ const styles = StyleSheet.create({
     right: 20,
     bottom: 20,
     backgroundColor: "#2196F3",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 6,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 3 },
+  },
+  list: {
+    position: "absolute",
+    left: 20,
+    bottom: 20,
+    backgroundColor: "#179742",
     width: 56,
     height: 56,
     borderRadius: 28,
