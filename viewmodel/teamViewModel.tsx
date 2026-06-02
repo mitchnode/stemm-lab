@@ -8,6 +8,7 @@ export class TeamViewModel {
   teamName: string = "";
   year: string = "";
   members: string[] = [];
+  teamNames: { [key: string]: string } = {};
 
   // Set the maximum members that are allowed in a team
   MAX_MEMBERS = 5;
@@ -83,5 +84,10 @@ export class TeamViewModel {
       this.year = this.team.year;
       this.members = this.team.members;
     });
+  }
+
+  async handleTeamNames() {
+    await this.team.loadAllTeamNames();
+    this.teamNames = this.team.teamNames;
   }
 }

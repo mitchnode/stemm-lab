@@ -11,7 +11,7 @@ export class ResultModel {
   activityID = "";
   resultDateTime = "";
   resultType = "";
-  resultValue = "";
+  resultValue = 0;
   resultData = "";
 
   constructor() {
@@ -25,7 +25,7 @@ export class ResultModel {
     activityID: string,
     resultDateTime: string,
     resultType: string,
-    resultValue: string,
+    resultValue: number,
     resultData: string,
   ) {
     this.resultID = resultID;

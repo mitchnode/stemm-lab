@@ -8,7 +8,7 @@ export class ResultViewModel {
   activityID = "";
   resultDateTime = "";
   resultType = "";
-  resultValue = "";
+  resultValue = 0;
   resultData = "";
 
   constructor() {
@@ -36,8 +36,8 @@ export class ResultViewModel {
     this.resultType = resultType;
   }
 
-  setResultValue(resultValue: string) {
-    this.resultValue = resultValue;
+  setResultValue(resultValue: number | string) {
+    this.resultValue = Number(resultValue);
   }
 
   setResultData(resultData: string) {
