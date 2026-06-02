@@ -25,7 +25,6 @@ export default function AppLayout() {
   const { width: SCREEN_WIDTH } = Dimensions.get("window");
   const DRAWER_WIDTH = SCREEN_WIDTH * 0.75;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [ChangeTeam, setChangeTeam] = useState(false);
 
   // Call to log out the user
   async function handleLogout() {
@@ -95,7 +94,7 @@ export default function AppLayout() {
               accessibilityLabel="Open sidebar menu"
               style={{ paddingHorizontal: 4 }}
             >
-              <Ionicons name="menu" size={26} color={colors.text} />
+              <Ionicons name="menu" size={26} color={colors.light} />
             </Pressable>
           ),
         }}
@@ -314,7 +313,7 @@ export default function AppLayout() {
               accessibilityHint={`Logs out and returns to the login screen`}
             >
               <Ionicons
-                name={"person"}
+                name={"log-out-outline"}
                 size={22}
                 color={colors.text}
                 style={styles.itemIcon}
