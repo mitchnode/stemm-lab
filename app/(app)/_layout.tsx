@@ -56,7 +56,7 @@ export default function AppLayout() {
     if (isMenuOpen) {
       // Close side-drawer
       Animated.timing(slideAnim, {
-        toValue: -DRAWER_WIDTH,
+        toValue: DRAWER_WIDTH,
         duration: 250,
         useNativeDriver: true,
       }).start(() => setIsMenuOpen(false));
@@ -64,7 +64,7 @@ export default function AppLayout() {
       // Open side-drawer
       setIsMenuOpen(true);
       Animated.timing(slideAnim, {
-        toValue: 0,
+        toValue: 150,
         duration: 300,
         useNativeDriver: true,
       }).start();
@@ -88,7 +88,7 @@ export default function AppLayout() {
           headerTitle: "STEMM Labs Games",
           headerTitleAlign: "center",
           headerTitleStyle: { fontWeight: "700", fontSize: 18 },
-          headerLeft: () => (
+          headerRight: () => (
             <Pressable
               onPress={toggleMenu}
               accessibilityRole="button"
@@ -237,7 +237,7 @@ export default function AppLayout() {
               </Text>
             </TouchableOpacity>
 
-            {/*  View eam Interactive Node */}
+            {/*  View Team Interactive Node */}
             <TouchableOpacity
               style={[styles.menuItem, { backgroundColor: colors.background }]}
               onPress={async () => {
@@ -264,6 +264,26 @@ export default function AppLayout() {
                 {isTeamVisible ? "Hide Team Info" : "View Team Info"}
               </Text>
             </TouchableOpacity>
+            {/* Change Team */}
+            <TouchableOpacity
+              style={[styles.menuItem, { backgroundColor: colors.background }]}
+              onPress={() => {
+                router.push("/(app)/team");
+                toggleMenu();
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="Change your team details"
+            >
+              <Ionicons
+                name="people-outline"
+                size={22}
+                color={colors.text}
+                style={styles.itemIcon}
+              />
+              <Text style={[styles.menuItemText, { color: colors.text }]}>
+                Change Team
+              </Text>
+            </TouchableOpacity>
 
             {/* Toggle Theme Interactive Node */}
             <TouchableOpacity
@@ -281,6 +301,26 @@ export default function AppLayout() {
               />
               <Text style={[styles.menuItemText, { color: colors.text }]}>
                 {isDark ? "Light Theme" : "Dark Theme"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.menuItem, { backgroundColor: colors.background }]}
+              onPress={() => {
+                handleLogout();
+                toggleMenu();
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="Logs out of the app"
+              accessibilityHint={`Logs out and returns to the login screen`}
+            >
+              <Ionicons
+                name={"person"}
+                size={22}
+                color={colors.text}
+                style={styles.itemIcon}
+              />
+              <Text style={[styles.menuItemText, { color: colors.text }]}>
+                Logout
               </Text>
             </TouchableOpacity>
           </Animated.View>

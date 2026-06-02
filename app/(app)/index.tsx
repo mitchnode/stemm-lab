@@ -1,19 +1,25 @@
-import { useAuth } from "@/context/authContext";
 import { useTheme } from "@/theme";
-import { TeamViewModel } from "@/viewmodel/teamViewModel";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, useRouter } from "expo-router";
-import { Button, Text } from "re-native-ui";
-import { useEffect } from "react";
-import { ActivityIndicator, Alert, StyleSheet, View } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+
+import { ALL_LABS } from "@/labsData.js";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { ScrollView, StyleSheet, View } from "react-native";
+
+import { useAuth } from "@/context/authContext";
+import { TeamViewModel } from "@/viewmodel/teamViewModel";
+import {
+  Button,
+  Text,
+  useTheme as useRETheme
+} from "re-native-ui";
 
 const team = new TeamViewModel();
 
-export default function Index() {
-  const { user } = useAuth();
-  const navigation = useNavigation();
+export default function activities({}) {
   const router = useRouter();
+  const navigation = useNavigation();
+  const { colors, setScheme, isDark } = useTheme();
 
   useEffect(() => {
     const listener = navigation.addListener("beforeRemove", (e) => {
@@ -28,113 +34,132 @@ export default function Index() {
     };
   }, []);
 
-  const { colors, setScheme, isDark } = useTheme();
-  const changeTheme = () => {
-    isDark ? setScheme("light") : setScheme("dark");
-    // Reapply theme color to header *** Not needed at the moment due to heade being the same color for both themes***
-    /* navigation.setOptions({
-      headerStyle: { backgroundColor: colors.header },
-    }); */
-  };
+  const [isVisible, setIsVisible] = useState(false);
+
+  const [ChangeTeam, setChangeTeam] = useState(false);
+  const { user } = useAuth();
 
   const loadTeam = async () => {
     if (user) await team.handleRestore(user.uid);
   };
 
-  const clearTeam = async () => {
-    try {
-      await AsyncStorage.removeItem("team", () => router.push("/team"));
-    } catch (error) {
-      console.error("Error clearing team:", error);
-    }
+  const changeTheme = () => {
+    isDark ? setScheme("light") : setScheme("dark");
   };
 
-  const clearAll = async () => {
-    try {
-      const keys = await AsyncStorage.getAllKeys();
-      if (keys.length > 0) {
-        Alert.alert(
-          "Clear all Keys",
-          "Are you sure you would like to clear all local storage keys?",
-          [
-            {
-              text: "Yes",
-              style: "destructive",
-              onPress: async () => {
-                await AsyncStorage.multiRemove(keys, () =>
-                  router.push("/team"),
-                );
-              },
-            },
-            { text: "No", style: "cancel" },
-          ],
-        );
-      } else {
-        Alert.alert("No Keys", "No keys found!");
-      }
-    } catch (error) {
-      console.error("Error clearing team:", error);
-    }
-  };
+  const theme = useRETheme();
+  theme.colors.background = colors.background;
+  theme.colors.primary = colors.primary;
+  theme.colors.text = colors.text;
+  theme.colors.border = colors.border;
+
+  const { control, handleSubmit } = useForm<any>({
+    defaultValues: { team_name: "", year: "", members: [] },
+  });
 
   useEffect(() => {
     loadTeam();
   }, []);
 
-  if (!user) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center" }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
-
   return (
-    <SafeAreaProvider>
-      <SafeAreaView
-        style={{ ...styles.container, backgroundColor: colors.background }}
-      >
-        <Text style={{ color: colors.text }}>Welcome {team.teamName}</Text>
-        <Button onPress={clearTeam}>Clear Team</Button>
-        <Button onPress={clearAll}>Clear All</Button>
-        <Button
-          onPress={() => {
-            router.push("/(app)/team-view");
-          }}
-        >
-          View Team
-        </Button>
-
-        <Button
-          onPress={() => {
-            router.push("/activities_selection");
-          }}
-        >
-          Activities{" "}
-        </Button>
-        <Button onPress={changeTheme}>Switch theme</Button>
-        {/* Switch theme button is just for testing, remove once setup in the menu. */}
-        <Button
-          onPress={() => {
-            const activityArray = ["1", "2", "3", "4", "5", "6", "7"];
-            router.push({
-              pathname: "/(app)/resultlist",
-              params: { activity: activityArray.join(",") },
-            }); // Pass activity number to filter result list
-          }}
-        >
-          Result List
-        </Button>
-      </SafeAreaView>
-    </SafeAreaProvider>
+    <ScrollView
+      style={{ backgroundColor: colors.background }}
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 60 }}
+    >
+      <View style={{ ...styles.screen, backgroundColor: colors.background }}>
+        <Text style={{ ...styles.heading, color: colors.text }}>
+          Activities
+        </Text>
+        <View style={styles.info}>
+          {/* Activities Selection Box */}
+          <View style={[styles.box, { backgroundColor: colors.surface }]}>
+            <View
+              style={{
+                flexDirection: "row",
+                flexWrap: "wrap",
+                rowGap: 15,
+                columnGap: 20,
+                justifyContent: "center",
+              }}
+            >
+              {/* Dynamic Loop through labsData registry mapping keys automatically */}
+              {Object.keys(ALL_LABS).map((labKey) => {
+                const lab = ALL_LABS[labKey as keyof typeof ALL_LABS];
+                return (
+                  <Button
+                    key={lab.id}
+                    onPress={() => {
+                      router.push({
+                        pathname: "/activity_detail",
+                        params: { id: lab.id },
+                      });
+                    }}
+                  >
+                    <Text style={{ color: "#fff" }}>{lab.title}</Text>
+                  </Button>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    justifyContent: "center",
+    flexDirection: "column",
+    justifyContent: "flex-start",
     alignItems: "center",
-    gap: 10,
+  },
+  box: {
+    justifyContent: "center",
+    alignItems: "stretch",
+    borderWidth: 2,
+    borderRadius: 20,
+    padding: 20,
+    width: "95%",
+    minWidth: 400,
+  },
+  box2: {
+    justifyContent: "center",
+    alignItems: "stretch",
+    borderWidth: 2,
+    borderRadius: 5,
+    padding: 5,
+
+    minWidth: 400,
+  },
+  heading: {
+    padding: 20,
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  info: {
+    gap: 40,
+  },
+  row: {
+    flexDirection: "row",
+    gap: 20,
+    justifyContent: "space-between",
+  },
+  input: {
+    flex: 1,
+    marginBottom: 0,
+  },
+  large_font: {
+    fontSize: 20,
+  },
+  bold_text: {
+    fontWeight: "bold",
+    fontSize: 20,
+  },
+  members: {
+    gap: 5,
+  },
+  members_text: {
+    textAlign: "right",
   },
 });
