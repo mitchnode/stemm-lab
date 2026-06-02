@@ -4,6 +4,7 @@ import { ResultListViewModel } from "@/viewmodel/ResultListViewModel";
 import { TeamViewModel } from "@/viewmodel/teamViewModel";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { LocationObject, LocationObjectCoords } from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
@@ -99,6 +100,13 @@ export default observer(() => {
     if (typeof activity === "string") return activity.split(","); // If it arrives as a string
     return []; // Default fallback
   }, [activity]);
+
+  const getLocation = (resultLocation: string): LocationObjectCoords | null => {
+    if (!resultLocation) return null;
+    const location: LocationObject = JSON.parse(resultLocation);
+    return location.coords;
+  };
+
   //debugging command
   useEffect(() => {
     console.log("Current Filter List:", allowedList);
@@ -128,7 +136,6 @@ export default observer(() => {
               >
                 <Pressable
                   style={styles.button}
-                  disabled={!isClickable(result)}
                   onPress={() => {
                     router.push({
                       pathname: "/playback",
@@ -171,7 +178,27 @@ export default observer(() => {
                       <Text
                         style={{ ...styles.large_font, color: colors.text }}
                       >
-                        {result.resultDateTime}
+                        {new Date(result.resultDateTime).toLocaleString()}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={{ ...styles.bold_text, color: colors.text }}>
+                        Longitude:
+                      </Text>
+                      <Text
+                        style={{ ...styles.large_font, color: colors.text }}
+                      >
+                        {getLocation(result.resultLocation)?.longitude}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={{ ...styles.bold_text, color: colors.text }}>
+                        Latitude:
+                      </Text>
+                      <Text
+                        style={{ ...styles.large_font, color: colors.text }}
+                      >
+                        {getLocation(result.resultLocation)?.latitude}
                       </Text>
                     </View>
                     <View style={styles.row}>

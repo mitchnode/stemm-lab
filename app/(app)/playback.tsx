@@ -22,6 +22,8 @@ import { LineChart } from "react-native-chart-kit";
 import Slider from "@react-native-community/slider";
 import { CameraView } from "expo-camera";
 
+import { LocationObject } from "expo-location";
+import MapView, { LatLng, Marker } from "react-native-maps";
 import Video, { VideoRef } from "react-native-video";
 
 //imported from record activity 1/////////////////
@@ -62,6 +64,11 @@ export default observer(function PlaybackResults() {
   const cameraRef = useRef<CameraView>(null);
   const videoRef = useRef<VideoRef>(null);
 
+  const [location, setLocation] = useState<LatLng>({
+    latitude: 0,
+    longitude: 0,
+  });
+
   // Selection mode tracker
   const [activeMode, setActiveMode] = useState<
     "RULER_TOP" | "RULER_BOTTOM" | "CHUTE_START" | "CHUTE_END" | "CHUTE_BOUNCE"
@@ -87,6 +94,13 @@ export default observer(function PlaybackResults() {
     try {
       await result.handleRestore(resultID.toString());
 
+      if (result.resultLocation) {
+        const resLoc: LocationObject = JSON.parse(result.resultLocation);
+        setLocation({
+          latitude: resLoc.coords.latitude,
+          longitude: resLoc.coords.longitude,
+        });
+      }
       console.log("Raw resultData from DB:", result.resultData);
 
       if (result.resultData) {
@@ -429,9 +443,10 @@ export default observer(function PlaybackResults() {
         <>
           {videoUri && <VideoView player={videoPlayer} style={styles.video} />}
           {imageUri && <Image source={imageUri} style={styles.image} />}
-          <View style={styles.resultData}>
-            {audioUri &&
-              (!audioPlayerStatus.playing ? (
+
+          {audioUri && (
+            <View style={styles.resultData}>
+              {!audioPlayerStatus.playing ? (
                 <TouchableOpacity onPress={() => audioPlayer.play()}>
                   <Ionicons
                     name="play"
@@ -447,43 +462,59 @@ export default observer(function PlaybackResults() {
                     color={colors.textSecondary}
                   />
                 </TouchableOpacity>
-              ))}
-          </View>
+              )}
+            </View>
+          )}
+
+          {(result.activityID === "5" ||
+            result.activityID === "4" ||
+            result.activityID === "7") &&
+            graphData.length > 0 && (
+              <ScrollView>
+                <View style={styles.graph}>
+                  <LineChart
+                    data={chartData}
+                    width={Dimensions.get("window").width - 32}
+                    height={220}
+                    chartConfig={{
+                      backgroundColor: colors.background,
+                      backgroundGradientFrom: colors.background,
+                      backgroundGradientTo: colors.surface || colors.background,
+                      color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
+                      labelColor: (opacity = 1) => colors.text,
+                    }}
+                    style={styles.chart}
+                  />
+                  <View style={styles.resultData}>
+                    {graphData.map((point, index) => (
+                      <Text key={index} style={{ color: colors.text }}>
+                        Point {index + 1}: {point.magnitude} mm/s² (Time:{" "}
+                        {point.timestamp})
+                      </Text>
+                    ))}
+                  </View>
+                </View>
+              </ScrollView>
+            )}
+
           <View style={styles.results}>
             <Text style={{ color: colors.text }}>{result.resultType}</Text>
             <Text style={{ color: colors.text }}>{result.resultValue}</Text>
           </View>
+          <MapView
+            style={styles.map}
+            camera={{
+              center: location,
+              pitch: 0,
+              heading: 0,
+              altitude: 18,
+              zoom: 18,
+            }}
+          >
+            <Marker coordinate={location} />
+          </MapView>
         </>
       )}
-
-      {(result.activityID === "5" ||
-        result.activityID === "4" ||
-        result.activityID === "7") &&
-        graphData.length > 0 && (
-          <LineChart
-            data={chartData}
-            width={Dimensions.get("window").width - 32}
-            height={220}
-            chartConfig={{
-              backgroundColor: colors.background,
-              backgroundGradientFrom: colors.background,
-              backgroundGradientTo: colors.surface || colors.background,
-              color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
-              labelColor: (opacity = 1) => colors.text,
-            }}
-            style={styles.chart}
-          />
-        )}
-      <ScrollView>
-        <View style={styles.resultData}>
-          {graphData.map((point, index) => (
-            <Text key={index} style={{ color: colors.text }}>
-              Point {index + 1}: {point.magnitude} mm/s² (Time:{" "}
-              {point.timestamp})
-            </Text>
-          ))}
-        </View>
-      </ScrollView>
     </View>
   );
 });
@@ -501,13 +532,18 @@ const styles = StyleSheet.create({
     height: "60%",
     width: "100%",
   },
+  map: {
+    width: "90%",
+    height: "30%",
+  },
+  graph: {
+    alignItems: "center",
+  },
   results: {
     flexDirection: "row",
-    justifyContent: "space-around",
     gap: 50,
   },
   text: {
-    flex: 1,
     textAlign: "center",
     textAlignVertical: "center",
   },
@@ -518,8 +554,7 @@ const styles = StyleSheet.create({
   resultData: {
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 20,
-    padding: 20,
+    marginTop: 10,
   },
 
   ////////// STYLES FOR ACTIVITY 1 MOVED FROM RECORDACTIVITY 1////////

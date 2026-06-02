@@ -63,7 +63,13 @@
         }
       ],
       "expo-asset",
-      "react-native-video"
+      "react-native-video",
+      [
+        "expo-location",
+        {
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
