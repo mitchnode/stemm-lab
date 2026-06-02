@@ -2,24 +2,19 @@ import { useTheme } from "@/theme";
 import { useNavigation, useRouter } from "expo-router";
 
 import { ALL_LABS } from "@/labsData.js";
-import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { ScrollView, StyleSheet, View } from "react-native";
+import React, { useEffect } from "react";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 
 import { useAuth } from "@/context/authContext";
 import { TeamViewModel } from "@/viewmodel/teamViewModel";
-import {
-  Button,
-  Text,
-  useTheme as useRETheme
-} from "re-native-ui";
+import { Text, useTheme as useRETheme } from "re-native-ui";
 
 const team = new TeamViewModel();
 
 export default function activities({}) {
   const router = useRouter();
   const navigation = useNavigation();
-  const { colors, setScheme, isDark } = useTheme();
+  const { colors } = useTheme();
 
   useEffect(() => {
     const listener = navigation.addListener("beforeRemove", (e) => {
@@ -34,17 +29,11 @@ export default function activities({}) {
     };
   }, []);
 
-  const [isVisible, setIsVisible] = useState(false);
-
-  const [ChangeTeam, setChangeTeam] = useState(false);
   const { user } = useAuth();
 
   const loadTeam = async () => {
     if (user) await team.handleRestore(user.uid);
-  };
-
-  const changeTheme = () => {
-    isDark ? setScheme("light") : setScheme("dark");
+    if (!team) router.push("/(app)/team");
   };
 
   const theme = useRETheme();
@@ -52,10 +41,6 @@ export default function activities({}) {
   theme.colors.primary = colors.primary;
   theme.colors.text = colors.text;
   theme.colors.border = colors.border;
-
-  const { control, handleSubmit } = useForm<any>({
-    defaultValues: { team_name: "", year: "", members: [] },
-  });
 
   useEffect(() => {
     loadTeam();
@@ -80,13 +65,18 @@ export default function activities({}) {
                 rowGap: 15,
                 columnGap: 20,
                 justifyContent: "center",
+                alignItems: "stretch",
               }}
             >
               {/* Dynamic Loop through labsData registry mapping keys automatically */}
               {Object.keys(ALL_LABS).map((labKey) => {
                 const lab = ALL_LABS[labKey as keyof typeof ALL_LABS];
                 return (
-                  <Button
+                  <Pressable
+                    style={{
+                      ...styles.button,
+                      backgroundColor: colors.primary,
+                    }}
                     key={lab.id}
                     onPress={() => {
                       router.push({
@@ -96,7 +86,7 @@ export default function activities({}) {
                     }}
                   >
                     <Text style={{ color: "#fff" }}>{lab.title}</Text>
-                  </Button>
+                  </Pressable>
                 );
               })}
             </View>
@@ -140,26 +130,10 @@ const styles = StyleSheet.create({
   info: {
     gap: 40,
   },
-  row: {
-    flexDirection: "row",
-    gap: 20,
-    justifyContent: "space-between",
-  },
-  input: {
-    flex: 1,
-    marginBottom: 0,
-  },
-  large_font: {
-    fontSize: 20,
-  },
-  bold_text: {
-    fontWeight: "bold",
-    fontSize: 20,
-  },
-  members: {
-    gap: 5,
-  },
-  members_text: {
-    textAlign: "right",
+  button: {
+    padding: 20,
+    borderRadius: 10,
+    width: "100%",
+    alignItems: "center",
   },
 });
