@@ -17,7 +17,12 @@ export default function RecordActivity6() {
 
   return (
     <View style={{ ...styles.container, backgroundColor: colors.background }}>
-      <Text style={{ ...styles.title, color: colors.text }}>Select a task</Text>
+      <Text
+        style={{ ...styles.title, color: colors.text }}
+        accessibilityRole="header"
+      >
+        Select a task
+      </Text>
       <View style={{ ...styles.buttonRow, borderColor: colors.text }}>
         <TouchableOpacity
           style={{
@@ -25,6 +30,10 @@ export default function RecordActivity6() {
             backgroundColor: colors.primary,
           }}
           onPress={() => router.push("/(app)/record/recordactivity6_1")}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Reaction Timer"
+          accessibilityHint="Navigates to the reaction timer test screen"
         >
           <Text style={{ ...styles.buttonText }}>Reaction Timer</Text>
         </TouchableOpacity>
@@ -34,6 +43,10 @@ export default function RecordActivity6() {
             backgroundColor: colors.primary,
           }}
           onPress={() => router.push("/(app)/record/recordactivity6_2")}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Path Tracing"
+          accessibilityHint="Navigates to the path tracing coordination screen"
         >
           <Text style={{ ...styles.buttonText }}>Path Tracing</Text>
         </TouchableOpacity>

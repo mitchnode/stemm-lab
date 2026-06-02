@@ -44,8 +44,24 @@ const RecordActivity2 = observer(() => {
   // <---------------------------------------------------------------- Add other required functions for updating the View
   if (hasAudioPermission === false) {
     return (
-      <View style={{ flex: 1, justifyContent: "center" }}>
+      <View
+        style={{ flex: 1, justifyContent: "center" }}
+        accessible={true}
+        accessibilityRole="alert"
+        accessibilityLiveRegion="assertive"
+      >
         <Text>Microphone permission denied.</Text>
+        <Text
+          style={{
+            color: "#666",
+            marginTop: 8,
+            textAlign: "center",
+            paddingHorizontal: 20,
+          }}
+        >
+          Please enable microphone access in your system settings to measure
+          experiment decibel levels.
+        </Text>
       </View>
     );
   }
@@ -121,7 +137,11 @@ const RecordActivity2 = observer(() => {
   return (
     <View style={{ ...styles.container, backgroundColor: colors.background }}>
       {/* <--------------------------------------------------------------------------------------------Modify to suit sensor display */}
-      <View style={styles.sensor}>
+      <View
+        style={styles.sensor}
+        importantForAccessibility="no-hide-descendants"
+        pointerEvents="none"
+      >
         <Animated.View
           style={[
             { ...styles.box, backgroundColor: colors.secondary },
@@ -131,15 +151,35 @@ const RecordActivity2 = observer(() => {
       </View>
 
       {isSoundRecording ? (
-        <View style={styles.data}>
-          <Text style={{ ...styles.text, color: colors.text }}>Recording</Text>
-          <Text style={{ ...styles.text, color: colors.text }}>
+        <View
+          style={styles.data}
+          accessible={true}
+          accessibilityRole="summary"
+          accessibilityLiveRegion="polite"
+          accessibilityLabel={`Sound recording. Current intensity: ${realdb?.toFixed(1) || 0} decibels. Peak register: ${maxdb.toFixed(1)} decibels.`}
+        >
+          <Text
+            style={{ ...styles.text, color: colors.text }}
+            importantForAccessibility="no"
+          >
+            Recording
+          </Text>
+          <Text
+            style={{ ...styles.text, color: colors.text }}
+            importantForAccessibility="no"
+          >
             dB: {realdb!.toFixed(2)}
           </Text>
-          <Text style={{ ...styles.text, color: colors.text }}>
+          <Text
+            style={{ ...styles.text, color: colors.text }}
+            importantForAccessibility="no"
+          >
             Max dB: {maxdb.toFixed(2)}
           </Text>
-          <Text style={{ ...styles.text, color: colors.text }}>
+          <Text
+            style={{ ...styles.text, color: colors.text }}
+            importantForAccessibility="no"
+          >
             Percent: {percent}
           </Text>
         </View>
@@ -148,12 +188,18 @@ const RecordActivity2 = observer(() => {
       )}
 
       {isSoundRecording && (
-        <View style={{ ...styles.record, backgroundColor: "red" }} />
+        <View
+          style={{ ...styles.record, backgroundColor: "red" }}
+          importantForAccessibility="no"
+        />
       )}
 
       {/* <^--------------------^---------------------^--------------------------------^----------------------------^------------------------^ */}
       <View style={styles.buttonRow}>
-        <View style={styles.buttonContainer}>
+        <View
+          style={styles.buttonContainer}
+          importantForAccessibility="no-hide-descendants"
+        >
           <TouchableOpacity
             style={{
               ...styles.button,
@@ -162,6 +208,19 @@ const RecordActivity2 = observer(() => {
               borderRadius: recButtonShape,
             }}
             onPress={toggleRecord}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityState={{ selected: isSoundRecording }}
+            accessibilityLabel={
+              isSoundRecording
+                ? "Stop decibel sound level collection"
+                : "Start sound sensor recording"
+            }
+            accessibilityHint={
+              isSoundRecording
+                ? "Stops ongoing data tracking and builds report results"
+                : "Clears cache tracking indices and starts recording"
+            }
           >
             <Text style={styles.text}>{btnName}</Text>
           </TouchableOpacity>
