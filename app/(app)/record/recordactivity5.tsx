@@ -164,16 +164,15 @@ export default function RecordActivity5() {
   }, []);
 
   useEffect(() => {
-    isActiveRef.current = isActive; // Keep the ref in sync with the state
+    isActiveRef.current = isActive;
   }, [isActive]);
 
   const handleToggleRecording = async (forcedPoints?: DataPoint[]) => {
     if (isActive) {
       setIsActive(false);
-      // STOPPING
+
       console.log("DEBUG: Current TeamID is:", team.teamID);
 
-      // Use the ref for the alert/upload
       const points = forcedPoints || dataPointsRef.current;
       if (points.length === 0) return;
 
@@ -251,18 +250,20 @@ export default function RecordActivity5() {
           const nextSecond = prev + 1;
 
           const currentAcc = accLiveRef.current;
-          const magnitude = parseFloat(
-            (
-              Math.sqrt(
-                currentAcc.x ** 2 + currentAcc.y ** 2 + currentAcc.z ** 2,
-              ) * 9806.65
-            ).toFixed(2),
+          const totalAcc = Math.sqrt(
+            currentAcc.x ** 2 + currentAcc.y ** 2 + currentAcc.z ** 2,
           );
 
-          if (isFinite(magnitude)) {
-            const newPoint = { timestamp: Date.now(), magnitude };
+          const magnitude = Math.max(0, (totalAcc - 1) * 9806.65);
+
+          const roundedMagnitude = parseFloat(magnitude.toFixed(2));
+          if (isFinite(roundedMagnitude)) {
+            const newPoint = {
+              timestamp: Date.now(),
+              magnitude: roundedMagnitude,
+            };
             dataPointsRef.current = [...dataPointsRef.current, newPoint];
-            setChartPoints([...dataPointsRef.current]); // Update chart
+            setChartPoints([...dataPointsRef.current]);
           }
           if (nextSecond >= targetSeconds) {
             clearInterval(timerRef.current!);
