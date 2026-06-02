@@ -211,7 +211,7 @@ export default function RecordActivity5() {
               const stringifiedData = JSON.stringify(points);
               result.setTeamID(team.teamID);
               result.setActivityID(ACTIVITY_ID);
-              const resultType = "mm/s2"; // <---------------------------------------------------- Modifiy resultType to suit sensor
+              const resultType = "Vibration (mm/s2)"; // <---------------------------------------------------- Modifiy resultType to suit sensor
               const resultValue =
                 points.length > 0 ? points[points.length - 1].magnitude : 0; // <------------------------------------------- Modify resultValue
               result.setTeamID(team.teamID);
