@@ -6,16 +6,39 @@ import { Image } from "expo-image";
 import { useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { observer } from "mobx-react-lite";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
+  GestureResponderEvent,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
+
+import Slider from "@react-native-community/slider";
+import { CameraView } from "expo-camera";
+
+import Video, { VideoRef } from "react-native-video";
+
+//imported from record activity 1/////////////////
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+const colors2 = {
+  background: "#121212",
+  text: "#FFFFFF",
+  primary: "#2196F3",
+  success: "#4CAF50",
+  accent: "#FF9800",
+};
+
+interface Coordinate {
+  x: number;
+  y: number;
+}
 
 export default observer(function PlaybackResults() {
   const { resultID } = useLocalSearchParams();
@@ -28,6 +51,32 @@ export default observer(function PlaybackResults() {
   const videoPlayer = useVideoPlayer(videoUri || "");
   const audioPlayer = useAudioPlayer(audioUri || "");
   const audioPlayerStatus = useAudioPlayerStatus(audioPlayer);
+
+  /////***** ACTIVITY 1 HOOKS */
+  // Video Playback States
+
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isPaused, setIsPaused] = useState(true);
+
+  const cameraRef = useRef<CameraView>(null);
+  const videoRef = useRef<VideoRef>(null);
+
+  // Selection mode tracker
+  const [activeMode, setActiveMode] = useState<
+    "RULER_TOP" | "RULER_BOTTOM" | "CHUTE_START" | "CHUTE_END" | "CHUTE_BOUNCE"
+  >("RULER_TOP");
+  const PHYSICAL_RULER_CM = 30; // Your reference physical ruler size
+  const [chuteStartTime, setChuteStartTime] = useState<number | null>(null);
+  const [chuteEndTime, setChuteEndTime] = useState<number | null>(null);
+  // Measurement States
+  const [rulerTop, setRulerTop] = useState<Coordinate | null>(null);
+  const [rulerBottom, setRulerBottom] = useState<Coordinate | null>(null);
+  const [chuteStart, setChuteStart] = useState<Coordinate | null>(null);
+  const [chuteEnd, setChuteEnd] = useState<Coordinate | null>(null);
+  const [bounce, setBounce] = useState<Coordinate | null>(null);
+
+  ///// END OF ACTIVITY 1 HOOKS /////////////////////////
 
   const loadImage = async (data: string) => {
     setImageUri(data);
@@ -95,12 +144,277 @@ export default observer(function PlaybackResults() {
     };
   }, []);
 
+  ///////////// ************ ACTIVITY 1 LOGIC *****************///////////////////
+  // this is the coordinates pin and measurement logic for activitiy 1 playback //
+
+  const handleVideoTap = (event: GestureResponderEvent) => {
+    const { locationX, locationY } = event.nativeEvent;
+    const coord = { x: locationX, y: locationY };
+
+    if (activeMode === "RULER_TOP") {
+      setRulerTop(coord);
+      setActiveMode("RULER_BOTTOM");
+    } else if (activeMode === "RULER_BOTTOM") {
+      setRulerBottom(coord);
+      setActiveMode("CHUTE_START");
+    } else if (activeMode === "CHUTE_START") {
+      setChuteStart(coord);
+      setChuteStartTime(currentTime);
+      setActiveMode("CHUTE_END");
+    } else if (activeMode === "CHUTE_END") {
+      setChuteEnd(coord);
+      setChuteEndTime(currentTime);
+      setActiveMode("CHUTE_BOUNCE");
+    } else if (activeMode === "CHUTE_BOUNCE") {
+      setBounce(coord);
+    }
+  };
+
+  const calculateMetrics = () => {
+    if (!rulerTop || !rulerBottom) {
+      return { drop: "Awaiting calibration", bounce: "Awaiting calibration" };
+    }
+
+    //Calculate pixel delta of the ruler
+    const rulerPixelLength = Math.sqrt(
+      Math.pow(rulerBottom.x - rulerTop.x, 2) +
+        Math.pow(rulerBottom.y - rulerTop.y, 2),
+    );
+
+    // Map scale factor: Physical units per single pixel
+    const cmPerPixel = PHYSICAL_RULER_CM / rulerPixelLength;
+
+    let dropStr = "Awaiting points...";
+    let bounceStr = "Awaiting points...";
+    let speedStr = "Awaiting points...";
+    // Calculate initial drop distance
+    if (chuteStart && chuteEnd) {
+      const chutePixelDelta = Math.sqrt(
+        Math.pow(chuteEnd.x - chuteStart.x, 2) +
+          Math.pow(chuteEnd.y - chuteStart.y, 2),
+      );
+      const dropCm = chutePixelDelta * cmPerPixel;
+      dropStr = `${dropCm.toFixed(2)} cm`;
+      if (chuteStartTime !== null && chuteEndTime !== null) {
+        const timeDelta = chuteEndTime - chuteStartTime;
+
+        if (timeDelta > 0) {
+          const speedCmPerSec = dropCm / timeDelta;
+          const speedMPerSec = speedCmPerSec / 100; // Convert cm/s to m/s
+          speedStr = `${speedMPerSec.toFixed(2)} m/s`;
+        } else {
+          speedStr = "0.00 m/s (Invalid timeframe)";
+        }
+      }
+    }
+
+    //calculate bounce.
+    if (chuteEnd && bounce) {
+      const bouncePixelDelta = Math.sqrt(
+        Math.pow(chuteEnd.x - bounce.x, 2) + Math.pow(chuteEnd.y - bounce.y, 2),
+      );
+      bounceStr = `${(bouncePixelDelta * cmPerPixel).toFixed(2)} cm`;
+    }
+
+    return { drop: dropStr, bounce: bounceStr, speed: speedStr };
+  };
+
+  const metrics = calculateMetrics();
+
+  const handleSliderValueChange = (value: number) => {
+    setCurrentTime(value);
+    videoRef.current?.seek(value);
+  };
+
+  function resetCoordinates() {
+    setRulerTop(null);
+    setRulerBottom(null);
+    setChuteStart(null);
+    setChuteEnd(null);
+    setBounce(null);
+    setChuteStartTime(null);
+    setChuteEndTime(null);
+    setActiveMode("RULER_TOP");
+  }
+  // END OF ACTIVITY 1 LOGIC //////////////////////////////////////
+
+  ///////////////////////////////////////////////////////////////
   if (loading) {
     return (
       <ActivityIndicator
         size="large"
         style={{ flex: 1, backgroundColor: colors.background }}
       />
+    );
+  }
+
+  if (result.activityID === "1") {
+    return (
+      <View
+        style={[styles.container2, { backgroundColor: colors2.background }]}
+      >
+        <View style={styles.headerInstructions}>
+          <Text style={[styles.instructionText, { color: "white" }]}>
+            Current Mode: {activeMode.replace("_", " ")}
+          </Text>
+          <Text style={styles.subText}>
+            {activeMode === "RULER_TOP" &&
+              "Tap the 0cm mark on the physical ruler"}
+            {activeMode === "RULER_BOTTOM" &&
+              "Tap the 30cm mark on the physical ruler"}
+            {activeMode === "CHUTE_START" &&
+              "Scrub video to release point, then tap bottom of toy Parachute"}
+            {activeMode === "CHUTE_END" &&
+              "Scrub video to impact point, then tap bottom of toy Parachute"}
+            {activeMode === "CHUTE_BOUNCE" &&
+              "Scrub video to peak rebound height, then tap same bottom of toy Parachute"}
+          </Text>
+        </View>
+
+        <View style={styles.videoCanvas}>
+          {videoUri && (
+            <Video
+              ref={videoRef}
+              source={{ uri: videoUri }}
+              style={StyleSheet.absoluteFill}
+              resizeMode="contain"
+              paused={isPaused}
+              onLoad={(data) => setDuration(data.duration)}
+              onProgress={(data) => setCurrentTime(data.currentTime)}
+              onError={(e) => console.error("Native local playback error: ", e)}
+            />
+          )}
+
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={handleVideoTap}
+            style={StyleSheet.absoluteFill}
+          />
+
+          {/* Anchors */}
+          {rulerTop && (
+            <View
+              style={[
+                styles.pin,
+                {
+                  left: rulerTop.x - 6,
+                  top: rulerTop.y - 6,
+                  backgroundColor: "black",
+                },
+              ]}
+              pointerEvents="none"
+            />
+          )}
+          {rulerBottom && (
+            <View
+              style={[
+                styles.pin,
+                {
+                  left: rulerBottom.x - 6,
+                  top: rulerBottom.y - 6,
+                  backgroundColor: "white",
+                },
+              ]}
+              pointerEvents="none"
+            />
+          )}
+          {chuteStart && (
+            <View
+              style={[
+                styles.pin,
+                {
+                  left: chuteStart.x - 6,
+                  top: chuteStart.y - 6,
+                  backgroundColor: "red",
+                },
+              ]}
+              pointerEvents="none"
+            />
+          )}
+          {chuteEnd && (
+            <View
+              style={[
+                styles.pin,
+                {
+                  left: chuteEnd.x - 6,
+                  top: chuteEnd.y - 6,
+                  backgroundColor: "blue",
+                },
+              ]}
+              pointerEvents="none"
+            />
+          )}
+          {bounce && (
+            <View
+              style={[
+                styles.pin,
+                {
+                  left: bounce.x - 6,
+                  top: bounce.y - 6,
+                  backgroundColor: "green",
+                },
+              ]}
+              pointerEvents="none"
+            />
+          )}
+        </View>
+
+        <View style={styles.controllerUi}>
+          <View style={styles.timelineRow}>
+            <Text style={{ color: colors2.text }}>
+              {currentTime.toFixed(1)}s
+            </Text>
+            <Slider
+              style={styles.slider}
+              minimumValue={0}
+              maximumValue={duration}
+              value={currentTime}
+              onValueChange={handleSliderValueChange}
+              minimumTrackTintColor={colors.primary}
+              maximumTrackTintColor={colors.text}
+              thumbTintColor={colors.primary}
+            />
+            <Text style={{ color: colors2.text }}>{duration.toFixed(1)}s</Text>
+          </View>
+
+          <View style={styles.actionRow}>
+            <TouchableOpacity
+              style={[styles.utilityBtn, { backgroundColor: colors2.primary }]}
+              onPress={() => setIsPaused(!isPaused)}
+            >
+              <Text style={styles.btnText}>{isPaused ? "Play" : "Pause"}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.utilityBtn, { backgroundColor: "#444" }]}
+              onPress={resetCoordinates}
+            >
+              <Text style={styles.btnText}>Clear Points</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.resultPanel}>
+            <View style={styles.metricColumn}>
+              <Text style={styles.resultLabel}>DROP DISTANCE</Text>
+              <Text style={[styles.resultValue, { color: colors2.success }]}>
+                {metrics.drop}
+              </Text>
+              <View style={styles.metricColumn}>
+                <Text style={styles.resultLabel}>DROP SPEED</Text>
+                <Text style={[styles.resultValue, { color: colors.primary }]}>
+                  {metrics.speed}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.metricColumn}>
+              <Text style={styles.resultLabel}>BOUNCE HEIGHT</Text>
+              <Text style={[styles.resultValue, { color: colors2.accent }]}>
+                {metrics.bounce}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
     );
   }
 
@@ -141,6 +455,7 @@ export default observer(function PlaybackResults() {
           </View>
         </>
       )}
+
       {(result.activityID === "5" ||
         result.activityID === "4" ||
         result.activityID === "7") &&
@@ -159,13 +474,16 @@ export default observer(function PlaybackResults() {
             style={styles.chart}
           />
         )}
-      <View style={styles.resultData}>
-        {graphData.map((point, index) => (
-          <Text key={index} style={{ color: colors.text }}>
-            Point {index + 1}: {point.magnitude} mm/s² (Time: {point.timestamp})
-          </Text>
-        ))}
-      </View>
+      <ScrollView>
+        <View style={styles.resultData}>
+          {graphData.map((point, index) => (
+            <Text key={index} style={{ color: colors.text }}>
+              Point {index + 1}: {point.magnitude} mm/s² (Time:{" "}
+              {point.timestamp})
+            </Text>
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
 });
@@ -203,4 +521,90 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 20,
   },
+
+  ////////// STYLES FOR ACTIVITY 1 MOVED FROM RECORDACTIVITY 1////////
+  container2: { flex: 1 },
+  centered: { justifyContent: "center", alignItems: "center" },
+  headerInstructions: {
+    padding: 16,
+    alignItems: "center",
+    paddingTop: 50,
+    height: 130,
+  },
+  instructionText: { fontSize: 16, fontWeight: "bold" },
+  subText: { color: "#aaa", fontSize: 12, marginTop: 4, textAlign: "center" },
+  videoCanvas: {
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT * 0.45,
+    backgroundColor: "#000",
+    position: "relative",
+  },
+  pin: {
+    position: "absolute",
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#fff",
+    zIndex: 10,
+  },
+  controllerUi: { paddingHorizontal: 20, paddingTop: 15, flex: 1 },
+  timelineRow: { flexDirection: "row", alignItems: "center", marginBottom: 15 },
+  slider: { flex: 1, marginHorizontal: 10, height: 40 },
+  actionRow: { flexDirection: "row", justifyContent: "space-between", gap: 10 },
+  utilityBtn: {
+    flex: 1,
+    height: 45,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  btnText: { color: "#fff", fontWeight: "600" },
+  resultPanel: {
+    marginTop: 25,
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  metricColumn: { alignItems: "center" },
+  resultLabel: { color: "#888", fontSize: 11, letterSpacing: 1 },
+  resultValue: { fontSize: 20, fontWeight: "700", marginTop: 4 },
+
+  // Recording View Layouts
+  recordingControlsRow: {
+    position: "absolute",
+    bottom: 40,
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 30,
+  },
+  recordButtonCircle: {
+    width: 74,
+    height: 74,
+    borderRadius: 37,
+    borderWidth: 4,
+    borderColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  recordInnerSquare: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    backgroundColor: "#fff", // Pure white square
+  },
+  recordInnerDot: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: "red",
+  },
+  smallCircleBtn: {
+    padding: 12,
+    borderRadius: 20,
+    minWidth: 80,
+    alignItems: "center",
+  },
+  //////// END OF ACTIVITY 1 MOVE //////////////////////////////
 });

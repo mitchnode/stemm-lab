@@ -3,63 +3,84 @@ Generalized record screen
 Use for creating screens for recording different activities sensor recording
  */
 
+import Slider from "@react-native-community/slider";
+import {
+  CameraView,
+  useCameraPermissions,
+  useMicrophonePermissions,
+} from "expo-camera";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Dimensions,
+  GestureResponderEvent,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Video, { VideoRef } from "react-native-video";
+
 import { useAuth } from "@/context/authContext";
-import { useSoundLevel } from "@/hooks/useSoundLevel"; // <------------------------- Import hook for the sensor
-import { useTheme } from "@/theme";
 import { ResultViewModel } from "@/viewmodel/ResultViewModel";
 import { TeamViewModel } from "@/viewmodel/teamViewModel";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
+import { useRouter } from "expo-router";
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+const colors = {
+  background: "#121212",
+  text: "#FFFFFF",
+  primary: "#2196F3",
+  success: "#4CAF50",
+  accent: "#FF9800",
+};
+
+interface Coordinate {
+  x: number;
+  y: number;
+}
 
 const result = new ResultViewModel();
 const team = new TeamViewModel();
 
-export default function RecordActivity1() {
-  // <---------------------------------------- Set to Activity number
+export default function MeasureDropScreen() {
+  const router = useRouter();
   const { user } = useAuth();
-  const ACTIVITY_ID = "1"; // <---------------------------------------- Set to Activity number
-  const [recButtonColor, setRecButtonColor] = useState("green");
-  const [recButtonShape, setRecButtonShape] = useState(50);
+  const ACTIVITY_ID = "1";
   const [data, setData] = useState("");
-  const [btnName, setBtnName] = useState("Start");
+  const [videoUri, setVideoUri] = useState<string | null>(null);
+  const [isRecordingMode, setIsRecordingMode] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
 
-  // Call hook for sensor <----------------------------------------------
-  const {
-    db,
-    maxdb,
-    percent,
-    isSoundRecording,
-    hasAudioPermission,
-    start,
-    stop,
-  } = useSoundLevel();
-  // <---------------------------------------------------------------- Add other required functions for updating the View
-  if (hasAudioPermission === false) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center" }}>
-        <Text>Microphone permission denied.</Text>
-      </View>
-    );
-  }
+  // Hardware Ref & Status Hooks
+  const cameraRef = useRef<CameraView>(null);
+  const videoRef = useRef<VideoRef>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+  const [micPermission, requestMicPermission] = useMicrophonePermissions();
 
-  const animatedStyle = useAnimatedStyle(() => {
-    if (db != undefined) {
-      return {
-        height: withSpring(percent),
-      };
-    }
-    return {
-      height: 100,
-    };
-  }, [db, percent]);
-  // ^--------------^-----------^--------------^------------^----------^--------^
+  // Video Playback States
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isPaused, setIsPaused] = useState(true);
 
-  const { colors } = useTheme();
+  const [chuteStartTime, setChuteStartTime] = useState<number | null>(null);
+  const [chuteEndTime, setChuteEndTime] = useState<number | null>(null);
+
+  // Measurement States
+  const [rulerTop, setRulerTop] = useState<Coordinate | null>(null);
+  const [rulerBottom, setRulerBottom] = useState<Coordinate | null>(null);
+  const [chuteStart, setChuteStart] = useState<Coordinate | null>(null);
+  const [chuteEnd, setChuteEnd] = useState<Coordinate | null>(null);
+  const [bounce, setBounce] = useState<Coordinate | null>(null);
+
+  // Selection mode tracker
+  const [activeMode, setActiveMode] = useState<
+    "RULER_TOP" | "RULER_BOTTOM" | "CHUTE_START" | "CHUTE_END" | "CHUTE_BOUNCE"
+  >("RULER_TOP");
+  const PHYSICAL_RULER_CM = 30; // Your reference physical ruler size
+
+  //team loading logic
 
   const loadTeam = async () => {
     if (user) await team.handleRestore(user.uid);
@@ -71,96 +92,408 @@ export default function RecordActivity1() {
     }
   }, []);
 
-  useEffect(() => {
-    if (data) {
-      // Get any processed result here before passing to the results page
+  // Camera  Actions
+  const startRecording = async () => {
+    if (cameraRef.current && !isRecording) {
+      try {
+        setIsRecording(true);
+        const video = await cameraRef.current.recordAsync({
+          maxDuration: 30,
+        });
+        if (video?.uri) {
+          setVideoUri(video.uri);
+          setIsRecordingMode(false);
+        }
+      } catch (err) {
+        console.error("Video record failure:", err);
+      } finally {
+        setIsRecording(false);
+      }
+    }
+  };
+
+  const handleRequestPermissions = async () => {
+    await requestCameraPermission();
+    await requestMicPermission();
+  };
+
+  const stopRecording = () => {
+    if (cameraRef.current && isRecording) {
+      cameraRef.current.stopRecording();
+      setIsRecording(false);
+    }
+  };
+
+  const handleSaveVideo = async () => {
+    if (!videoUri) return;
+    try {
+      setIsUploading(true);
+
       const dateTime = new Date().toLocaleString();
-      const resultType = "Volume"; // <---------------------------------------------------- Modifiy resultType to suit sensor
-      const resultValue = maxdb.toString(); // <------------------------------------------- Modify resultValue
-      result.setTeamID(team.teamID);
+      const resultType = "Parachute drop distance";
+
+      const freshMetrics = calculateMetrics();
+      const resultValue = freshMetrics.speed || 0;
+
+      // 3. Configure your ViewModel with the local URI and metrics
+      result.setTeamID(team.teamID || "local_user");
       result.setActivityID(ACTIVITY_ID);
       result.setResultDateTime(dateTime);
       result.setResultType(resultType);
       result.setResultValue(resultValue);
-      result.setResultData(data);
 
-      const recordResult = async () => {
-        const resultID = await result.handleRecord();
-        router.push({
-          pathname: "/results",
-          params: { resultID: resultID },
-        });
-      };
+      result.setResultData(videoUri);
 
-      recordResult();
-    }
-    return () => {
-      setData("");
-    };
-  });
+      const resultID = await result.handleRecord();
 
-  const toggleRecord = async () => {
-    if (isSoundRecording) {
-      setBtnName("Start");
-      setRecButtonColor(colors.success);
-      setRecButtonShape(50);
-      const returnedData = await stop(); // <---------------------------------------- Call stop function from the sensor hook -> Returned data is the sensor data, not the final value. e.g Audio file location.
-      returnedData ? setData(returnedData) : setData("No Data");
-    } else {
-      setBtnName("Stop");
-      setRecButtonColor(colors.error);
-      setRecButtonShape(20);
-      await start(); // <-----------------------------------------------------------Call function to begin recording sensor data
+      router.push({
+        pathname: "/results",
+        params: { resultID: resultID },
+      });
+    } catch (error) {
+      console.error("Failed handling local video save pipeline:", error);
+      alert("Failed to save video layout.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
-  return (
-    <View style={{ ...styles.container, backgroundColor: colors.background }}>
-      {/* <--------------------------------------------------------------------------------------------Modify to suit sensor display */}
-      <View style={styles.sensor}>
-        <Animated.View
+  // Capture the exact tap coordinates over the video display layer
+  const handleVideoTap = (event: GestureResponderEvent) => {
+    const { locationX, locationY } = event.nativeEvent;
+    const coord = { x: locationX, y: locationY };
+
+    if (activeMode === "RULER_TOP") {
+      setRulerTop(coord);
+      setActiveMode("RULER_BOTTOM");
+    } else if (activeMode === "RULER_BOTTOM") {
+      setRulerBottom(coord);
+      setActiveMode("CHUTE_START");
+    } else if (activeMode === "CHUTE_START") {
+      setChuteStart(coord);
+      setChuteStartTime(currentTime);
+      setActiveMode("CHUTE_END");
+    } else if (activeMode === "CHUTE_END") {
+      setChuteEnd(coord);
+      setChuteEndTime(currentTime);
+      setActiveMode("CHUTE_BOUNCE");
+    } else if (activeMode === "CHUTE_BOUNCE") {
+      setBounce(coord);
+    }
+  };
+
+  const calculateMetrics = () => {
+    if (!rulerTop || !rulerBottom) {
+      return { drop: "Awaiting calibration", bounce: "Awaiting calibration" };
+    }
+
+    //Calculate pixel delta of the ruler
+    const rulerPixelLength = Math.sqrt(
+      Math.pow(rulerBottom.x - rulerTop.x, 2) +
+        Math.pow(rulerBottom.y - rulerTop.y, 2),
+    );
+
+    // Map scale factor: Physical units per single pixel
+    const cmPerPixel = PHYSICAL_RULER_CM / rulerPixelLength;
+
+    let dropStr = "Awaiting points...";
+    let bounceStr = "Awaiting points...";
+    let rawSpeed = 0;
+    // Calculate initial drop distance
+    if (chuteStart && chuteEnd) {
+      const chutePixelDelta = Math.sqrt(
+        Math.pow(chuteEnd.x - chuteStart.x, 2) +
+          Math.pow(chuteEnd.y - chuteStart.y, 2),
+      );
+      const dropCm = chutePixelDelta * cmPerPixel;
+      dropStr = `${dropCm.toFixed(2)} cm`;
+      if (chuteStartTime !== null && chuteEndTime !== null) {
+        const timeDelta = chuteEndTime - chuteStartTime;
+
+        if (timeDelta > 0) {
+          const speedCmPerSec = dropCm / timeDelta;
+          rawSpeed = speedCmPerSec / 100;
+        }
+      }
+    }
+
+    //calculate bounce.
+    if (chuteEnd && bounce) {
+      const bouncePixelDelta = Math.sqrt(
+        Math.pow(chuteEnd.x - bounce.x, 2) + Math.pow(chuteEnd.y - bounce.y, 2),
+      );
+      bounceStr = `${(bouncePixelDelta * cmPerPixel).toFixed(2)} cm`;
+    }
+
+    return { drop: dropStr, bounce: bounceStr, speed: rawSpeed };
+  };
+
+  const metrics = calculateMetrics();
+
+  const handleSliderValueChange = (value: number) => {
+    setCurrentTime(value);
+    videoRef.current?.seek(value);
+  };
+
+  const resetCoordinates = () => {
+    setRulerTop(null);
+    setRulerBottom(null);
+    setChuteStart(null);
+    setChuteEnd(null);
+    setBounce(null);
+    setChuteStartTime(null);
+    setChuteEndTime(null);
+    setActiveMode("RULER_TOP");
+  };
+
+  if (isRecordingMode) {
+    if (!cameraPermission?.granted || !micPermission?.granted) {
+      return (
+        <View
           style={[
-            { ...styles.box, backgroundColor: colors.secondary },
-            animatedStyle,
+            styles.container,
+            styles.centered,
+            { backgroundColor: colors.background },
           ]}
+        >
+          <Text
+            style={{
+              color: colors.text,
+              marginBottom: 15,
+              textAlign: "center",
+              paddingHorizontal: 20,
+            }}
+          >
+            Camera and Audio permissions are required
+          </Text>
+          <TouchableOpacity
+            style={[
+              styles.utilityBtn,
+              {
+                backgroundColor: colors.primary,
+                paddingHorizontal: 20,
+                flex: 0,
+              },
+            ]}
+            onPress={handleRequestPermissions}
+          >
+            <Text style={styles.btnText}>Grant Permissions</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return (
+      <View style={[styles.container, { backgroundColor: "#000" }]}>
+        <CameraView
+          ref={cameraRef}
+          style={StyleSheet.absoluteFill}
+          mode="video"
         />
+
+        {/* recording overlay */}
+
+        <View style={styles.recordingControlsRow}>
+          {videoUri && (
+            <TouchableOpacity
+              style={[styles.smallCircleBtn, { backgroundColor: "#333" }]}
+              onPress={() => setIsRecordingMode(false)}
+            >
+              <Text style={styles.btnText}>Cancel</Text>
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity
+            style={[
+              styles.recordButtonCircle,
+              isRecording && { borderColor: "#fff" },
+            ]}
+            onPress={isRecording ? stopRecording : startRecording}
+          >
+            <View
+              style={
+                isRecording ? styles.recordInnerSquare : styles.recordInnerDot
+              }
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  // Render Canvas
+  return (
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={styles.headerInstructions}>
+        <Text style={[styles.instructionText, { color: "white" }]}>
+          Current Mode: {activeMode.replace("_", " ")}
+        </Text>
+        <Text style={styles.subText}>
+          {activeMode === "RULER_TOP" &&
+            "Tap the 0cm mark on the physical ruler"}
+          {activeMode === "RULER_BOTTOM" &&
+            "Tap the 30cm mark on the physical ruler"}
+          {activeMode === "CHUTE_START" &&
+            "Scrub video to release point, then tap bottom of toy Parachute"}
+          {activeMode === "CHUTE_END" &&
+            "Scrub video to impact point, then tap bottom of toy Parachute"}
+          {activeMode === "CHUTE_BOUNCE" &&
+            "Scrub video to peak rebound height, then tap same bottom of toy Parachute"}
+        </Text>
       </View>
 
-      {isSoundRecording ? (
-        <View style={styles.data}>
-          <Text style={{ ...styles.text, color: colors.text }}>Recording</Text>
-          <Text style={{ ...styles.text, color: colors.text }}>
-            dB: {db?.toFixed(2)}
-          </Text>
-          <Text style={{ ...styles.text, color: colors.text }}>
-            Max dB: {maxdb.toFixed(2)}
-          </Text>
-          <Text style={{ ...styles.text, color: colors.text }}>
-            Percent: {percent}
-          </Text>
+      <View style={styles.videoCanvas}>
+        {videoUri && (
+          <Video
+            ref={videoRef}
+            source={{ uri: videoUri }}
+            style={StyleSheet.absoluteFill}
+            resizeMode="contain"
+            paused={isPaused}
+            onLoad={(data) => setDuration(data.duration)}
+            onProgress={(data) => setCurrentTime(data.currentTime)}
+          />
+        )}
+
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={handleVideoTap}
+          style={StyleSheet.absoluteFill}
+        />
+
+        {/* Anchors */}
+        {rulerTop && (
+          <View
+            style={[
+              styles.pin,
+              {
+                left: rulerTop.x - 6,
+                top: rulerTop.y - 6,
+                backgroundColor: "black",
+              },
+            ]}
+            pointerEvents="none"
+          />
+        )}
+        {rulerBottom && (
+          <View
+            style={[
+              styles.pin,
+              {
+                left: rulerBottom.x - 6,
+                top: rulerBottom.y - 6,
+                backgroundColor: "white",
+              },
+            ]}
+            pointerEvents="none"
+          />
+        )}
+        {chuteStart && (
+          <View
+            style={[
+              styles.pin,
+              {
+                left: chuteStart.x - 6,
+                top: chuteStart.y - 6,
+                backgroundColor: "red",
+              },
+            ]}
+            pointerEvents="none"
+          />
+        )}
+        {chuteEnd && (
+          <View
+            style={[
+              styles.pin,
+              {
+                left: chuteEnd.x - 6,
+                top: chuteEnd.y - 6,
+                backgroundColor: "blue",
+              },
+            ]}
+            pointerEvents="none"
+          />
+        )}
+        {bounce && (
+          <View
+            style={[
+              styles.pin,
+              {
+                left: bounce.x - 6,
+                top: bounce.y - 6,
+                backgroundColor: "green",
+              },
+            ]}
+            pointerEvents="none"
+          />
+        )}
+      </View>
+
+      <View style={styles.controllerUi}>
+        <View style={styles.timelineRow}>
+          <Text style={{ color: colors.text }}>{currentTime.toFixed(1)}s</Text>
+          <Slider
+            style={styles.slider}
+            minimumValue={0}
+            maximumValue={duration}
+            value={currentTime}
+            onValueChange={handleSliderValueChange}
+            minimumTrackTintColor={colors.primary}
+            maximumTrackTintColor={colors.text}
+            thumbTintColor={colors.primary}
+          />
+          <Text style={{ color: colors.text }}>{duration.toFixed(1)}s</Text>
         </View>
-      ) : (
-        <></>
-      )}
 
-      {isSoundRecording && (
-        <View style={{ ...styles.record, backgroundColor: "red" }} />
-      )}
-
-      {/* <^--------------------^---------------------^--------------------------------^----------------------------^------------------------^ */}
-      <View style={styles.buttonRow}>
-        <View style={styles.buttonContainer}>
+        <View style={styles.actionRow}>
           <TouchableOpacity
-            style={{
-              ...styles.button,
-              borderColor: "transparent",
-              backgroundColor: recButtonColor,
-              borderRadius: recButtonShape,
-            }}
-            onPress={toggleRecord}
+            style={[styles.utilityBtn, { backgroundColor: colors.primary }]}
+            onPress={() => setIsPaused(!isPaused)}
           >
-            <Text style={styles.text}>{btnName}</Text>
+            <Text style={styles.btnText}>{isPaused ? "Play" : "Pause"}</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.utilityBtn, { backgroundColor: "#444" }]}
+            onPress={resetCoordinates}
+          >
+            <Text style={styles.btnText}>Clear Points</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.utilityBtn, { backgroundColor: "#c62828" }]}
+            onPress={() => setIsRecordingMode(true)}
+          >
+            <Text style={styles.btnText}>Retake</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.resultPanel}>
+          <View style={styles.metricColumn}>
+            <Text style={styles.resultLabel}>DROP DISTANCE</Text>
+            <Text style={[styles.resultValue, { color: colors.success }]}>
+              {metrics.drop}
+            </Text>
+          </View>
+          <View style={styles.metricColumn}>
+            <Text style={styles.resultLabel}>DROP SPEED</Text>
+            <Text style={[styles.resultValue, { color: colors.primary }]}>
+              {metrics.speed}
+            </Text>
+          </View>
+          <View style={styles.metricColumn}>
+            <Text style={styles.resultLabel}>BOUNCE HEIGHT</Text>
+            <Text style={[styles.resultValue, { color: colors.accent }]}>
+              {metrics.bounce}
+            </Text>
+          </View>
+          {bounce && (
+            <TouchableOpacity
+              style={[styles.utilityBtn, { backgroundColor: "green" }]}
+              onPress={handleSaveVideo}
+            >
+              <Text style={styles.btnText}>Save</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </View>
@@ -168,62 +501,87 @@ export default function RecordActivity1() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  container: { flex: 1 },
+  centered: { justifyContent: "center", alignItems: "center" },
+  headerInstructions: {
+    padding: 16,
+    alignItems: "center",
+    paddingTop: 50,
+    height: 130,
+  },
+  instructionText: { fontSize: 16, fontWeight: "bold" },
+  subText: { color: "#aaa", fontSize: 12, marginTop: 4, textAlign: "center" },
+  videoCanvas: {
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT * 0.45,
+    backgroundColor: "#000",
+    position: "relative",
+  },
+  pin: {
+    position: "absolute",
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#fff",
+    zIndex: 10,
+  },
+  controllerUi: { paddingHorizontal: 20, paddingTop: 15, flex: 1 },
+  timelineRow: { flexDirection: "row", alignItems: "center", marginBottom: 15 },
+  slider: { flex: 1, marginHorizontal: 10, height: 40 },
+  actionRow: { flexDirection: "row", justifyContent: "space-between", gap: 10 },
+  utilityBtn: {
     flex: 1,
+    height: 45,
+    borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
   },
-  sensor: {
+  btnText: { color: "#fff", fontWeight: "600" },
+  resultPanel: {
+    marginTop: 25,
     flexDirection: "row",
-    alignItems: "stretch",
+    justifyContent: "space-around",
   },
-  data: {
-    flexDirection: "row",
-  },
-  box: {
-    flex: 1,
-    width: 100,
-  },
-  message: {
-    textAlign: "center",
-    paddingBottom: 10,
-  },
-  camera: {
-    flex: 1,
-  },
-  buttonRow: {
+  metricColumn: { alignItems: "center" },
+  resultLabel: { color: "#888", fontSize: 11, letterSpacing: 1 },
+  resultValue: { fontSize: 20, fontWeight: "700", marginTop: 4 },
+
+  // Recording View Layouts
+  recordingControlsRow: {
     position: "absolute",
-    bottom: 64,
+    bottom: 40,
     flexDirection: "row",
     width: "100%",
     justifyContent: "center",
-  },
-  buttonContainer: {
-    backgroundColor: "transparent",
-    padding: 20,
-    borderWidth: 1,
-    borderRadius: 60,
-    borderColor: "white",
-  },
-  button: {
-    width: 70,
-    height: 70,
-    borderWidth: 2,
-    padding: 5,
     alignItems: "center",
+    gap: 30,
+  },
+  recordButtonCircle: {
+    width: 74,
+    height: 74,
+    borderRadius: 37,
+    borderWidth: 4,
+    borderColor: "#fff",
     justifyContent: "center",
+    alignItems: "center",
   },
-  text: {
-    fontSize: 12,
-    fontWeight: "bold",
-    color: "white",
+  recordInnerSquare: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    backgroundColor: "#fff", // Pure white square
   },
-  record: {
-    position: "absolute",
-    top: 64,
-    left: 32,
-    width: 10,
-    height: 10,
-    borderRadius: 50,
+  recordInnerDot: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: "red",
+  },
+  smallCircleBtn: {
+    padding: 12,
+    borderRadius: 20,
+    minWidth: 80,
+    alignItems: "center",
   },
 });

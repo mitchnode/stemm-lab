@@ -104,7 +104,6 @@ export default function activities({}) {
                 Change Team
               </Button>
 
-              <Button onPress={changeTheme}>Switch theme</Button>
               {/* Switch theme button is just for testing, remove once setup in the menu. */}
             </View>
           </View>
