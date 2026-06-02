@@ -64,6 +64,9 @@ export default function MeasureDropScreen() {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPaused, setIsPaused] = useState(true);
 
+  const [chuteStartTime, setChuteStartTime] = useState<number | null>(null);
+  const [chuteEndTime, setChuteEndTime] = useState<number | null>(null);
+
   // Measurement States
   const [rulerTop, setRulerTop] = useState<Coordinate | null>(null);
   const [rulerBottom, setRulerBottom] = useState<Coordinate | null>(null);
@@ -129,7 +132,8 @@ export default function MeasureDropScreen() {
       const dateTime = new Date().toLocaleString();
       const resultType = "Parachute drop distance";
 
-      const resultValue = `Video url`;
+      const freshMetrics = calculateMetrics();
+      const resultValue = freshMetrics.speed || "0.00 m/s";
 
       // 3. Configure your ViewModel with the local URI and metrics
       result.setTeamID(team.teamID || "local_user");
@@ -167,9 +171,11 @@ export default function MeasureDropScreen() {
       setActiveMode("CHUTE_START");
     } else if (activeMode === "CHUTE_START") {
       setChuteStart(coord);
+      setChuteStartTime(currentTime);
       setActiveMode("CHUTE_END");
     } else if (activeMode === "CHUTE_END") {
       setChuteEnd(coord);
+      setChuteEndTime(currentTime);
       setActiveMode("CHUTE_BOUNCE");
     } else if (activeMode === "CHUTE_BOUNCE") {
       setBounce(coord);
@@ -192,14 +198,26 @@ export default function MeasureDropScreen() {
 
     let dropStr = "Awaiting points...";
     let bounceStr = "Awaiting points...";
-
+    let speedStr = "Awaiting points...";
     // Calculate initial drop distance
     if (chuteStart && chuteEnd) {
       const chutePixelDelta = Math.sqrt(
         Math.pow(chuteEnd.x - chuteStart.x, 2) +
           Math.pow(chuteEnd.y - chuteStart.y, 2),
       );
-      dropStr = `${(chutePixelDelta * cmPerPixel).toFixed(2)} cm`;
+      const dropCm = chutePixelDelta * cmPerPixel;
+      dropStr = `${dropCm.toFixed(2)} cm`;
+      if (chuteStartTime !== null && chuteEndTime !== null) {
+        const timeDelta = chuteEndTime - chuteStartTime;
+
+        if (timeDelta > 0) {
+          const speedCmPerSec = dropCm / timeDelta;
+          const speedMPerSec = speedCmPerSec / 100; // Convert cm/s to m/s
+          speedStr = `${speedMPerSec.toFixed(2)} m/s`;
+        } else {
+          speedStr = "0.00 m/s (Invalid timeframe)";
+        }
+      }
     }
 
     //calculate bounce.
@@ -210,7 +228,7 @@ export default function MeasureDropScreen() {
       bounceStr = `${(bouncePixelDelta * cmPerPixel).toFixed(2)} cm`;
     }
 
-    return { drop: dropStr, bounce: bounceStr };
+    return { drop: dropStr, bounce: bounceStr, speed: speedStr };
   };
 
   const metrics = calculateMetrics();
@@ -226,6 +244,8 @@ export default function MeasureDropScreen() {
     setChuteStart(null);
     setChuteEnd(null);
     setBounce(null);
+    setChuteStartTime(null);
+    setChuteEndTime(null);
     setActiveMode("RULER_TOP");
   };
 
@@ -457,18 +477,26 @@ export default function MeasureDropScreen() {
               {metrics.drop}
             </Text>
           </View>
-          <TouchableOpacity
-            style={[styles.utilityBtn, { backgroundColor: "green" }]}
-            onPress={handleSaveVideo}
-          >
-            <Text style={styles.btnText}>Save</Text>
-          </TouchableOpacity>
+          <View style={styles.metricColumn}>
+            <Text style={styles.resultLabel}>DROP SPEED</Text>
+            <Text style={[styles.resultValue, { color: colors.primary }]}>
+              {metrics.speed}
+            </Text>
+          </View>
           <View style={styles.metricColumn}>
             <Text style={styles.resultLabel}>BOUNCE HEIGHT</Text>
             <Text style={[styles.resultValue, { color: colors.accent }]}>
               {metrics.bounce}
             </Text>
           </View>
+          {bounce && (
+            <TouchableOpacity
+              style={[styles.utilityBtn, { backgroundColor: "green" }]}
+              onPress={handleSaveVideo}
+            >
+              <Text style={styles.btnText}>Save</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </View>

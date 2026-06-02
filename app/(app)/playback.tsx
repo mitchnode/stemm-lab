@@ -67,7 +67,8 @@ export default observer(function PlaybackResults() {
     "RULER_TOP" | "RULER_BOTTOM" | "CHUTE_START" | "CHUTE_END" | "CHUTE_BOUNCE"
   >("RULER_TOP");
   const PHYSICAL_RULER_CM = 30; // Your reference physical ruler size
-
+  const [chuteStartTime, setChuteStartTime] = useState<number | null>(null);
+  const [chuteEndTime, setChuteEndTime] = useState<number | null>(null);
   // Measurement States
   const [rulerTop, setRulerTop] = useState<Coordinate | null>(null);
   const [rulerBottom, setRulerBottom] = useState<Coordinate | null>(null);
@@ -158,9 +159,11 @@ export default observer(function PlaybackResults() {
       setActiveMode("CHUTE_START");
     } else if (activeMode === "CHUTE_START") {
       setChuteStart(coord);
+      setChuteStartTime(currentTime);
       setActiveMode("CHUTE_END");
     } else if (activeMode === "CHUTE_END") {
       setChuteEnd(coord);
+      setChuteEndTime(currentTime);
       setActiveMode("CHUTE_BOUNCE");
     } else if (activeMode === "CHUTE_BOUNCE") {
       setBounce(coord);
@@ -183,14 +186,26 @@ export default observer(function PlaybackResults() {
 
     let dropStr = "Awaiting points...";
     let bounceStr = "Awaiting points...";
-
+    let speedStr = "Awaiting points...";
     // Calculate initial drop distance
     if (chuteStart && chuteEnd) {
       const chutePixelDelta = Math.sqrt(
         Math.pow(chuteEnd.x - chuteStart.x, 2) +
           Math.pow(chuteEnd.y - chuteStart.y, 2),
       );
-      dropStr = `${(chutePixelDelta * cmPerPixel).toFixed(2)} cm`;
+      const dropCm = chutePixelDelta * cmPerPixel;
+      dropStr = `${dropCm.toFixed(2)} cm`;
+      if (chuteStartTime !== null && chuteEndTime !== null) {
+        const timeDelta = chuteEndTime - chuteStartTime;
+
+        if (timeDelta > 0) {
+          const speedCmPerSec = dropCm / timeDelta;
+          const speedMPerSec = speedCmPerSec / 100; // Convert cm/s to m/s
+          speedStr = `${speedMPerSec.toFixed(2)} m/s`;
+        } else {
+          speedStr = "0.00 m/s (Invalid timeframe)";
+        }
+      }
     }
 
     //calculate bounce.
@@ -201,7 +216,7 @@ export default observer(function PlaybackResults() {
       bounceStr = `${(bouncePixelDelta * cmPerPixel).toFixed(2)} cm`;
     }
 
-    return { drop: dropStr, bounce: bounceStr };
+    return { drop: dropStr, bounce: bounceStr, speed: speedStr };
   };
 
   const metrics = calculateMetrics();
@@ -217,6 +232,8 @@ export default observer(function PlaybackResults() {
     setChuteStart(null);
     setChuteEnd(null);
     setBounce(null);
+    setChuteStartTime(null);
+    setChuteEndTime(null);
     setActiveMode("RULER_TOP");
   }
   // END OF ACTIVITY 1 LOGIC //////////////////////////////////////
@@ -382,6 +399,12 @@ export default observer(function PlaybackResults() {
               <Text style={[styles.resultValue, { color: colors2.success }]}>
                 {metrics.drop}
               </Text>
+              <View style={styles.metricColumn}>
+                <Text style={styles.resultLabel}>DROP SPEED</Text>
+                <Text style={[styles.resultValue, { color: colors.primary }]}>
+                  {metrics.speed}
+                </Text>
+              </View>
             </View>
             <View style={styles.metricColumn}>
               <Text style={styles.resultLabel}>BOUNCE HEIGHT</Text>
