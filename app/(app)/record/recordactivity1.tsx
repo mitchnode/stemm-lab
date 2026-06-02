@@ -133,7 +133,7 @@ export default function MeasureDropScreen() {
       const resultType = "Parachute drop distance";
 
       const freshMetrics = calculateMetrics();
-      const resultValue = freshMetrics.speed || "0.00 m/s";
+      const resultValue = freshMetrics.speed || 0;
 
       // 3. Configure your ViewModel with the local URI and metrics
       result.setTeamID(team.teamID || "local_user");
@@ -198,7 +198,7 @@ export default function MeasureDropScreen() {
 
     let dropStr = "Awaiting points...";
     let bounceStr = "Awaiting points...";
-    let speedStr = "Awaiting points...";
+    let rawSpeed = 0;
     // Calculate initial drop distance
     if (chuteStart && chuteEnd) {
       const chutePixelDelta = Math.sqrt(
@@ -212,10 +212,7 @@ export default function MeasureDropScreen() {
 
         if (timeDelta > 0) {
           const speedCmPerSec = dropCm / timeDelta;
-          const speedMPerSec = speedCmPerSec / 100; // Convert cm/s to m/s
-          speedStr = `${speedMPerSec.toFixed(2)} m/s`;
-        } else {
-          speedStr = "0.00 m/s (Invalid timeframe)";
+          rawSpeed = speedCmPerSec / 100;
         }
       }
     }
@@ -228,7 +225,7 @@ export default function MeasureDropScreen() {
       bounceStr = `${(bouncePixelDelta * cmPerPixel).toFixed(2)} cm`;
     }
 
-    return { drop: dropStr, bounce: bounceStr, speed: speedStr };
+    return { drop: dropStr, bounce: bounceStr, speed: rawSpeed };
   };
 
   const metrics = calculateMetrics();
