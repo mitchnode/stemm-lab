@@ -23,7 +23,7 @@ import Slider from "@react-native-community/slider";
 import { CameraView } from "expo-camera";
 
 import { LocationObject } from "expo-location";
-import MapView, { LatLng, Marker } from "react-native-maps";
+import MapView, { LatLng, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import Video, { VideoRef } from "react-native-video";
 
 //imported from record activity 1/////////////////
@@ -502,6 +502,7 @@ export default observer(function PlaybackResults() {
             <Text style={{ color: colors.text }}>{result.resultValue}</Text>
           </View>
           <MapView
+            provider={PROVIDER_GOOGLE}
             style={styles.map}
             camera={{
               center: location,
