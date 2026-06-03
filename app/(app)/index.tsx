@@ -89,7 +89,10 @@ export default function Activities({}) {
                       });
                     }}
                   >
-                    <Text style={{ color: "#fff" }}>{lab.title}</Text>
+                    c
+                    <Text testID="4" style={{ color: "#fff" }}>
+                      {lab.title}
+                    </Text>
                   </Pressable>
                 );
               })}
