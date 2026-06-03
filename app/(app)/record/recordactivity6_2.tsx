@@ -6,17 +6,17 @@ import { TeamViewModel } from "@/viewmodel/teamViewModel";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Animated,
-    Dimensions,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Animated,
+  Dimensions,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import {
-    GestureDetector,
-    GestureHandlerRootView,
+  GestureDetector,
+  GestureHandlerRootView,
 } from "react-native-gesture-handler";
 import Svg, { Polyline } from "react-native-svg";
 
@@ -61,7 +61,7 @@ export default function RecordActivity6_2() {
   useEffect(() => {
     if (data) {
       // Get any processed result here before passing to the results page
-      const dateTime = new Date().toLocaleString();
+      const dateTime = new Date().toISOString();
       const resultType = "Path Tracing - Time (ms)";
       const resultValue = bestTime!.toString();
       result.setTeamID(team.teamID);

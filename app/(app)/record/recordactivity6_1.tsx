@@ -6,11 +6,11 @@ import { TeamViewModel } from "@/viewmodel/teamViewModel";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    Animated,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 const result = new ResultViewModel();
@@ -46,7 +46,7 @@ export default function RecordActivity6_1() {
   useEffect(() => {
     if (data) {
       // Get any processed result here before passing to the results page
-      const dateTime = new Date().toLocaleString();
+      const dateTime = new Date().toISOString();
       const resultType = "Reaction Timer - Time (ms)";
       const resultValue = bestTime!.toString();
       result.setTeamID(team.teamID);

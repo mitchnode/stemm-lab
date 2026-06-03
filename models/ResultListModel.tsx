@@ -51,5 +51,10 @@ export class ResultListModel {
         this.populatedList.push(result);
       });
     });
+    this.populatedList.sort(
+      (a, b) =>
+        new Date(a["resultDateTime"]).valueOf() -
+        new Date(b["resultDateTime"]).valueOf(),
+    );
   };
 }

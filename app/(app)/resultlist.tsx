@@ -4,6 +4,7 @@ import { ResultListViewModel } from "@/viewmodel/ResultListViewModel";
 import { TeamViewModel } from "@/viewmodel/teamViewModel";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { LocationObject, LocationObjectCoords } from "expo-location";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
@@ -24,7 +25,7 @@ export default observer(() => {
   const { user } = useAuth();
   const { activity } = useLocalSearchParams();
 
-  console.log("Current Activity Filter:", activity);
+  //console.log("Current Activity Filter:", activity);
   const router = useRouter();
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
@@ -39,7 +40,7 @@ export default observer(() => {
         await resultList.handlePopulate();
         console.log(
           "Full Result List Data:",
-          JSON.stringify(resultList.populatedList, null, 2),
+          JSON.stringify(resultList.populatedList),
         );
       }
     } catch (error) {
@@ -89,16 +90,19 @@ export default observer(() => {
     loadResults();
   }, []);
 
-  const isClickable = (res: any) => {
-    const id = res.activityID.toString();
-    return ["1", "2", "3", "4", "5", "7"].includes(id);
-  };
-
   const allowedList = React.useMemo(() => {
     if (Array.isArray(activity)) return activity; // arrives as an array
     if (typeof activity === "string") return activity.split(","); // If it arrives as a string
     return []; // Default fallback
   }, [activity]);
+
+  const getLocation = (resultLocation: string): LocationObjectCoords | null => {
+    console.log(resultLocation);
+    if (!resultLocation) return null;
+    const location: LocationObject = JSON.parse(resultLocation);
+    return location.coords;
+  };
+
   //debugging command
   useEffect(() => {
     console.log("Current Filter List:", allowedList);
@@ -128,7 +132,6 @@ export default observer(() => {
               >
                 <Pressable
                   style={styles.button}
-                  disabled={!isClickable(result)}
                   onPress={() => {
                     router.push({
                       pathname: "/playback",
@@ -171,7 +174,27 @@ export default observer(() => {
                       <Text
                         style={{ ...styles.large_font, color: colors.text }}
                       >
-                        {result.resultDateTime}
+                        {new Date(result.resultDateTime).toLocaleString()}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={{ ...styles.bold_text, color: colors.text }}>
+                        Longitude:
+                      </Text>
+                      <Text
+                        style={{ ...styles.large_font, color: colors.text }}
+                      >
+                        {getLocation(result.resultLocation)?.longitude}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={{ ...styles.bold_text, color: colors.text }}>
+                        Latitude:
+                      </Text>
+                      <Text
+                        style={{ ...styles.large_font, color: colors.text }}
+                      >
+                        {getLocation(result.resultLocation)?.latitude}
                       </Text>
                     </View>
                     <View style={styles.row}>

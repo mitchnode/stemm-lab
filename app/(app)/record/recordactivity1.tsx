@@ -129,7 +129,7 @@ export default function MeasureDropScreen() {
     try {
       setIsUploading(true);
 
-      const dateTime = new Date().toLocaleString();
+      const dateTime = new Date().toISOString();
       const resultType = "Parachute drop distance";
 
       const freshMetrics = calculateMetrics();
