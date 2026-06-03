@@ -55,7 +55,7 @@ export default function Activities({}) {
         testID="b4"
         style={{ ...styles.screen, backgroundColor: colors.background }}
       >
-        <Text testID="b5" style={{ ...styles.heading, color: colors.text }}>
+        <Text testID="c4" style={{ ...styles.heading, color: colors.text }}>
           Activities
         </Text>
         <View style={styles.info}>
@@ -89,34 +89,13 @@ export default function Activities({}) {
                       });
                     }}
                   >
-                    c
-                    <Text testID="4" style={{ color: "#fff" }}>
-                      {lab.title}
-                    </Text>
+                    <Text style={{ color: "#fff" }}>{lab.title}</Text>
                   </Pressable>
                 );
               })}
             </View>
           </View>
         </View>
-      </View>
-      <View>
-        <Pressable
-          style={{
-            ...styles.button,
-            backgroundColor: colors.primary,
-          }}
-          onPress={() => {
-            router.push({
-              pathname: "/index_old",
-            });
-          }}
-        >
-          <Text testID="b3" style={{ color: "#fff" }}>
-            {" "}
-            Old Index
-          </Text>
-        </Pressable>
       </View>
     </ScrollView>
   );

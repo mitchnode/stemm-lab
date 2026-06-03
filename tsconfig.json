@@ -3,6 +3,7 @@
   "compilerOptions": {
     //"ignoreDeprecations": "6.0",
     "strict": true,
+    "moduleResolution": "bundler",
     "paths": {
       "@/*": ["./*"],
       "@firebase/auth": ["./node_modules/@firebase/auth/dist/index.rn.d.ts"]
@@ -13,6 +14,6 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
-    "__test__/**/*"
+    "__tests__/**/*"
   ]
 }
