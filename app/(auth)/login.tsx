@@ -60,6 +60,7 @@ export default function Login() {
             color: colors.text,
           }}
           placeholder="Email"
+          nativeID="robo_username"
           placeholderTextColor={colors.text}
           onChangeText={setEmail}
           value={email}
@@ -77,6 +78,7 @@ export default function Login() {
           placeholder="Password"
           placeholderTextColor={colors.text}
           secureTextEntry
+          nativeID="robo_password"
           onChangeText={setPassword}
           value={password}
           accessibilityLabel="Password input field"
@@ -88,7 +90,7 @@ export default function Login() {
 
         <TouchableOpacity
           accessibilityRole="none"
-          accessibilityLabel="Login"
+          accessibilityLabel="robo_login_button"
           accessibilityState={{ disabled: loading }}
           style={{ ...styles.button, backgroundColor: colors.primary }}
           onPress={handleLogin}
