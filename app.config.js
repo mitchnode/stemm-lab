@@ -70,6 +70,7 @@ export default {
             "Allow $(PRODUCT_NAME) to access your microphone.",
         },
       ],
+      "expo-maps",
       "expo-asset",
       "react-native-video",
       [
@@ -81,7 +82,7 @@ export default {
     ],
     experiments: {
       typedRoutes: true,
-      reactCompiler: true,
+      reactCompiler: false,
     },
   },
 };

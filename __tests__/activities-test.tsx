@@ -52,10 +52,10 @@ jest.mock("react-native", () => {
 });
 
 import Activities from "@/app/(app)/index";
+
+import "@testing-library/jest-native/extend-expect";
 import { render, screen } from "@testing-library/react-native";
-
 import { Pressable, Text } from "react-native";
-
 jest.mock(
   "react-native-safe-area-context",
   () => require("react-native-safe-area-context/jest/mock").default,
