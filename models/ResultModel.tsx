@@ -49,7 +49,7 @@ export class ResultModel {
       resultType: this.resultType,
       resultValue: this.resultValue,
       resultData: this.resultData,
-      reusltLocation: this.resultLocation,
+      resultLocation: this.resultLocation,
     } as Result;
   };
 
