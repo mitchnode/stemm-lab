@@ -93,7 +93,6 @@ export default function AppLayout() {
               onPress={toggleMenu}
               accessibilityRole="none"
               accessibilityLabel="Open sidebar menu"
-              accessibilityHint="Opens sidebar menu"
               style={{ paddingHorizontal: 4 }}
             >
               <Ionicons name="menu" size={26} color={colors.text} />
@@ -118,7 +117,6 @@ export default function AppLayout() {
               </Text>
               <TouchableOpacity
                 onPress={() => setIsTeamVisible(false)}
-                accessibilityLabel="Close team view overview"
                 accessibilityRole="none"
                 accessibilityHint="Close the team view overview"
               >
@@ -302,7 +300,6 @@ export default function AppLayout() {
               style={[styles.menuItem, { backgroundColor: colors.background }]}
               onPress={changeTheme}
               accessibilityRole="none"
-              accessibilityLabel="Toggle interface color mode appearance profile"
               accessibilityState={{ checked: isDark }}
               accessibilityHint={`Switches UI container styles from dark mode to light mode configurations`}
             >

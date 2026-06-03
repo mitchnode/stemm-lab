@@ -116,8 +116,8 @@ export default function Login() {
 
         <TouchableOpacity
           accessibilityRole="none"
-          accessibilityLabel="Forgot password"
-          accessibilityHint="Triggers an email reset process using the input address provided above"
+          accessibilityLabel="Register"
+          accessibilityHint="Register new account"
           onPress={() => router.push("/register")}
         >
           <Text style={{ ...styles.link, color: colors.primary }}>

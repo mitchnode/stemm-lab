@@ -324,8 +324,8 @@ export default function RecordActivity5() {
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={{ alignSelf: "flex-end" }}
           accessible={true}
-          accessibilityRole="button"
-          accessibilityLabel={`Toggle color theme. Currently set to ${isDark ? "dark mode" : "light mode"}.`}
+          accessibilityRole="none"
+          accessibilityLabel={`Toggle color theme`}
         >
           <MaterialIcons
             name={isDark ? "wb-sunny" : "nights-stay"}
@@ -359,8 +359,7 @@ export default function RecordActivity5() {
           ]}
           onPress={() => handleToggleRecording()}
           accessible={true}
-          accessibilityRole="button"
-          accessibilityLabel={isActive ? "Stop Recording" : "Start Recording"}
+          accessibilityRole="none"
           accessibilityHint={
             isActive
               ? "Stops saving sensor metric data steps and processes final entries"
@@ -395,9 +394,6 @@ export default function RecordActivity5() {
                 borderColor: colors.border,
               },
             ]}
-            accessible={true}
-            accessibilityLiveRegion="polite"
-            accessibilityLabel={`Live Accelerometer Data. X axis: ${(acc.x * 9806.65).toFixed(0)} millimeters per second squared. Y axis: ${(acc.y * 9806.65).toFixed(0)} millimeters per second squared. Z axis: ${(acc.z * 9806.65).toFixed(0)} millimeters per second squared.`}
           >
             <Text
               style={[styles.header, { color: colors.text }]}

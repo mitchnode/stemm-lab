@@ -30,6 +30,7 @@ export default function RecordActivity3() {
   const [permission, requestPermission] = useCameraPermissions();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const [announcedAngle, setAnnouncedAngle] = useState(0);
 
   const [facing] = useState<CameraType>("back");
 
@@ -141,7 +142,7 @@ export default function RecordActivity3() {
           style={styles.button}
           onPress={requestPermission}
           accessible={true}
-          accessibilityRole="button"
+          accessibilityRole="none"
           accessibilityLabel="Grant app system camera hardware access permissions"
         >
           <Text style={styles.buttonText}>GRANT ACCESS</Text>
@@ -191,7 +192,7 @@ export default function RecordActivity3() {
         <View
           style={styles.angleBlock}
           accessible={true}
-          accessibilityRole="summary"
+          accessibilityRole="none"
           accessibilityLiveRegion="polite"
         >
           <Text style={{ ...styles.angleLabel, color: colors.text }}>
@@ -212,6 +213,9 @@ export default function RecordActivity3() {
             maximumValue={90}
             value={currentAngleDeg}
             onValueChange={setCurrentAngleDeg}
+            onSlidingComplete={(value) => {
+              setAnnouncedAngle(Math.round(value));
+            }}
             minimumTrackTintColor={colors.primary}
             maximumTrackTintColor={colors.text}
             thumbTintColor={colors.primary}
@@ -244,7 +248,7 @@ export default function RecordActivity3() {
             }}
             onPress={handleReset}
             accessible={true}
-            accessibilityRole="button"
+            accessibilityRole="none"
             accessibilityLabel="Reset workspace calculations"
             accessibilityHint="Clears the current captured image cache and unfreezes the live camera feed"
           >
@@ -258,7 +262,7 @@ export default function RecordActivity3() {
               }}
               onPress={record}
               accessible={true}
-              accessibilityRole="button"
+              accessibilityRole="none"
               accessibilityLabel="Confirm and upload recorded video"
               accessibilityHint="Captures viewshot image frame graphics"
             >
@@ -272,7 +276,7 @@ export default function RecordActivity3() {
               }}
               onPress={captureImage}
               accessible={true}
-              accessibilityRole="button"
+              accessibilityRole="none"
               accessibilityLabel="Capture current view frame snapshot"
               accessibilityHint="Snaps picture from active camera lens stream output"
             >

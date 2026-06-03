@@ -94,7 +94,7 @@ export default function Index() {
       <SafeAreaView
         style={{ ...styles.container, backgroundColor: colors.background }}
       >
-        <Text style={{ color: colors.text }} accessibilityRole="header">
+        <Text style={{ color: colors.text }} accessibilityRole="none">
           Welcome {team.teamName}
         </Text>
         <View

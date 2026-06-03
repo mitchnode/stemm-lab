@@ -423,10 +423,6 @@ export default function RecordActivity5() {
                 borderColor: colors.border,
               },
             ]}
-            accessible={true}
-            accessibilityRole="summary"
-            accessibilityLiveRegion="polite"
-            accessibilityLabel={`Real-time spatial axes metrics. Coordinate X: ${(acc.x * 9806.65).toFixed(0)} millimeters per second squared. Coordinate Y: ${(acc.y * 9806.65).toFixed(0)} millimeters per second squared. Coordinate Z: ${(acc.z * 9806.65).toFixed(0)} millimeters per second squared.`}
           >
             <Text
               style={[styles.header, { color: colors.text }]}
