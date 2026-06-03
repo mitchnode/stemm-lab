@@ -217,25 +217,6 @@ export default function AppLayout() {
               style={[styles.separator, { backgroundColor: colors.border }]}
             />
 
-            {/* NEW: Navigation Back to Main */}
-            <TouchableOpacity
-              style={[styles.menuItem, { backgroundColor: colors.background }]}
-              onPress={handleNavigateHome}
-              accessibilityRole="link"
-              accessibilityLabel="Go back to the main home dashboard"
-              accessibilityHint="Closes the drawer menu and returns you to the start page"
-            >
-              <Ionicons
-                name="home-outline"
-                size={22}
-                color={colors.text}
-                style={styles.itemIcon}
-              />
-              <Text style={[styles.menuItemText, { color: colors.text }]}>
-                Home Screen
-              </Text>
-            </TouchableOpacity>
-
             {/*  View Team Interactive Node */}
             <TouchableOpacity
               style={[styles.menuItem, { backgroundColor: colors.background }]}
