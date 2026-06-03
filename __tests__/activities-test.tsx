@@ -61,19 +61,23 @@ jest.mock(
   () => require("react-native-safe-area-context/jest/mock").default,
 );
 
-jest.mock("expo-router", () => ({
-  useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    back: jest.fn(),
-  }),
-  useNavigation: () => ({
-    navigate: jest.fn(),
-    goBack: jest.fn(),
-    addListener: jest.fn(() => () => {}),
-  }),
-  useLocalSearchParams: () => ({}),
-}));
+jest.mock("expo-router", () => {
+  const removeListener = jest.fn(); // Define it here
+  return {
+    useRouter: () => ({
+      push: jest.fn(),
+      replace: jest.fn(),
+      back: jest.fn(),
+    }),
+    useNavigation: () => ({
+      navigate: jest.fn(),
+      goBack: jest.fn(),
+      addListener: jest.fn(() => removeListener),
+      removeListener: removeListener,
+    }),
+    useLocalSearchParams: () => ({}),
+  };
+});
 
 jest.mock("@/services/authService", () => ({
   createUserWithEmailAndPassword: jest.fn(),
