@@ -47,12 +47,22 @@ const DescriptionTab = ({ activity, themeContainer, themeText }: TabProps) => (
   <ScrollView style={[styles.tabContent, themeContainer]}>
     <Text style={[styles.sectionTitle, themeText]}>Equipment Required</Text>
     {activity.description.equipment.map((item, index) => (
-      <Text key={index} style={[styles.bodyText, themeText]}>
-        • {item}
-      </Text>
+      <View
+        key={index}
+        accessible={true}
+        accessibilityRole="text"
+        accessibilityLabel={item}
+      >
+        <Text key={index} style={[styles.bodyText, themeText]}>
+          • {item}
+        </Text>
+      </View>
     ))}
 
-    <Text style={[styles.sectionTitle, themeText, styles.topMargin]}>
+    <Text
+      style={[styles.sectionTitle, themeText, styles.topMargin]}
+      accessibilityRole="header"
+    >
       Instructions
     </Text>
 
@@ -76,7 +86,7 @@ const WriteUpTab = ({
   isDark,
 }: WriteUpProps) => {
   const data = activity.writeUp;
-
+  const horizontalScrollRef = React.useRef<ScrollView>(null);
   const tableHeaderBg = isDark ? "#1e1e1e" : "#e0e0e0";
   const tableBorderColor = isDark ? "#333333" : "#cccccc";
   const cellStyle = [
@@ -88,7 +98,10 @@ const WriteUpTab = ({
 
   return (
     <ScrollView style={[styles.tabContent, themeContainer]}>
-      <Text style={[styles.sectionTitle, themeText]}>Write-up (on paper):</Text>
+      <Text style={[styles.sectionTitle, themeText]} accessibilityRole="header">
+        Write-up (on paper):
+      </Text>
+
       <View style={styles.questionsContainer}>
         {data.questions.map((question: string, index: number) => (
           <Text
@@ -100,9 +113,32 @@ const WriteUpTab = ({
         ))}
       </View>
 
-      <ScrollView horizontal showsHorizontalScrollIndicator>
+      <ScrollView
+        ref={horizontalScrollRef}
+        horizontal
+        showsHorizontalScrollIndicator
+        accessible={true} // Makes the scroll block contextually recognized
+        accessibilityRole="none"
+        accessibilityLabel="data table. up or down with your screen reader adjustment gesture to scroll horizontally."
+        accessibilityActions={[
+          { name: "scrollRight", label: "Scroll Table Right" },
+          { name: "scrollLeft", label: "Scroll Table Left" },
+        ]}
+        onAccessibilityAction={(event) => {
+          switch (event.nativeEvent.actionName) {
+            case "scrollRight":
+              horizontalScrollRef.current?.scrollTo({ x: 150, animated: true });
+              break;
+            case "scrollLeft":
+              horizontalScrollRef.current?.scrollTo({ x: 0, animated: true });
+              break;
+          }
+        }}
+      >
         <View
           style={[styles.tableContainer, { borderColor: tableBorderColor }]}
+          accessible={true}
+          accessibilityLabel="Data Recording Reference Table"
         >
           {/* Table Headers */}
           <View
@@ -114,6 +150,9 @@ const WriteUpTab = ({
                 borderBottomColor: tableBorderColor,
               },
             ]}
+            accessible={true}
+            accessibilityRole="header"
+            accessibilityLabel={`Columns: ${data.tableHeaders.join(", ")}`}
           >
             <View
               style={[
@@ -151,6 +190,8 @@ const WriteUpTab = ({
           {/* Table Data Rows */}
           {data.tableRows.map((row: any, rowIndex: number) => {
             const isLastRow = rowIndex === data.tableRows.length - 1;
+
+            const rowAccessibilityText = `Row ${rowIndex + 1}: ${data.tableHeaders[0]} is ${row.label}. Contains blank recording cells for column 2: ${data.tableHeaders[1]}, column 3: ${data.tableHeaders[2]}, column 4: ${data.tableHeaders[3]}, and column 5: ${data.tableHeaders[4]}.`;
             return (
               <View
                 key={rowIndex}
@@ -162,6 +203,9 @@ const WriteUpTab = ({
                     minHeight: 80,
                   },
                 ]}
+                accessible={true}
+                accessibilityRole="text"
+                accessibilityLabel={rowAccessibilityText}
               >
                 <View
                   style={[
@@ -179,10 +223,26 @@ const WriteUpTab = ({
                   </Text>
                 </View>
 
-                <View style={cellStyle} />
-                <View style={cellStyle} />
-                <View style={cellStyle} />
-                <View style={lastCellStyle} />
+                <View
+                  style={cellStyle}
+                  importantForAccessibility="no"
+                  aria-hidden={true}
+                />
+                <View
+                  style={cellStyle}
+                  importantForAccessibility="no"
+                  aria-hidden={true}
+                />
+                <View
+                  style={cellStyle}
+                  importantForAccessibility="no"
+                  aria-hidden={true}
+                />
+                <View
+                  style={lastCellStyle}
+                  importantForAccessibility="no"
+                  aria-hidden={true}
+                />
               </View>
             );
           })}
@@ -190,7 +250,10 @@ const WriteUpTab = ({
       </ScrollView>
 
       <View style={styles.topMargin}>
-        <Text style={[styles.sectionTitle, themeText]}>
+        <Text
+          style={[styles.sectionTitle, themeText]}
+          accessibilityRole="header"
+        >
           {data.discussionTitle}
         </Text>
         <Text style={[styles.bodyText, themeText, styles.justifyText]}>
@@ -214,7 +277,7 @@ const DiscussionTabContent = ({
   return (
     <ScrollView style={[styles.tabContent, themeContainer]}>
       <View style={[styles.topMargin]}>
-        <Text style={[styles.sectionTitle, themeText]}>
+        <Text style={[styles.sectionTitle, themeText]} accessibilityRole="none">
           Your Discussion Observations
         </Text>
         <TextInput
@@ -230,6 +293,8 @@ const DiscussionTabContent = ({
           value={userNotes}
           onChangeText={setUserNotes}
           textAlignVertical="top"
+          accessible={true}
+          accessibilityLabel="Discussion observations input field"
         />
       </View>
     </ScrollView>
@@ -279,10 +344,19 @@ export default function ActivityDetail() {
   return (
     <View style={[styles.container, themeContainer]}>
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, themeText]}>{activity.title}</Text>
+        <Text
+          style={[styles.headerTitle, themeText]}
+          accessibilityRole="header"
+        >
+          {activity.title}
+        </Text>
         <TouchableOpacity
           onPress={changeTheme}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessible={true}
+          accessibilityRole="none"
+          accessibilityState={{ checked: isDark }}
+          accessibilityLabel="Toggle Dark Mode"
         >
           <MaterialIcons
             name={isDark ? "wb-sunny" : "nights-stay"}
@@ -342,6 +416,9 @@ export default function ActivityDetail() {
             params: { activity: activity.id },
           }); // Pass activity number to filter result list
         }}
+        accessible={true}
+        accessibilityRole="none"
+        accessibilityLabel="View Results List"
       >
         <MaterialIcons name="list" size={30} color="#fff" />
       </TouchableOpacity>
@@ -353,6 +430,9 @@ export default function ActivityDetail() {
             params: { activityId: activity.id },
           });
         }}
+        accessible={true}
+        accessibilityRole="none"
+        accessibilityLabel="View Leaderboard"
       >
         <MaterialIcons name="leaderboard" size={30} color="#fff" />
       </TouchableOpacity>
@@ -361,6 +441,9 @@ export default function ActivityDetail() {
         onPress={() => {
           router.push(`./record/recordactivity${activity.id}`);
         }}
+        accessible={true}
+        accessibilityRole="none"
+        accessibilityLabel="Record New Activity Data"
       >
         <MaterialIcons name="add" size={30} color="#fff" />
       </TouchableOpacity>

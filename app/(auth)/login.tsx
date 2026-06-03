@@ -65,6 +65,8 @@ export default function Login() {
           value={email}
           autoCapitalize="none"
           keyboardType="email-address"
+          accessibilityLabel="Email input field"
+          accessibilityHint="Enter your registered account email address"
         />
         <TextInput
           style={{
@@ -77,12 +79,17 @@ export default function Login() {
           secureTextEntry
           onChangeText={setPassword}
           value={password}
+          accessibilityLabel="Password input field"
+          accessibilityHint="Enter your secret account password"
         />
         {error ? (
           <Text style={{ ...styles.error, color: colors.error }}>{error}</Text>
         ) : null}
 
         <TouchableOpacity
+          accessibilityRole="none"
+          accessibilityLabel="Login"
+          accessibilityState={{ disabled: loading }}
           style={{ ...styles.button, backgroundColor: colors.primary }}
           onPress={handleLogin}
           disabled={loading}
@@ -96,13 +103,23 @@ export default function Login() {
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={handleForgotPassword}>
+        <TouchableOpacity
+          accessibilityRole="none"
+          accessibilityLabel="Forgot password"
+          accessibilityHint="Triggers an email reset process using the input address provided above"
+          onPress={handleForgotPassword}
+        >
           <Text style={{ ...styles.link, color: colors.primary }}>
             Forgot password?
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push("/register")}>
+        <TouchableOpacity
+          accessibilityRole="none"
+          accessibilityLabel="Forgot password"
+          accessibilityHint="Triggers an email reset process using the input address provided above"
+          onPress={() => router.push("/register")}
+        >
           <Text style={{ ...styles.link, color: colors.primary }}>
             Register Account
           </Text>

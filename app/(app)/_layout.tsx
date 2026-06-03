@@ -91,7 +91,7 @@ export default function AppLayout() {
           headerLeft: () => (
             <Pressable
               onPress={toggleMenu}
-              accessibilityRole="button"
+              accessibilityRole="none"
               accessibilityLabel="Open sidebar menu"
               accessibilityHint="Opens sidebar menu"
               style={{ paddingHorizontal: 4 }}
@@ -119,7 +119,7 @@ export default function AppLayout() {
               <TouchableOpacity
                 onPress={() => setIsTeamVisible(false)}
                 accessibilityLabel="Close team view overview"
-                accessibilityRole="button"
+                accessibilityRole="none"
                 accessibilityHint="Close the team view overview"
               >
                 <Ionicons
@@ -219,11 +219,9 @@ export default function AppLayout() {
           <TouchableWithoutFeedback
             onPress={toggleMenu}
             accessible={true}
-            accessibilityRole="switch"
-            accessibilityLabel={
-              isDark ? "Switch to light theme" : "Switch to dark theme"
-            }
-            accessibilityHint="Closes the options menu overlay layout panel"
+            accessibilityRole="none"
+            accessibilityLabel={"side Drawer"}
+            accessibilityHint="opens and closes side drawer panel"
           >
             <View style={styles.backdropDismiss} />
           </TouchableWithoutFeedback>
@@ -253,7 +251,7 @@ export default function AppLayout() {
             <TouchableOpacity
               style={[styles.menuItem, { backgroundColor: colors.background }]}
               onPress={handleNavigateHome}
-              accessibilityRole="link"
+              accessibilityRole="none"
               accessibilityLabel="Go back to the main home dashboard"
               accessibilityHint="Closes the drawer menu and returns you to the start page"
             >
@@ -282,10 +280,10 @@ export default function AppLayout() {
                 setIsTeamVisible(nextVisibilityState);
                 toggleMenu();
               }}
-              accessibilityRole="button"
+              accessibilityRole="none"
               accessibilityLabel="View or switch current active team summary card"
               accessibilityState={{ checked: isTeamVisible }}
-              accessibilityHint="Toggles the dynamic team profile presentation card layout status"
+              accessibilityHint="Toggles the dynamic team profile"
             >
               <Ionicons
                 name="people-outline"
@@ -303,7 +301,7 @@ export default function AppLayout() {
             <TouchableOpacity
               style={[styles.menuItem, { backgroundColor: colors.background }]}
               onPress={changeTheme}
-              accessibilityRole="switch"
+              accessibilityRole="none"
               accessibilityLabel="Toggle interface color mode appearance profile"
               accessibilityState={{ checked: isDark }}
               accessibilityHint={`Switches UI container styles from dark mode to light mode configurations`}

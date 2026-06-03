@@ -331,13 +331,12 @@ export default function MeasureDropScreen() {
             ]}
             onPress={isRecording ? stopRecording : startRecording}
             accessible={true}
-            accessibilityRole="button"
+            accessibilityRole="none"
             accessibilityLabel={
               isRecording
                 ? "Stop video recording shutter button"
                 : "Start capturing video sequence shutter button"
             }
-            accessibilityHint="Toggles physical video stream record states inside player"
           >
             <View
               style={
@@ -356,7 +355,7 @@ export default function MeasureDropScreen() {
       <View
         style={styles.headerInstructions}
         accessible={true}
-        accessibilityRole="summary"
+        accessibilityRole="none"
         accessibilityLiveRegion="assertive" // Forces screen readers to announce instruction switches immediately
         accessibilityLabel={`Active Mode setup step: ${activeMode.replace("_", " ")}. ${getInstructionText()}`}
       >
@@ -396,8 +395,8 @@ export default function MeasureDropScreen() {
           onPress={handleVideoTap}
           style={StyleSheet.absoluteFill}
           accessible={true}
-          accessibilityRole="imagebutton"
-          accessibilityLabel="Video analyzer plotting pad surface area."
+          accessibilityRole="none"
+          accessibilityLabel="Video area"
           accessibilityHint={`Double-tap to register mapping pinpoint data item for ${activeMode.replace("_", " ")}`}
         />
 
@@ -478,7 +477,7 @@ export default function MeasureDropScreen() {
         <View
           style={styles.timelineRow}
           accessible={true}
-          accessibilityLabel={`Media Timeline playback track scrubber slider profile. Position at ${currentTime.toFixed(1)} seconds of total duration ${duration.toFixed(1)} seconds`}
+          accessibilityLabel={`Media Timeline playback track slider scrubber. Position at ${currentTime.toFixed(1)} seconds of total duration ${duration.toFixed(1)} seconds`}
         >
           <Text style={{ color: colors.text }}>{currentTime.toFixed(1)}s</Text>
           <Slider
@@ -500,7 +499,7 @@ export default function MeasureDropScreen() {
             style={[styles.utilityBtn, { backgroundColor: colors.primary }]}
             onPress={() => setIsPaused(!isPaused)}
             accessible={true}
-            accessibilityRole="button"
+            accessibilityRole="none"
             accessibilityLabel={
               isPaused ? "Play analysis video" : "Pause video playback engine"
             }
@@ -512,7 +511,7 @@ export default function MeasureDropScreen() {
             style={[styles.utilityBtn, { backgroundColor: "#444" }]}
             onPress={resetCoordinates}
             accessible={true}
-            accessibilityRole="button"
+            accessibilityRole="none"
             accessibilityLabel="Clear points"
             accessibilityHint="Wipes all recorded mapping coordinate vectors"
           >
@@ -523,9 +522,9 @@ export default function MeasureDropScreen() {
             style={[styles.utilityBtn, { backgroundColor: "#c62828" }]}
             onPress={() => setIsRecordingMode(true)}
             accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel="Retake measurement video resource asset"
-            accessibilityHint="Discards active workspace cache file assets and restarts hardware capturing module"
+            accessibilityRole="none"
+            accessibilityLabel="Retake video"
+            accessibilityHint="Discards active workspace cache file assets and restarts video capture"
           >
             <Text style={styles.btnText}>Retake</Text>
           </TouchableOpacity>
@@ -561,7 +560,7 @@ export default function MeasureDropScreen() {
               style={[styles.utilityBtn, { backgroundColor: "green" }]}
               onPress={handleSaveVideo}
               accessible={true}
-              accessibilityRole="button"
+              accessibilityRole="none"
               accessibilityState={{ busy: isUploading }}
               accessibilityLabel="Upload video"
               accessibilityHint="uploads video to storage"

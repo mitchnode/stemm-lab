@@ -51,9 +51,13 @@ export default function Leaderbaord() {
     >
       <View style={styles.title}>
         <Text style={{ ...styles.titleText, color: colors.text }}>
+          accessibilityRole="header"
           {activity?.title}
         </Text>
-        <Text style={{ ...styles.titleText, color: colors.text }}>
+        <Text
+          style={{ ...styles.titleText, color: colors.text }}
+          accessibilityRole="header"
+        >
           Leaderboard
         </Text>
       </View>
@@ -62,8 +66,13 @@ export default function Leaderbaord() {
           <View
             key={key}
             style={{ ...styles.table, borderColor: colors.border }}
+            accessible={true}
+            accessibilityLabel={`Results Category: ${key}`}
           >
-            <View style={{ ...styles.tableRow, borderColor: colors.border }}>
+            <View
+              style={{ ...styles.tableRow, borderColor: colors.border }}
+              importantForAccessibility="no-hide-descendants"
+            >
               <View
                 style={{
                   ...styles.headerCell,
@@ -76,7 +85,10 @@ export default function Leaderbaord() {
                 </Text>
               </View>
             </View>
-            <View style={{ ...styles.tableRow, borderColor: colors.border }}>
+            <View
+              style={{ ...styles.tableRow, borderColor: colors.border }}
+              importantForAccessibility="no-hide-descendants"
+            >
               <View
                 style={{
                   ...styles.rankCell,
@@ -118,6 +130,7 @@ export default function Leaderbaord() {
               >
                 <View
                   style={{ ...styles.rankCell, borderColor: colors.border }}
+                  importantForAccessibility="no"
                 >
                   <Text style={{ ...styles.cellText, color: colors.text }}>
                     {index + 1}
@@ -125,6 +138,7 @@ export default function Leaderbaord() {
                 </View>
                 <View
                   style={{ ...styles.teamCell, borderColor: colors.border }}
+                  importantForAccessibility="no"
                 >
                   <Text style={{ ...styles.cellText, color: colors.text }}>
                     {team.teamNames[result.teamID]}
@@ -132,6 +146,7 @@ export default function Leaderbaord() {
                 </View>
                 <View
                   style={{ ...styles.resultCell, borderColor: colors.border }}
+                  importantForAccessibility="no"
                 >
                   <Text style={{ ...styles.cellText, color: colors.text }}>
                     {result.resultValue}

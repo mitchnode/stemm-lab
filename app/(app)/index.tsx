@@ -94,37 +94,75 @@ export default function Index() {
       <SafeAreaView
         style={{ ...styles.container, backgroundColor: colors.background }}
       >
-        <Text style={{ color: colors.text }}>Welcome {team.teamName}</Text>
-        <Button onPress={clearTeam}>Clear Team</Button>
-        <Button onPress={clearAll}>Clear All</Button>
-        <Button
-          onPress={() => {
-            router.push("/(app)/team-view");
-          }}
+        <Text style={{ color: colors.text }} accessibilityRole="header">
+          Welcome {team.teamName}
+        </Text>
+        <View
+          accessible={true}
+          accessibilityRole="none"
+          accessibilityLabel="Clear Current Team Configuration"
         >
-          View Team
-        </Button>
-
-        <Button
-          onPress={() => {
-            router.push("/activities_selection");
-          }}
+          <Button onPress={clearTeam}>Clear Team</Button>
+        </View>
+        <View
+          accessible={true}
+          accessibilityRole="none"
+          accessibilityLabel="Clear All Local Application Keys"
         >
-          Activities{" "}
-        </Button>
-        <Button onPress={changeTheme}>Switch theme</Button>
+          <Button onPress={clearAll}>Clear All</Button>
+        </View>
+        <View
+          accessible={true}
+          accessibilityRole="none"
+          accessibilityLabel="Navigate to View Team Profile"
+        >
+          <Button
+            onPress={() => {
+              router.push("/(app)/team-view");
+            }}
+          >
+            View Team
+          </Button>
+        </View>
+        <View
+          accessible={true}
+          accessibilityRole="none"
+          accessibilityLabel="Navigate to Laboratory Activities Selection"
+        >
+          <Button
+            onPress={() => {
+              router.push("/activities_selection");
+            }}
+          >
+            Activities{" "}
+          </Button>
+        </View>
+        <View
+          accessible={true}
+          accessibilityRole="none"
+          accessibilityState={{ checked: isDark }}
+          accessibilityLabel="Switch Application Theme"
+        >
+          <Button onPress={changeTheme}>Switch theme</Button>
+        </View>
         {/* Switch theme button is just for testing, remove once setup in the menu. */}
-        <Button
-          onPress={() => {
-            const activityArray = ["1", "2", "3", "4", "5", "6", "7"];
-            router.push({
-              pathname: "/(app)/resultlist",
-              params: { activity: activityArray.join(",") },
-            }); // Pass activity number to filter result list
-          }}
+        <View
+          accessible={true}
+          accessibilityRole="none"
+          accessibilityLabel="Navigate to Global Results List"
         >
-          Result List
-        </Button>
+          <Button
+            onPress={() => {
+              const activityArray = ["1", "2", "3", "4", "5", "6", "7"];
+              router.push({
+                pathname: "/(app)/resultlist",
+                params: { activity: activityArray.join(",") },
+              }); // Pass activity number to filter result list
+            }}
+          >
+            Result List
+          </Button>
+        </View>
       </SafeAreaView>
     </SafeAreaProvider>
   );
