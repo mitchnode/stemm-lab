@@ -51,7 +51,6 @@ export default function Leaderbaord() {
     >
       <View style={styles.title}>
         <Text style={{ ...styles.titleText, color: colors.text }}>
-          accessibilityRole="header"
           {activity?.title}
         </Text>
         <Text
