@@ -23,7 +23,7 @@ import Slider from "@react-native-community/slider";
 import { CameraView } from "expo-camera";
 
 import { LocationObject } from "expo-location";
-import MapView, { LatLng, Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { Coordinates, GoogleMaps } from "expo-maps";
 import Video, { VideoRef } from "react-native-video";
 
 //imported from record activity 1/////////////////
@@ -64,7 +64,7 @@ export default observer(function PlaybackResults() {
   const cameraRef = useRef<CameraView>(null);
   const videoRef = useRef<VideoRef>(null);
 
-  const [location, setLocation] = useState<LatLng>({
+  const [location, setLocation] = useState<Coordinates>({
     latitude: 0,
     longitude: 0,
   });
@@ -156,7 +156,7 @@ export default observer(function PlaybackResults() {
       setAudioUri("");
       setImageUri("");
     };
-  }, []);
+  }, [resultID]);
 
   ///////////// ************ ACTIVITY 1 LOGIC *****************///////////////////
   // this is the coordinates pin and measurement logic for activitiy 1 playback //
@@ -501,19 +501,11 @@ export default observer(function PlaybackResults() {
             <Text style={{ color: colors.text }}>{result.resultType}</Text>
             <Text style={{ color: colors.text }}>{result.resultValue}</Text>
           </View>
-          <MapView
-            provider={PROVIDER_GOOGLE}
+          <GoogleMaps.View
             style={styles.map}
-            camera={{
-              center: location,
-              pitch: 0,
-              heading: 0,
-              altitude: 18,
-              zoom: 18,
-            }}
-          >
-            <Marker coordinate={location} />
-          </MapView>
+            cameraPosition={{ coordinates: location, zoom: 18 }}
+            markers={[{ coordinates: location }]}
+          />
         </>
       )}
     </View>

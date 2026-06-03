@@ -25,7 +25,7 @@ export default observer(() => {
   const { user } = useAuth();
   const { activity } = useLocalSearchParams();
 
-  console.log("Current Activity Filter:", activity);
+  //console.log("Current Activity Filter:", activity);
   const router = useRouter();
   const { colors } = useTheme();
   const [loading, setLoading] = useState(true);
@@ -40,7 +40,7 @@ export default observer(() => {
         await resultList.handlePopulate();
         console.log(
           "Full Result List Data:",
-          JSON.stringify(resultList.populatedList, null, 2),
+          JSON.stringify(resultList.populatedList),
         );
       }
     } catch (error) {
@@ -90,11 +90,6 @@ export default observer(() => {
     loadResults();
   }, []);
 
-  const isClickable = (res: any) => {
-    const id = res.activityID.toString();
-    return ["1", "2", "3", "4", "5", "7"].includes(id);
-  };
-
   const allowedList = React.useMemo(() => {
     if (Array.isArray(activity)) return activity; // arrives as an array
     if (typeof activity === "string") return activity.split(","); // If it arrives as a string
@@ -102,6 +97,7 @@ export default observer(() => {
   }, [activity]);
 
   const getLocation = (resultLocation: string): LocationObjectCoords | null => {
+    console.log(resultLocation);
     if (!resultLocation) return null;
     const location: LocationObject = JSON.parse(resultLocation);
     return location.coords;
