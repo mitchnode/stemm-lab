@@ -77,6 +77,7 @@ export default function Activities({}) {
                 const lab = ALL_LABS[labKey as keyof typeof ALL_LABS];
                 return (
                   <Pressable
+                    testID={`lab-button-${lab.id}`}
                     style={{
                       ...styles.button,
                       backgroundColor: colors.primary,

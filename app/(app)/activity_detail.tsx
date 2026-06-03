@@ -417,7 +417,7 @@ export default function ActivityDetail() {
           }); // Pass activity number to filter result list
         }}
         accessible={true}
-        accessibilityRole="none"
+        accessibilityRole="button"
         accessibilityLabel="View Results List"
       >
         <MaterialIcons name="list" size={30} color="#fff" />
@@ -431,7 +431,7 @@ export default function ActivityDetail() {
           });
         }}
         accessible={true}
-        accessibilityRole="none"
+        accessibilityRole="button"
         accessibilityLabel="View Leaderboard"
       >
         <MaterialIcons name="leaderboard" size={30} color="#fff" />
@@ -442,7 +442,7 @@ export default function ActivityDetail() {
           router.push(`./record/recordactivity${activity.id}`);
         }}
         accessible={true}
-        accessibilityRole="none"
+        accessibilityRole="button"
         accessibilityLabel="Record New Activity Data"
       >
         <MaterialIcons name="add" size={30} color="#fff" />
