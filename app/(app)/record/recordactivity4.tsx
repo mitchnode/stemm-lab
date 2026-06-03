@@ -228,7 +228,7 @@ export default function RecordActivity5() {
                 alert("Error: Team ID not found. Please try again.");
                 return;
               }
-              const dateTime = new Date().toLocaleString();
+              const dateTime = new Date().toISOString();
 
               const stringifiedData = JSON.stringify(points);
               result.setTeamID(team.teamID);

@@ -13,6 +13,7 @@ export class ResultModel {
   resultType = "";
   resultValue = 0;
   resultData = "";
+  resultLocation = "";
 
   constructor() {
     makeAutoObservable(this);
@@ -27,6 +28,7 @@ export class ResultModel {
     resultType: string,
     resultValue: number,
     resultData: string,
+    resultLocation: string,
   ) {
     this.resultID = resultID;
     this.teamID = teamID;
@@ -35,6 +37,7 @@ export class ResultModel {
     this.resultType = resultType;
     this.resultValue = resultValue;
     this.resultData = resultData;
+    this.resultLocation = resultLocation;
   }
 
   objectifyResult = () => {
@@ -46,6 +49,7 @@ export class ResultModel {
       resultType: this.resultType,
       resultValue: this.resultValue,
       resultData: this.resultData,
+      reusltLocation: this.resultLocation,
     } as Result;
   };
 
@@ -108,7 +112,7 @@ export class ResultModel {
           resultType: "No Result",
           resultValue: "No Result",
           resultData: "No Result",
-          resultThumbnail: "No Result",
+          resultLocation: "No Result",
         };
       }
       this.resultID = resultID;
@@ -121,6 +125,7 @@ export class ResultModel {
         resultJSON.resultType,
         resultJSON.resultValue,
         resultJSON.resultData,
+        resultJSON.resultLocation,
       );
     } catch (error) {
       console.error("Error loading result:", error, "resultID:", resultID);

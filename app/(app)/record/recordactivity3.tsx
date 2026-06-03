@@ -68,7 +68,7 @@ export default function RecordActivity3() {
   useEffect(() => {
     if (data) {
       // Get any processed result here before passing to the results page
-      const dateTime = new Date().toLocaleString();
+      const dateTime = new Date().toISOString();
       const resultType = "Bend Angle Degrees(°)";
       const resultValue = currentAngleDeg.toString();
       result.setTeamID(team.teamID);

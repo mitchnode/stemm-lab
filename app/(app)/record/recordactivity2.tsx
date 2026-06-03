@@ -93,7 +93,7 @@ const RecordActivity2 = observer(() => {
   useEffect(() => {
     if (data) {
       // Get any processed result here before passing to the results page
-      const dateTime = new Date().toLocaleString();
+      const dateTime = new Date().toISOString();
       const resultType = "Volume"; // <---------------------------------------------------- Modifiy resultType to suit sensor
       const resultValue = maxdb.toFixed(2).toString(); // <------------------------------------------- Modify resultValue
       result.setTeamID(team.teamID);

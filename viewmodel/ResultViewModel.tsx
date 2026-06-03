@@ -1,5 +1,10 @@
 import { ResultModel } from "@/models/ResultModel";
+import {
+  getLastKnownPositionAsync,
+  requestForegroundPermissionsAsync
+} from "expo-location";
 import { makeAutoObservable, runInAction } from "mobx";
+import { StyleSheet, Text, View } from "react-native";
 
 export class ResultViewModel {
   result = new ResultModel();
@@ -10,6 +15,7 @@ export class ResultViewModel {
   resultType = "";
   resultValue = 0;
   resultData = "";
+  resultLocation = "";
 
   constructor() {
     makeAutoObservable(this);
@@ -73,6 +79,19 @@ export class ResultViewModel {
     return this.resultData;
   }
 
+  async getCurrentLocation() {
+    let { status } = await requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      return (
+        <View style={StyleSheet.absoluteFill}>
+          <Text>Permission to access location was denied</Text>
+        </View>
+      );
+    }
+
+    return await getLastKnownPositionAsync({});
+  }
+
   getResultDataParsed(): { timestamp: number; magnitude: number }[] {
     try {
       return this.resultData ? JSON.parse(this.resultData) : [];
@@ -83,12 +102,15 @@ export class ResultViewModel {
   }
 
   // Record the result data, generating a new resultID
-  handleRecord() {
+  async handleRecord() {
     this.resultID =
       "result-" +
       this.activityID +
       "-" +
       Math.random().toString(36).substring(0, 11);
+
+    this.resultLocation = JSON.stringify(await this.getCurrentLocation());
+
     this.result.setResultInfo(
       this.resultID,
       this.teamID,
@@ -97,6 +119,7 @@ export class ResultViewModel {
       this.resultType,
       this.resultValue,
       this.resultData,
+      this.resultLocation,
     );
     return this.result.storeResult();
   }
@@ -117,6 +140,7 @@ export class ResultViewModel {
       this.resultType = this.result.resultType;
       this.resultValue = this.result.resultValue;
       this.resultData = this.result.resultData;
+      this.resultLocation = this.result.resultLocation;
     });
   }
 

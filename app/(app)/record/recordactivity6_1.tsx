@@ -46,7 +46,7 @@ export default function RecordActivity6_1() {
   useEffect(() => {
     if (data) {
       // Get any processed result here before passing to the results page
-      const dateTime = new Date().toLocaleString();
+      const dateTime = new Date().toISOString();
       const resultType = "Reaction Timer - Time (ms)";
       const resultValue = bestTime!.toString();
       result.setTeamID(team.teamID);
