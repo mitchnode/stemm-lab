@@ -11,7 +11,7 @@ import { Text, useTheme as useRETheme } from "re-native-ui";
 
 const team = new TeamViewModel();
 
-export default function activities({}) {
+export default function Activities({}) {
   const router = useRouter();
   const navigation = useNavigation();
   const { colors } = useTheme();
@@ -51,14 +51,18 @@ export default function activities({}) {
       style={{ backgroundColor: colors.background }}
       contentContainerStyle={{ flexGrow: 1, paddingBottom: 60 }}
     >
-      <View style={{ ...styles.screen, backgroundColor: colors.background }}>
-        <Text style={{ ...styles.heading, color: colors.text }}>
+      <View
+        testID="b4"
+        style={{ ...styles.screen, backgroundColor: colors.background }}
+      >
+        <Text testID="c4" style={{ ...styles.heading, color: colors.text }}>
           Activities
         </Text>
         <View style={styles.info}>
           {/* Activities Selection Box */}
           <View style={[styles.box, { backgroundColor: colors.surface }]}>
             <View
+              testID="t1"
               style={{
                 flexDirection: "row",
                 flexWrap: "wrap",
@@ -73,6 +77,7 @@ export default function activities({}) {
                 const lab = ALL_LABS[labKey as keyof typeof ALL_LABS];
                 return (
                   <Pressable
+                    testID={`lab-button-${lab.id}`}
                     style={{
                       ...styles.button,
                       backgroundColor: colors.primary,

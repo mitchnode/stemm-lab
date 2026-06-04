@@ -267,7 +267,12 @@ export default observer(function PlaybackResults() {
       <View
         style={[styles.container2, { backgroundColor: colors2.background }]}
       >
-        <View style={styles.headerInstructions}>
+        <View
+          style={styles.headerInstructions}
+          accessible={true}
+          accessibilityRole="none"
+          accessibilityLabel={`Active Tool Mode: ${activeMode.replace("_", " ")}`}
+        >
           <Text style={[styles.instructionText, { color: "white" }]}>
             Current Mode: {activeMode.replace("_", " ")}
           </Text>
@@ -285,7 +290,13 @@ export default observer(function PlaybackResults() {
           </Text>
         </View>
 
-        <View style={styles.videoCanvas}>
+        <View
+          style={styles.videoCanvas}
+          accessible={true}
+          accessibilityRole="image"
+          accessibilityLabel="Video playback overlay analytical surface map"
+          accessibilityHint=" tap the target canvas layout grid locations to map selected points"
+        >
           {videoUri && (
             <Video
               ref={videoRef}
@@ -295,6 +306,7 @@ export default observer(function PlaybackResults() {
               paused={isPaused}
               onLoad={(data) => setDuration(data.duration)}
               onProgress={(data) => setCurrentTime(data.currentTime)}
+              importantForAccessibility="no"
               onError={(e) => console.error("Native local playback error: ", e)}
             />
           )}
@@ -303,6 +315,7 @@ export default observer(function PlaybackResults() {
             activeOpacity={1}
             onPress={handleVideoTap}
             style={StyleSheet.absoluteFill}
+            accessible={false}
           />
 
           {/* Anchors */}
@@ -317,6 +330,7 @@ export default observer(function PlaybackResults() {
                 },
               ]}
               pointerEvents="none"
+              importantForAccessibility="no"
             />
           )}
           {rulerBottom && (
@@ -330,6 +344,7 @@ export default observer(function PlaybackResults() {
                 },
               ]}
               pointerEvents="none"
+              importantForAccessibility="no"
             />
           )}
           {chuteStart && (
@@ -343,6 +358,7 @@ export default observer(function PlaybackResults() {
                 },
               ]}
               pointerEvents="none"
+              importantForAccessibility="no"
             />
           )}
           {chuteEnd && (
@@ -356,6 +372,7 @@ export default observer(function PlaybackResults() {
                 },
               ]}
               pointerEvents="none"
+              importantForAccessibility="no"
             />
           )}
           {bounce && (
@@ -369,13 +386,21 @@ export default observer(function PlaybackResults() {
                 },
               ]}
               pointerEvents="none"
+              importantForAccessibility="no"
             />
           )}
         </View>
 
         <View style={styles.controllerUi}>
-          <View style={styles.timelineRow}>
-            <Text style={{ color: colors2.text }}>
+          <View
+            style={styles.timelineRow}
+            accessible={true}
+            accessibilityLabel={`Timeline track configuration. Elapsed timeline: ${currentTime.toFixed(1)} seconds of total ${duration.toFixed(1)} seconds.`}
+          >
+            <Text
+              style={{ color: colors2.text }}
+              importantForAccessibility="no"
+            >
               {currentTime.toFixed(1)}s
             </Text>
             <Slider
@@ -387,6 +412,9 @@ export default observer(function PlaybackResults() {
               minimumTrackTintColor={colors.primary}
               maximumTrackTintColor={colors.text}
               thumbTintColor={colors.primary}
+              accessible={true}
+              accessibilityRole="adjustable"
+              accessibilityLabel="Video frame navigation scrubbing track line"
             />
             <Text style={{ color: colors2.text }}>{duration.toFixed(1)}s</Text>
           </View>
@@ -395,6 +423,11 @@ export default observer(function PlaybackResults() {
             <TouchableOpacity
               style={[styles.utilityBtn, { backgroundColor: colors2.primary }]}
               onPress={() => setIsPaused(!isPaused)}
+              accessible={true}
+              accessibilityRole="none"
+              accessibilityLabel={
+                isPaused ? "Play Video Track" : "Pause Video Track"
+              }
             >
               <Text style={styles.btnText}>{isPaused ? "Play" : "Pause"}</Text>
             </TouchableOpacity>
@@ -402,24 +435,33 @@ export default observer(function PlaybackResults() {
             <TouchableOpacity
               style={[styles.utilityBtn, { backgroundColor: "#444" }]}
               onPress={resetCoordinates}
+              accessible={true}
+              accessibilityRole="none"
+              accessibilityLabel="Clear All Placed Coordinates Pins"
             >
               <Text style={styles.btnText}>Clear Points</Text>
             </TouchableOpacity>
           </View>
 
-          <View style={styles.resultPanel}>
+          <View
+            style={styles.resultPanel}
+            accessible={true}
+            accessibilityRole="text"
+            accessibilityLabel={`Calculated metric values. Drop distance: ${metrics.drop}. Drop speed: ${metrics.speed}. Bounce height: ${metrics.bounce}.`}
+          >
             <View style={styles.metricColumn}>
               <Text style={styles.resultLabel}>DROP DISTANCE</Text>
               <Text style={[styles.resultValue, { color: colors2.success }]}>
                 {metrics.drop}
               </Text>
-              <View style={styles.metricColumn}>
-                <Text style={styles.resultLabel}>DROP SPEED</Text>
-                <Text style={[styles.resultValue, { color: colors.primary }]}>
-                  {metrics.speed}
-                </Text>
-              </View>
             </View>
+            <View style={styles.metricColumn} importantForAccessibility="no">
+              <Text style={styles.resultLabel}>DROP SPEED</Text>
+              <Text style={[styles.resultValue, { color: colors.primary }]}>
+                {metrics.speed}
+              </Text>
+            </View>
+
             <View style={styles.metricColumn}>
               <Text style={styles.resultLabel}>BOUNCE HEIGHT</Text>
               <Text style={[styles.resultValue, { color: colors2.accent }]}>
@@ -442,12 +484,27 @@ export default observer(function PlaybackResults() {
       {resultID && (
         <>
           {videoUri && <VideoView player={videoPlayer} style={styles.video} />}
-          {imageUri && <Image source={imageUri} style={styles.image} />}
-
-          {audioUri && (
-            <View style={styles.resultData}>
-              {!audioPlayerStatus.playing ? (
-                <TouchableOpacity onPress={() => audioPlayer.play()}>
+          {imageUri && (
+            <Image
+              source={imageUri}
+              style={styles.image}
+              accessible={true}
+              accessibilityLabel="Visual capture data image"
+            />
+          )}
+          <View style={styles.resultData}>
+            {audioUri &&
+              (!audioPlayerStatus.playing ? (
+                <TouchableOpacity
+                  onPress={() => audioPlayer.play()}
+                  accessible={true}
+                  accessibilityRole="none"
+                  accessibilityLabel={
+                    audioPlayerStatus.playing
+                      ? "Pause recorded audio sample clip playback track"
+                      : "Play recorded audio sample clip playback track"
+                  }
+                >
                   <Ionicons
                     name="play"
                     size={100}
@@ -462,16 +519,20 @@ export default observer(function PlaybackResults() {
                     color={colors.textSecondary}
                   />
                 </TouchableOpacity>
-              )}
-            </View>
-          )}
+              ))}
+          </View>
 
           {(result.activityID === "5" ||
             result.activityID === "4" ||
             result.activityID === "7") &&
             graphData.length > 0 && (
               <ScrollView>
-                <View style={styles.graph}>
+                <View
+                  style={styles.graph}
+                  accessible={true}
+                  accessibilityRole="image"
+                  accessibilityLabel={`acceleremter data metrics data chart mapping over ${graphData.length}`}
+                >
                   <LineChart
                     data={chartData}
                     width={Dimensions.get("window").width - 32}
@@ -485,6 +546,7 @@ export default observer(function PlaybackResults() {
                     }}
                     style={styles.chart}
                   />
+
                   <View style={styles.resultData}>
                     {graphData.map((point, index) => (
                       <Text key={index} style={{ color: colors.text }}>

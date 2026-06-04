@@ -78,7 +78,10 @@ export default function RecordActivity6_1() {
   return (
     <View style={{ ...styles.container, backgroundColor: colors.background }}>
       <View style={styles.header}>
-        <Text style={{ ...styles.title, color: colors.text }}>
+        <Text
+          style={{ ...styles.title, color: colors.text }}
+          accessibilityRole="header"
+        >
           REACTION TIMER
         </Text>
         {!reactionTime !== null && (
@@ -87,7 +90,11 @@ export default function RecordActivity6_1() {
           </Text>
         )}
         {bestTime !== null && (
-          <View style={[styles.statsRow]}>
+          <View
+            style={[styles.statsRow]}
+            accessible={true}
+            accessibilityLabel={`High Score is ${bestTime} milliseconds`}
+          >
             <Text style={{ ...styles.statLabel, color: colors.text }}>
               High Score:
             </Text>
@@ -119,6 +126,10 @@ export default function RecordActivity6_1() {
                 borderRadius: R_BUTTON_SIZE / 2,
               }}
               activeOpacity={0.7}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Press Me"
+              accessibilityHint="Target button. Press as fast as you can to record your reaction time."
             >
               <Text style={{ ...styles.text, color: colors.text }}>
                 Press Me
@@ -128,7 +139,16 @@ export default function RecordActivity6_1() {
         )}
 
         {!ready && reactionTime !== null && (
-          <View style={styles.resultContainer}>
+          <View
+            style={styles.resultContainer}
+            accessible={true}
+            accessibilityLiveRegion="polite"
+            accessibilityLabel={
+              reactionTime === bestTime
+                ? `New High Score! ${reactionTime} milliseconds`
+                : `Your reaction time is ${reactionTime} milliseconds`
+            }
+          >
             <Text style={{ ...styles.text, color: colors.text }}>
               {reactionTime}
             </Text>
@@ -152,6 +172,10 @@ export default function RecordActivity6_1() {
               backgroundColor: colors.primary,
             }}
             onPress={start}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Retry"
+            accessibilityHint="Restarts the reaction timer test"
           >
             <Text style={{ ...styles.buttonText }}>Retry</Text>
           </TouchableOpacity>
@@ -161,6 +185,10 @@ export default function RecordActivity6_1() {
               backgroundColor: colors.success,
             }}
             onPress={record}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Record Result"
+            accessibilityHint="Saves this reaction time to your team results and opens the results page"
           >
             <Text style={{ ...styles.buttonText }}>Record Result</Text>
           </TouchableOpacity>
