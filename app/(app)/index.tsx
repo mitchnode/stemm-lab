@@ -33,7 +33,7 @@ export default function Activities({}) {
 
   const loadTeam = async () => {
     if (user) await team.handleRestore(user.uid);
-    if (!team) router.push("/(app)/team");
+    if (!team.teamID) router.push("/(app)/team");
   };
 
   const theme = useRETheme();
