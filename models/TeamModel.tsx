@@ -52,7 +52,10 @@ export class TeamModel {
   // Store the team data in local storage and in Firestore
   storeTeam = async () => {
     try {
-      await AsyncStorage.setItem("team", JSON.stringify(this.objectifyTeam()));
+      await AsyncStorage.setItem(
+        `team-${this.uid}`,
+        JSON.stringify(this.objectifyTeam()),
+      );
       await createTeam(this.objectifyTeam());
       router.push("/");
     } catch (error) {
@@ -64,7 +67,7 @@ export class TeamModel {
   loadTeam = async (uid: string) => {
     try {
       let teamJSON;
-      let storedTeam = await AsyncStorage.getItem("team");
+      let storedTeam = await AsyncStorage.getItem(`team-${this.uid}`);
       if (!storedTeam) {
         storedTeam = JSON.stringify(await getTeam(uid));
       }
