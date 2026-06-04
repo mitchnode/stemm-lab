@@ -120,7 +120,12 @@ export default observer(() => {
   return (
     <View style={{ ...styles.screen, backgroundColor: colors.background }}>
       <ScrollView>
-        <Text style={{ ...styles.heading, color: colors.text }}>Results</Text>
+        <Text
+          style={{ ...styles.heading, color: colors.text }}
+          accessibilityRole="header"
+        >
+          Results
+        </Text>
         {resultList.populatedList.map((result, index) => {
           // We check if the result's ID is in allowed list
           const isinList = allowedList.includes(result.activityID.toString());
@@ -138,15 +143,27 @@ export default observer(() => {
                       params: { resultID: result.resultID },
                     });
                   }}
+                  accessible={true}
+                  accessibilityRole="none"
+                  accessibilityLabel={`Result entry ${index + 1}. Type: Result ID: ${result.resultID}. Activity ID: ${result.activityID}. Timestamp: ${result.resultDateTime}. Outcome metric: ${result.resultValue || "No recorded value"}.`}
+                  accessibilityHint="to review this activity in playback"
                 >
-                  {result.activityID == "1" && <VideoIcon />}
-                  {result.activityID == "2" && <AudioIcon />}
-                  {result.activityID == "3" && <ImageIcon />}
-                  {result.activityID != "1" &&
-                    result.activityID != "2" &&
-                    result.activityID != "3" && <SensorIcon />}
-
-                  <View style={styles.info}>
+                  <View
+                    accessible={false}
+                    importantForAccessibility="no-hide-descendants"
+                  >
+                    {result.activityID == "1" && <VideoIcon />}
+                    {result.activityID == "2" && <AudioIcon />}
+                    {result.activityID == "3" && <ImageIcon />}
+                    {result.activityID != "1" &&
+                      result.activityID != "2" &&
+                      result.activityID != "3" && <SensorIcon />}
+                  </View>
+                  <View
+                    style={styles.info}
+                    accessible={false}
+                    importantForAccessibility="no-hide-descendants"
+                  >
                     <View style={styles.row}>
                       <Text style={{ ...styles.bold_text, color: colors.text }}>
                         Result ID:

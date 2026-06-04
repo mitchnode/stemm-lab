@@ -139,6 +139,7 @@ export default function Index() {
             rules={{ required: "Team Name is required" }}
             style={{ ...styles.input, backgroundColor: colors.background }}
             placeholder="Enter Team Name"
+            accessibilityLabel="Team Name input field"
           />
           <ControlledSelect
             name="year"
@@ -148,6 +149,7 @@ export default function Index() {
             control={control}
             rules={{ required: "Year is required" }}
             placeholder="Select Year"
+            accessibilityLabel="Select Year dropdown"
           />
           <Text style={styles.label}>Member Names</Text>
 
@@ -162,6 +164,8 @@ export default function Index() {
                 placeholder="Enter Member Name"
                 onChangeText={memberInput}
                 value={member_input}
+                accessibilityLabel="Add new member name"
+                accessibilityHint="Type a name here then press the add button next to it"
               />
             ) : (
               <Input
@@ -175,7 +179,11 @@ export default function Index() {
               />
             )}
             {isMemberEmptyVisible && (
-              <Text style={{ ...styles.member_error, color: colors.error }}>
+              <Text
+                style={{ ...styles.member_error, color: colors.error }}
+                accessibilityLiveRegion="assertive"
+                accessibilityRole="alert"
+              >
                 Member name cannot be blank
               </Text>
             )}
@@ -186,6 +194,9 @@ export default function Index() {
                   backgroundColor: colors.primary,
                 }}
                 onPress={addTeamMember}
+                accessibilityRole="button"
+                accessibilityLabel="Add member"
+                accessibilityHint="Adds the typed name to your team list"
               >
                 <Ionicons name="add-outline" size={32} color={colors.text} />
               </Pressable>
@@ -193,7 +204,12 @@ export default function Index() {
           </View>
           <View style={styles.members}>
             {members_text.map((item) => (
-              <View key={item.id} style={styles.row}>
+              <View
+                key={item.id}
+                style={styles.row}
+                accessibilityRole="text"
+                accessibilityLabel={`Team member: ${item.name}`}
+              >
                 <Text style={styles.member_text}>{item.name}</Text>
                 <Pressable
                   id={item.id.toString()}
@@ -212,18 +228,33 @@ export default function Index() {
               </View>
             ))}
             {isMemberErrorVisible && (
-              <Text style={{ ...styles.member_error, color: colors.error }}>
+              <Text
+                style={{ ...styles.member_error, color: colors.error }}
+                accessibilityLiveRegion="assertive"
+                accessibilityRole="alert"
+              >
                 Need at least 1 team member
               </Text>
             )}
             {isMemberMaxVisible && (
-              <Text style={{ ...styles.member_error, color: colors.error }}>
+              <Text
+                style={{ ...styles.member_error, color: colors.error }}
+                accessibilityLiveRegion="polite"
+                accessibilityRole="alert"
+              >
                 {`Maximum team members is ${team.MAX_MEMBERS}`}
               </Text>
             )}
           </View>
         </Box>
-        <Button onPress={handleSubmit(createTeam)}>Create Team</Button>
+        <View
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel="Create Team"
+          accessibilityHint="Double tap to submit form and register your team"
+        >
+          <Button onPress={handleSubmit(createTeam)}>Create Team</Button>
+        </View>
       </View>
       <StatusBar hidden={true} />
     </View>

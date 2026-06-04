@@ -60,11 +60,14 @@ export default function Login() {
             color: colors.text,
           }}
           placeholder="Email"
+          nativeID="robo_username"
           placeholderTextColor={colors.text}
           onChangeText={setEmail}
           value={email}
           autoCapitalize="none"
           keyboardType="email-address"
+          accessibilityLabel="Email input field"
+          accessibilityHint="Enter your registered account email address"
         />
         <TextInput
           style={{
@@ -75,14 +78,20 @@ export default function Login() {
           placeholder="Password"
           placeholderTextColor={colors.text}
           secureTextEntry
+          nativeID="robo_password"
           onChangeText={setPassword}
           value={password}
+          accessibilityLabel="Password input field"
+          accessibilityHint="Enter your secret account password"
         />
         {error ? (
           <Text style={{ ...styles.error, color: colors.error }}>{error}</Text>
         ) : null}
 
         <TouchableOpacity
+          accessibilityRole="none"
+          accessibilityLabel="robo_login_button"
+          accessibilityState={{ disabled: loading }}
           style={{ ...styles.button, backgroundColor: colors.primary }}
           onPress={handleLogin}
           disabled={loading}
@@ -96,13 +105,23 @@ export default function Login() {
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={handleForgotPassword}>
+        <TouchableOpacity
+          accessibilityRole="none"
+          accessibilityLabel="Forgot password"
+          accessibilityHint="Triggers an email reset process using the input address provided above"
+          onPress={handleForgotPassword}
+        >
           <Text style={{ ...styles.link, color: colors.primary }}>
             Forgot password?
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push("/register")}>
+        <TouchableOpacity
+          accessibilityRole="none"
+          accessibilityLabel="Register"
+          accessibilityHint="Register new account"
+          onPress={() => router.push("/register")}
+        >
           <Text style={{ ...styles.link, color: colors.primary }}>
             Register Account
           </Text>

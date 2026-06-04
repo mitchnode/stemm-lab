@@ -30,6 +30,7 @@ export default function RecordActivity3() {
   const [permission, requestPermission] = useCameraPermissions();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
+  const [announcedAngle, setAnnouncedAngle] = useState(0);
 
   const [facing] = useState<CameraType>("back");
 
@@ -110,6 +111,9 @@ export default function RecordActivity3() {
           ...styles.permissionContainer,
           backgroundColor: colors.background,
         }}
+        accessible={true}
+        accessibilityRole="summary"
+        accessibilityLiveRegion="assertive"
       >
         <Text style={{ ...styles.text, color: colors.text }}>
           Requesting camera access…
@@ -125,6 +129,8 @@ export default function RecordActivity3() {
           ...styles.permissionContainer,
           backgroundColor: colors.background,
         }}
+        accessible={true}
+        accessibilityRole="alert"
       >
         <Text style={{ ...styles.title, color: colors.primary }}>
           Camera Access Required
@@ -132,7 +138,13 @@ export default function RecordActivity3() {
         <Text style={{ ...styles.text, color: colors.text }}>
           This app needs the camera to measure the paper bend angle.
         </Text>
-        <TouchableOpacity style={styles.button} onPress={requestPermission}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={requestPermission}
+          accessible={true}
+          accessibilityRole="none"
+          accessibilityLabel="Grant app system camera hardware access permissions"
+        >
           <Text style={styles.buttonText}>GRANT ACCESS</Text>
         </TouchableOpacity>
       </View>
@@ -140,7 +152,16 @@ export default function RecordActivity3() {
   }
 
   return (
-    <View style={{ ...styles.root, backgroundColor: colors.background }}>
+    <View
+      accessible={true}
+      accessibilityRole="image"
+      accessibilityLabel={
+        isCaptured
+          ? "Captured static preview image frame showing targeted paper curve trajectory."
+          : "Live camera view finder preview feed. Align the paper profile with the graphics overlay layer tools."
+      }
+      style={{ ...styles.root, backgroundColor: colors.background }}
+    >
       <ViewShot
         ref={viewShotRef}
         style={{
@@ -157,6 +178,7 @@ export default function RecordActivity3() {
             ref={cameraRef}
             style={StyleSheet.absoluteFill}
             facing={facing}
+            importantForAccessibility="no"
           />
         )}
         <AngleOverlay
@@ -167,7 +189,12 @@ export default function RecordActivity3() {
         />
       </ViewShot>
       <View style={styles.resultContainer}>
-        <View style={styles.angleBlock}>
+        <View
+          style={styles.angleBlock}
+          accessible={true}
+          accessibilityRole="none"
+          accessibilityLiveRegion="polite"
+        >
           <Text style={{ ...styles.angleLabel, color: colors.text }}>
             BEND ANGLE
           </Text>
@@ -186,12 +213,28 @@ export default function RecordActivity3() {
             maximumValue={90}
             value={currentAngleDeg}
             onValueChange={setCurrentAngleDeg}
+            onSlidingComplete={(value) => {
+              setAnnouncedAngle(Math.round(value));
+            }}
             minimumTrackTintColor={colors.primary}
             maximumTrackTintColor={colors.text}
             thumbTintColor={colors.primary}
             step={0.5}
+            accessible={true}
+            accessibilityRole="adjustable"
+            accessibilityLabel="Paper alignment calculation degree track bar"
+            accessibilityLabelledBy="sliderLabelId"
+            accessibilityValue={{
+              min: 0,
+              max: 90,
+              now: Math.round(currentAngleDeg),
+            }}
+            accessibilityHint="adjust bend angle degree"
           />
-          <View style={styles.sliderTicks}>
+          <View
+            style={styles.sliderTicks}
+            importantForAccessibility="no-hide-descendants"
+          >
             <Text style={{ ...styles.tickLabel, color: colors.text }}>0°</Text>
             <Text style={{ ...styles.tickLabel, color: colors.text }}>90°</Text>
           </View>
@@ -204,6 +247,10 @@ export default function RecordActivity3() {
               backgroundColor: colors.primary,
             }}
             onPress={handleReset}
+            accessible={true}
+            accessibilityRole="none"
+            accessibilityLabel="Reset workspace calculations"
+            accessibilityHint="Clears the current captured image cache and unfreezes the live camera feed"
           >
             <Text style={{ ...styles.buttonText }}>Reset</Text>
           </TouchableOpacity>
@@ -214,6 +261,10 @@ export default function RecordActivity3() {
                 backgroundColor: colors.success,
               }}
               onPress={record}
+              accessible={true}
+              accessibilityRole="none"
+              accessibilityLabel="Confirm and upload recorded video"
+              accessibilityHint="Captures viewshot image frame graphics"
             >
               <Text style={{ ...styles.buttonText }}>Record Result</Text>
             </TouchableOpacity>
@@ -224,6 +275,10 @@ export default function RecordActivity3() {
                 backgroundColor: colors.success,
               }}
               onPress={captureImage}
+              accessible={true}
+              accessibilityRole="none"
+              accessibilityLabel="Capture current view frame snapshot"
+              accessibilityHint="Snaps picture from active camera lens stream output"
             >
               <Text style={{ ...styles.buttonText }}>Capture</Text>
             </TouchableOpacity>

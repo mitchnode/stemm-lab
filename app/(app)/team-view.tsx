@@ -40,7 +40,7 @@ const TeamView = observer(() => {
   return (
     <View style={{ ...styles.screen, backgroundColor: colors.background }}>
       <Text style={{ ...styles.heading, color: colors.text }}>
-        Team Information
+        accessibilityRole="header" Team Information
       </Text>
       <View style={{ ...styles.box, backgroundColor: colors.surface }}>
         <View style={styles.info}>

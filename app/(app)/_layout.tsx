@@ -90,7 +90,7 @@ export default function AppLayout() {
           headerRight: () => (
             <Pressable
               onPress={toggleMenu}
-              accessibilityRole="button"
+              accessibilityRole="none"
               accessibilityLabel="Open sidebar menu"
               style={{ paddingHorizontal: 4 }}
             >
@@ -116,8 +116,8 @@ export default function AppLayout() {
               </Text>
               <TouchableOpacity
                 onPress={() => setIsTeamVisible(false)}
-                accessibilityLabel="Close team view overview"
-                accessibilityRole="button"
+                accessibilityRole="none"
+                accessibilityHint="Close the team view overview"
               >
                 <Ionicons
                   name="close-circle"
@@ -135,7 +135,12 @@ export default function AppLayout() {
             />
 
             <View style={styles.info}>
-              <View style={styles.row}>
+              <View
+                style={styles.row}
+                accessible={true}
+                accessibilityLabel={`Team ID: ${team.teamID}`}
+              >
+                {" "}
                 <Text style={[styles.bold_text, { color: colors.text }]}>
                   Team ID:
                 </Text>
@@ -144,7 +149,11 @@ export default function AppLayout() {
                 </Text>
               </View>
 
-              <View style={styles.row}>
+              <View
+                style={styles.row}
+                accessible={true}
+                accessibilityLabel={`Team Name: ${team.teamName}`}
+              >
                 <Text style={[styles.bold_text, { color: colors.text }]}>
                   Team name:
                 </Text>
@@ -153,7 +162,11 @@ export default function AppLayout() {
                 </Text>
               </View>
 
-              <View style={styles.row}>
+              <View
+                style={styles.row}
+                accessible={true}
+                accessibilityLabel={`Academic Year group: ${team.year}`}
+              >
                 <Text style={[styles.bold_text, { color: colors.text }]}>
                   Year:
                 </Text>
@@ -162,7 +175,11 @@ export default function AppLayout() {
                 </Text>
               </View>
 
-              <View style={styles.row}>
+              <View
+                style={styles.row}
+                accessible={true}
+                accessibilityLabel={`Team members count: ${team.members.length}`}
+              >
                 <Text style={[styles.bold_text, { color: colors.text }]}>
                   Members:
                 </Text>
@@ -175,6 +192,7 @@ export default function AppLayout() {
                         styles.members_text,
                         { color: colors.text },
                       ]}
+                      accessibilityLabel={`Member: ${item}`}
                     >
                       • {item}
                     </Text>
@@ -195,7 +213,13 @@ export default function AppLayout() {
       >
         <View style={styles.modalOverlay}>
           {/* Backdrop Tap to Close Dismiss Layer */}
-          <TouchableWithoutFeedback onPress={toggleMenu}>
+          <TouchableWithoutFeedback
+            onPress={toggleMenu}
+            accessible={true}
+            accessibilityRole="none"
+            accessibilityLabel={"side Drawer"}
+            accessibilityHint="opens and closes side drawer panel"
+          >
             <View style={styles.backdropDismiss} />
           </TouchableWithoutFeedback>
 
@@ -209,6 +233,9 @@ export default function AppLayout() {
                 transform: [{ translateX: slideAnim }],
               },
             ]}
+            accessible={true}
+            accessibilityRole="menu"
+            accessibilityLabel="Sidebar Navigation Menu Options"
           >
             <Text style={[styles.menuHeading, { color: colors.text }]}>
               Options Menu
@@ -230,15 +257,17 @@ export default function AppLayout() {
                 setIsTeamVisible(nextVisibilityState);
                 toggleMenu();
               }}
-              accessibilityRole="button"
+              accessibilityRole="none"
               accessibilityLabel="View or switch current active team summary card"
               accessibilityState={{ checked: isTeamVisible }}
+              accessibilityHint="Toggles the dynamic team profile"
             >
               <Ionicons
                 name="people-outline"
                 size={22}
                 color={colors.text}
                 style={styles.itemIcon}
+                importantForAccessibility="no"
               />
               <Text style={[styles.menuItemText, { color: colors.text }]}>
                 {isTeamVisible ? "Hide Team Info" : "View Team Info"}
@@ -269,15 +298,16 @@ export default function AppLayout() {
             <TouchableOpacity
               style={[styles.menuItem, { backgroundColor: colors.background }]}
               onPress={changeTheme}
-              accessibilityRole="togglebutton"
-              accessibilityLabel="Toggle app interface appearance color mode"
-              accessibilityHint={`Switches app environment display theme to ${isDark ? "Light Mode" : "Dark Mode"}`}
+              accessibilityRole="none"
+              accessibilityState={{ checked: isDark }}
+              accessibilityHint={`Switches UI container styles from dark mode to light mode configurations`}
             >
               <Ionicons
                 name={isDark ? "sunny-outline" : "moon-outline"}
                 size={22}
                 color={colors.text}
                 style={styles.itemIcon}
+                importantForAccessibility="no"
               />
               <Text style={[styles.menuItemText, { color: colors.text }]}>
                 {isDark ? "Light Theme" : "Dark Theme"}

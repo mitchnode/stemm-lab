@@ -37,14 +37,14 @@ export default function Index() {
     }); */
   };
 
-  const loadTeam = async () => {
-    if (user) await team.handleRestore(user.uid);
-    if (team) {
-      router.push("/(app)/activities_selection");
-    } else {
-      router.push("/(app)/team");
-    }
-  };
+  // const loadTeam = async () => {
+  //   if (user) await team.handleRestore(user.uid);
+  //   if (team) {
+  //     router.push("/(app)/activities_selection");
+  //   } else {
+  //     router.push("/(app)/team");
+  //   }
+  // };
 
   const clearTeam = async () => {
     try {
@@ -82,9 +82,9 @@ export default function Index() {
     }
   };
 
-  useEffect(() => {
-    loadTeam();
-  }, []);
+  // useEffect(() => {
+  //   loadTeam();
+  // }, []);
 
   if (!user) {
     return (
@@ -108,13 +108,13 @@ export default function Index() {
           }}
         >
           View Team
-        </Button>
+          {/* </Button>
 
-        <Button
+        {/* <Button
           onPress={() => {
             router.push("/activities_selection");
           }}
-        >
+        > */}
           Activities{" "}
         </Button>
         <Button onPress={changeTheme}>Switch theme</Button>

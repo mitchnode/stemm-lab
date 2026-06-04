@@ -95,7 +95,13 @@ export default function RecordActivity6_2() {
       style={{ ...styles.container, backgroundColor: colors.background }}
     >
       <GestureDetector gesture={gesture}>
-        <View style={[styles.field, { width, height }]}>
+        <View
+          style={[styles.field, { width, height }]}
+          accessible={motion === "ready" || motion === "moving"}
+          accessibilityRole="adjustable"
+          accessibilityLabel="Path Tracing Area"
+          accessibilityHint="Requires dragging a finger along with a moving circle."
+        >
           {motion === "done" && waypointCoords.length > 1 && (
             <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
               <Polyline
@@ -111,11 +117,18 @@ export default function RecordActivity6_2() {
           )}
 
           <View style={styles.header}>
-            <Text style={{ ...styles.title, color: colors.text }}>
+            <Text
+              style={{ ...styles.title, color: colors.text }}
+              accessibilityRole="header"
+            >
               PATH TRACING
             </Text>
             {bestTime !== null && (
-              <View style={[styles.statsRow]}>
+              <View
+                style={[styles.statsRow]}
+                accessible={true}
+                accessibilityLabel={`High Score is ${bestTime} milliseconds`}
+              >
                 <Text style={{ ...styles.statLabel, color: colors.text }}>
                   High Score:
                 </Text>
@@ -127,7 +140,12 @@ export default function RecordActivity6_2() {
           </View>
 
           {motion === "idle" && (
-            <View style={styles.centreOverlay}>
+            <View
+              style={styles.centreOverlay}
+              accessible={true}
+              accessibilityLiveRegion="polite"
+              accessibilityLabel="Loading activity configuration"
+            >
               <Text style={{ ...styles.text, color: colors.text }}>
                 <ActivityIndicator size="large" />
               </Text>
@@ -135,7 +153,13 @@ export default function RecordActivity6_2() {
           )}
 
           {motion === "ready" && (
-            <View style={styles.centreOverlay} pointerEvents="none">
+            <View
+              style={styles.centreOverlay}
+              pointerEvents="none"
+              accessible={true}
+              accessibilityLiveRegion="polite"
+              accessibilityLabel="Press and hold instructions. Keep your finger on the button as it moves around the screen."
+            >
               <Text style={{ ...styles.text, color: colors.text }}>
                 PRESS & HOLD
               </Text>
@@ -181,6 +205,13 @@ export default function RecordActivity6_2() {
                       shadowColor: colors.error,
                     },
                 ]}
+                accessible={true}
+                accessibilityRole="none"
+                accessibilityLabel={
+                  motion === "moving" && isMissing
+                    ? "Target button: Off Track"
+                    : "Target button: On Track"
+                }
               >
                 {/* <View
                     style={{
@@ -195,7 +226,16 @@ export default function RecordActivity6_2() {
           )}
 
           {motion === "done" && (
-            <View style={styles.resultOverlay}>
+            <View
+              style={styles.resultOverlay}
+              accessible={true}
+              accessibilityLiveRegion="assertive"
+              accessibilityLabel={
+                bestTime !== null && totalMissTime === bestTime
+                  ? `New High Score! Total time off path is ${totalMissTime} milliseconds`
+                  : `Total time off path is ${totalMissTime} milliseconds`
+              }
+            >
               <Text style={{ ...styles.text, color: colors.text }}>
                 TOTAL TIME OFF PATH
               </Text>
@@ -217,6 +257,10 @@ export default function RecordActivity6_2() {
                     backgroundColor: colors.primary,
                   }}
                   onPress={start}
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel="Retry"
+                  accessibilityHint="Restarts the path tracing activity"
                 >
                   <Text style={{ ...styles.buttonText }}>Retry</Text>
                 </TouchableOpacity>
@@ -226,6 +270,10 @@ export default function RecordActivity6_2() {
                     backgroundColor: colors.success,
                   }}
                   onPress={record}
+                  accessible={true}
+                  accessibilityRole="button"
+                  accessibilityLabel="Record Result"
+                  accessibilityHint="Saves this tracing score and transfers to the main results breakdown"
                 >
                   <Text style={{ ...styles.buttonText }}>Record Result</Text>
                 </TouchableOpacity>

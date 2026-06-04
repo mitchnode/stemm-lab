@@ -49,7 +49,14 @@ const NumericStepper: React.FC<NumericStepperProps> = ({
   const decrement = () => onChange(Math.max(5, value - 5));
 
   return (
-    <View style={styles.stepperContainer}>
+    <View
+      style={styles.stepperContainer}
+      accessible={true}
+      accessibilityRole="adjustable"
+      accessibilityLabel="Target recording duration"
+      accessibilityValue={{ text: `${value} seconds` }}
+      accessibilityHint="Use the plus or minus buttons to alter the runtime limit length in five second steps."
+    >
       <TouchableOpacity
         style={[
           styles.stepperButton,
@@ -58,6 +65,9 @@ const NumericStepper: React.FC<NumericStepperProps> = ({
         ]}
         onPress={decrement}
         disabled={disabled}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel="Decrease time calculation by 5 seconds"
       >
         <Text style={{ color: colors.text }}>-</Text>
       </TouchableOpacity>
@@ -67,6 +77,7 @@ const NumericStepper: React.FC<NumericStepperProps> = ({
           styles.large_font,
           { color: colors.text, marginHorizontal: 20 },
         ]}
+        importantForAccessibility="no"
       >
         {value}s
       </Text>
@@ -79,6 +90,9 @@ const NumericStepper: React.FC<NumericStepperProps> = ({
         ]}
         onPress={increment}
         disabled={disabled}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel="Increase time calculation by 5 seconds"
       >
         <Text style={{ color: colors.text, fontWeight: "bold" }}>+</Text>
       </TouchableOpacity>
@@ -125,6 +139,7 @@ export default function RecordActivity7() {
   const smoothedZRef = useRef(0);
   const velocityRef = useRef(0);
   const positionRef = useRef(0);
+  const [isPreparing, setIsPreparing] = useState(false);
 
   const multiplier = reduceMotion ? 10 : 50;
 
@@ -162,6 +177,7 @@ export default function RecordActivity7() {
     Accelerometer.setUpdateInterval(20);
     const subscription = Accelerometer.addListener((data) => {
       accLiveRef.current = data;
+      setAccData(data);
 
       const gravityAlpha = 0.95;
       smoothedZRef.current =
@@ -187,13 +203,7 @@ export default function RecordActivity7() {
     await handleToggleRecording();
   };
 
-  useEffect(() => {
-    if (!isCountingDown && isActive && seconds === 0) {
-      playSound(); // Start alert
-    }
-  }, [isActive]);
-
-  const handleToggleRecording = async (forcedPoints?: DataPoint[]) => {
+  async function handleToggleRecording(forcedPoints?: DataPoint[]) {
     if (isCountingDown) return;
     if (isActive) {
       setIsActive(false);
@@ -228,7 +238,7 @@ export default function RecordActivity7() {
               const stringifiedData = JSON.stringify(points);
               result.setTeamID(team.teamID);
               result.setActivityID(ACTIVITY_ID);
-              const resultType = "Vibration (mm/s2)"; // <---------------------------------------------------- Modifiy resultType to suit sensor
+              const resultType = "mms/2"; // <---------------------------------------------------- Modifiy resultType to suit sensor
               const resultValue =
                 points.length > 0 ? points[points.length - 1].magnitude : 0; // <------------------------------------------- Modify resultValue
               result.setTeamID(team.teamID);
@@ -257,21 +267,38 @@ export default function RecordActivity7() {
           },
         ],
       );
-    } else {
-      setTimeout(() => {
-        velocityRef.current = 0;
-        positionRef.current = 0;
-        const initialZ = accLiveRef.current.z;
-        smoothedZRef.current = initialZ;
-        dataPointsRef.current = [];
-        tickRef.current = 0;
-        setChartPoints([]);
-        setSeconds(0);
-        setIsActive(true);
-        playSound();
-      }, 2500);
     }
-  };
+  }
+  function startRecording() {
+    if (isActive || isPreparing) return;
+
+    setIsPreparing(true);
+
+    setTimeout(() => {
+      const initialZ = accLiveRef.current.z;
+      smoothedZRef.current = initialZ;
+      dataPointsRef.current = [];
+      tickRef.current = 0;
+
+      setChartPoints([]);
+      setSeconds(0);
+      setIsPreparing(false);
+      setIsActive(true);
+      playSound();
+    }, 2500); // 2.5s delay countdown
+  }
+
+  function manualStopRecording() {
+    setIsActive(false);
+    handleToggleRecording(dataPointsRef.current);
+  }
+
+  function cancelRecording() {
+    setIsActive(false);
+    setIsPreparing(false);
+    setSeconds(0);
+    setChartPoints([]);
+  }
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -298,8 +325,13 @@ export default function RecordActivity7() {
         if (tickRef.current >= targetSeconds) {
           setIsActive(false);
           playSound();
-          stopRecording();
-          Alert.alert("Recording Complete", "Breathing pattern recorded.");
+
+          Alert.alert("Recording Complete", "Breathing pattern recorded.", [
+            {
+              text: "OK",
+              onPress: () => handleToggleRecording(dataPointsRef.current),
+            },
+          ]);
         }
       }, 200); // update every second
     }
@@ -308,15 +340,15 @@ export default function RecordActivity7() {
     };
   }, [isActive, targetSeconds]);
 
-  const cancelRecording = () => {
-    setIsActive(false);
-    setSeconds(0);
-    setChartPoints([]);
-  };
-
   const chartData = {
     labels:
-      chartPoints.length > 0 ? chartPoints.map((_, i) => `${i + 1}`) : ["0"],
+      chartPoints.length > 0
+        ? chartPoints.map((_, i) => {
+            const secondValue = (i + 1) / 5;
+            // Only show whole numbers on the label grid line axis
+            return secondValue % 1 === 0 ? `${secondValue}s` : "";
+          })
+        : ["0"],
     datasets: [
       {
         data:
@@ -336,6 +368,11 @@ export default function RecordActivity7() {
           onPress={changeTheme}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={{ alignSelf: "flex-end" }}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel={
+            isDark ? "Switch to light mode" : "Switch to dark mode"
+          }
         >
           <MaterialIcons
             name={isDark ? "wb-sunny" : "nights-stay"}
@@ -353,7 +390,12 @@ export default function RecordActivity7() {
         styles={styles}
       />
       <View style={[styles.screen, { backgroundColor: colors.background }]}>
-        <Text style={[styles.timerText, { color: colors.text }]}>
+        <Text
+          style={[styles.timerText, { color: colors.text }]}
+          accessible={true}
+          accessibilityLiveRegion="polite"
+          accessibilityLabel={`Recording status: ${seconds} seconds elapsed out of ${targetSeconds} seconds total target.`}
+        >
           Recording: {seconds}s
         </Text>
 
@@ -362,7 +404,15 @@ export default function RecordActivity7() {
             styles.button,
             { backgroundColor: isActive ? "#ff0000" : "#4cd964" },
           ]}
-          onPress={() => handleToggleRecording()}
+          onPress={isActive ? () => handleToggleRecording() : startRecording}
+          accessible={true}
+          accessibilityRole="button"
+          accessibilityLabel={isActive ? "Stop Recording" : "Start Recording"}
+          accessibilityHint={
+            isActive
+              ? "Halts data intake and prompts to save calculations."
+              : "Initiates a two and a half second countdown sequence before tracking sensor input."
+          }
         >
           <Text style={[styles.buttonText, { color: colors.text }]}>
             {isActive ? "Stop Recording" : "Start Recording"}
@@ -372,54 +422,80 @@ export default function RecordActivity7() {
           <TouchableOpacity
             style={[styles.button, { backgroundColor: "#ff9500" }]}
             onPress={cancelRecording}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Cancel recording"
+            accessibilityHint="Discards currently tracked sensor accelerometer points and resets timeline numbers back to zero."
           >
             <Text style={styles.buttonText}>Cancel</Text>
           </TouchableOpacity>
         )}
-        {acc ? (
-          <View
-            style={[
-              styles.dataContainer,
-              {
-                backgroundColor: colors.background,
-                borderColor: colors.border,
-              },
-            ]}
+        <View
+          accessible={true}
+          accessibilityLabel="Total Magnitude over Time Graph Layout"
+          accessibilityHint={
+            chartPoints.length > 0
+              ? "Displaying changing linear accelerometer points on screen grid."
+              : "No plot points calculated yet."
+          }
+        >
+          <Text
+            style={[styles.graphHeader, { color: colors.text }]}
+            accessibilityRole="header"
           >
-            <Text style={[styles.header, { color: colors.text }]}>
-              Accelerometer Live Metrics
-            </Text>
-
-            <Text style={{ color: colors.text }}>
-              X: {(acc.x * 9806.65).toFixed(2)} mm
-            </Text>
-            <Text style={{ color: colors.text }}>
-              Y: {(acc.y * 9806.65).toFixed(2)} mm
-            </Text>
-            <Text style={{ color: colors.text }}>
-              Z: {(acc.z * 9806.65).toFixed(2)}mm
-            </Text>
-          </View>
-        ) : null}
-
-        <Text style={[styles.graphHeader, { color: colors.text }]}>
-          Total Magnitude (g) over Time
+            Total Magnitude (g) over Time
+          </Text>
+          {chartPoints.length > 0 && (
+            <View
+              accessibilityElementsHidden={true}
+              importantForAccessibility="no-hide-descendants"
+            >
+              <LineChart
+                data={chartData}
+                width={Dimensions.get("window").width - 32}
+                height={220}
+                chartConfig={{
+                  backgroundColor: colors.background,
+                  backgroundGradientFrom: colors.background,
+                  backgroundGradientTo: colors.surface || colors.background,
+                  color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
+                  labelColor: (opacity = 1) => colors.text,
+                }}
+                style={styles.chart}
+              />
+            </View>
+          )}
+        </View>
+      </View>
+      <View
+        style={[
+          styles.dataContainer,
+          {
+            backgroundColor: colors.background,
+            borderColor: colors.border,
+          },
+        ]}
+        accessible={true}
+        accessibilityLabel={`Accelerometer Live Metrics. X axis is ${(acc.x * 9806.65).toFixed(2)} millimeters. Y axis is ${(acc.y * 9806.65).toFixed(2)} millimeters. Z axis is ${(acc.z * 9806.65).toFixed(2)} millimeters.`}
+        accessibilityHint="Values update continuously as physical device coordinates shift."
+      >
+        <Text style={[styles.header, { color: colors.text }]}>
+          Accelerometer Live Metrics
         </Text>
-        {chartPoints.length > 0 && (
-          <LineChart
-            data={chartData}
-            width={Dimensions.get("window").width - 32}
-            height={220}
-            chartConfig={{
-              backgroundColor: colors.background,
-              backgroundGradientFrom: colors.background,
-              backgroundGradientTo: colors.surface || colors.background,
-              color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
-              labelColor: (opacity = 1) => colors.text,
-            }}
-            style={styles.chart}
-          />
-        )}
+        <View
+          accessibilityElementsHidden={true}
+          importantForAccessibility="no-hide-descendants"
+        >
+          <Text style={{ color: colors.text }}>
+            X: {(acc.x * 9806.65).toFixed(2)} mm
+          </Text>
+          <Text style={{ color: colors.text }}>
+            Y: {(acc.y * 9806.65).toFixed(2)} mm
+          </Text>
+          <Text style={{ color: colors.text }}>
+            Z: {(acc.z * 9806.65).toFixed(2)}mm
+          </Text>
+        </View>
       </View>
     </ScrollView>
   );

@@ -70,6 +70,7 @@ export default {
             "Allow $(PRODUCT_NAME) to access your microphone.",
         },
       ],
+      "expo-maps",
       "expo-asset",
       "react-native-video",
       [

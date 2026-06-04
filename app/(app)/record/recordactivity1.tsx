@@ -80,6 +80,19 @@ export default function MeasureDropScreen() {
   >("RULER_TOP");
   const PHYSICAL_RULER_CM = 30; // Your reference physical ruler size
 
+  const getInstructionText = () => {
+    if (activeMode === "RULER_TOP")
+      return "Tap the 0cm mark on the physical ruler";
+    if (activeMode === "RULER_BOTTOM")
+      return "Tap the 30cm mark on the physical ruler";
+    if (activeMode === "CHUTE_START")
+      return "Scrub video to release point, then tap bottom of toy Parachute";
+    if (activeMode === "CHUTE_END")
+      return "Scrub video to impact point, then tap bottom of toy Parachute";
+    if (activeMode === "CHUTE_BOUNCE")
+      return "Scrub video to peak rebound height, then tap same bottom of toy Parachute";
+    return "";
+  };
   //team loading logic
 
   const loadTeam = async () => {
@@ -276,6 +289,9 @@ export default function MeasureDropScreen() {
               },
             ]}
             onPress={handleRequestPermissions}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Grant system camera and microphone permissions"
           >
             <Text style={styles.btnText}>Grant Permissions</Text>
           </TouchableOpacity>
@@ -288,6 +304,8 @@ export default function MeasureDropScreen() {
           ref={cameraRef}
           style={StyleSheet.absoluteFill}
           mode="video"
+          accessible={true}
+          accessibilityLabel="Camera view finder preview display grid"
         />
 
         {/* recording overlay */}
@@ -297,6 +315,10 @@ export default function MeasureDropScreen() {
             <TouchableOpacity
               style={[styles.smallCircleBtn, { backgroundColor: "#333" }]}
               onPress={() => setIsRecordingMode(false)}
+              accessible={true}
+              accessibilityRole="button"
+              accessibilityLabel="Cancel recording mode"
+              accessibilityHint="Exits recording step and returns to analysis viewport panel"
             >
               <Text style={styles.btnText}>Cancel</Text>
             </TouchableOpacity>
@@ -308,6 +330,13 @@ export default function MeasureDropScreen() {
               isRecording && { borderColor: "#fff" },
             ]}
             onPress={isRecording ? stopRecording : startRecording}
+            accessible={true}
+            accessibilityRole="none"
+            accessibilityLabel={
+              isRecording
+                ? "Stop video recording shutter button"
+                : "Start capturing video sequence shutter button"
+            }
           >
             <View
               style={
@@ -323,7 +352,13 @@ export default function MeasureDropScreen() {
   // Render Canvas
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.headerInstructions}>
+      <View
+        style={styles.headerInstructions}
+        accessible={true}
+        accessibilityRole="none"
+        accessibilityLiveRegion="assertive" // Forces screen readers to announce instruction switches immediately
+        accessibilityLabel={`Active Mode setup step: ${activeMode.replace("_", " ")}. ${getInstructionText()}`}
+      >
         <Text style={[styles.instructionText, { color: "white" }]}>
           Current Mode: {activeMode.replace("_", " ")}
         </Text>
@@ -351,6 +386,7 @@ export default function MeasureDropScreen() {
             paused={isPaused}
             onLoad={(data) => setDuration(data.duration)}
             onProgress={(data) => setCurrentTime(data.currentTime)}
+            importantForAccessibility="no"
           />
         )}
 
@@ -358,6 +394,10 @@ export default function MeasureDropScreen() {
           activeOpacity={1}
           onPress={handleVideoTap}
           style={StyleSheet.absoluteFill}
+          accessible={true}
+          accessibilityRole="none"
+          accessibilityLabel="Video area"
+          accessibilityHint={`Double-tap to register mapping pinpoint data item for ${activeMode.replace("_", " ")}`}
         />
 
         {/* Anchors */}
@@ -372,6 +412,7 @@ export default function MeasureDropScreen() {
               },
             ]}
             pointerEvents="none"
+            importantForAccessibility="no-hide-descendants"
           />
         )}
         {rulerBottom && (
@@ -385,6 +426,7 @@ export default function MeasureDropScreen() {
               },
             ]}
             pointerEvents="none"
+            importantForAccessibility="no-hide-descendants"
           />
         )}
         {chuteStart && (
@@ -398,6 +440,7 @@ export default function MeasureDropScreen() {
               },
             ]}
             pointerEvents="none"
+            importantForAccessibility="no-hide-descendants"
           />
         )}
         {chuteEnd && (
@@ -411,6 +454,7 @@ export default function MeasureDropScreen() {
               },
             ]}
             pointerEvents="none"
+            importantForAccessibility="no-hide-descendants"
           />
         )}
         {bounce && (
@@ -424,12 +468,17 @@ export default function MeasureDropScreen() {
               },
             ]}
             pointerEvents="none"
+            importantForAccessibility="no-hide-descendants"
           />
         )}
       </View>
 
       <View style={styles.controllerUi}>
-        <View style={styles.timelineRow}>
+        <View
+          style={styles.timelineRow}
+          accessible={true}
+          accessibilityLabel={`Media Timeline playback track slider scrubber. Position at ${currentTime.toFixed(1)} seconds of total duration ${duration.toFixed(1)} seconds`}
+        >
           <Text style={{ color: colors.text }}>{currentTime.toFixed(1)}s</Text>
           <Slider
             style={styles.slider}
@@ -440,6 +489,7 @@ export default function MeasureDropScreen() {
             minimumTrackTintColor={colors.primary}
             maximumTrackTintColor={colors.text}
             thumbTintColor={colors.primary}
+            importantForAccessibility="no"
           />
           <Text style={{ color: colors.text }}>{duration.toFixed(1)}s</Text>
         </View>
@@ -448,6 +498,11 @@ export default function MeasureDropScreen() {
           <TouchableOpacity
             style={[styles.utilityBtn, { backgroundColor: colors.primary }]}
             onPress={() => setIsPaused(!isPaused)}
+            accessible={true}
+            accessibilityRole="none"
+            accessibilityLabel={
+              isPaused ? "Play analysis video" : "Pause video playback engine"
+            }
           >
             <Text style={styles.btnText}>{isPaused ? "Play" : "Pause"}</Text>
           </TouchableOpacity>
@@ -455,6 +510,10 @@ export default function MeasureDropScreen() {
           <TouchableOpacity
             style={[styles.utilityBtn, { backgroundColor: "#444" }]}
             onPress={resetCoordinates}
+            accessible={true}
+            accessibilityRole="none"
+            accessibilityLabel="Clear points"
+            accessibilityHint="Wipes all recorded mapping coordinate vectors"
           >
             <Text style={styles.btnText}>Clear Points</Text>
           </TouchableOpacity>
@@ -462,12 +521,22 @@ export default function MeasureDropScreen() {
           <TouchableOpacity
             style={[styles.utilityBtn, { backgroundColor: "#c62828" }]}
             onPress={() => setIsRecordingMode(true)}
+            accessible={true}
+            accessibilityRole="none"
+            accessibilityLabel="Retake video"
+            accessibilityHint="Discards active workspace cache file assets and restarts video capture"
           >
             <Text style={styles.btnText}>Retake</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.resultPanel}>
+        <View
+          style={styles.resultPanel}
+          accessible={true}
+          accessibilityRole="summary"
+          accessibilityLiveRegion="polite"
+          accessibilityLabel={`drop distance`}
+        >
           <View style={styles.metricColumn}>
             <Text style={styles.resultLabel}>DROP DISTANCE</Text>
             <Text style={[styles.resultValue, { color: colors.success }]}>
@@ -490,6 +559,11 @@ export default function MeasureDropScreen() {
             <TouchableOpacity
               style={[styles.utilityBtn, { backgroundColor: "green" }]}
               onPress={handleSaveVideo}
+              accessible={true}
+              accessibilityRole="none"
+              accessibilityState={{ busy: isUploading }}
+              accessibilityLabel="Upload video"
+              accessibilityHint="uploads video to storage"
             >
               <Text style={styles.btnText}>Save</Text>
             </TouchableOpacity>

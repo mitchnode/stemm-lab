@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Pressable Rendering CustomText renders correctly inside the map loop 1`] = `
+[
+  <Pressable
+    ref={null}
+  >
+    <Text
+      ref={null}
+      testID="lab-text-1"
+    >
+      Activity 1: Parachute Drop Challenge
+    </Text>
+  </Pressable>,
+  <Pressable
+    ref={null}
+  >
+    <Text
+      ref={null}
+      testID="lab-text-2"
+    >
+      Activity 2: Sound Pollution Hunter
+    </Text>
+  </Pressable>,
+  <Pressable
+    ref={null}
+  >
+    <Text
+      ref={null}
+      testID="lab-text-3"
+    >
+      Activity 3: Hand Fan Challenge
+    </Text>
+  </Pressable>,
+  <Pressable
+    ref={null}
+  >
+    <Text
+      ref={null}
+      testID="lab-text-4"
+    >
+      Activity 4: Earthquake-Resistant Structure
+    </Text>
+  </Pressable>,
+  <Pressable
+    ref={null}
+  >
+    <Text
+      ref={null}
+      testID="lab-text-5"
+    >
+      Activity 5: Human Performance Lab
+    </Text>
+  </Pressable>,
+  <Pressable
+    ref={null}
+  >
+    <Text
+      ref={null}
+      testID="lab-text-6"
+    >
+      Activity 6: Reaction Board Challenge
+    </Text>
+  </Pressable>,
+  <Pressable
+    ref={null}
+  >
+    <Text
+      ref={null}
+      testID="lab-text-7"
+    >
+      Activity 7: Breathing Pace Trainer
+    </Text>
+  </Pressable>,
+]
+`;

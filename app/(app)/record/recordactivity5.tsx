@@ -48,7 +48,12 @@ const NumericStepper: React.FC<NumericStepperProps> = ({
   const decrement = () => onChange(Math.max(5, value - 5));
 
   return (
-    <View style={styles.stepperContainer}>
+    <View
+      style={styles.stepperContainer}
+      accessible={true}
+      accessibilityRole="summary"
+      accessibilityLabel={`Target recording timer selector. Current value is ${value} seconds.`}
+    >
       <TouchableOpacity
         style={[
           styles.stepperButton,
@@ -57,8 +62,14 @@ const NumericStepper: React.FC<NumericStepperProps> = ({
         ]}
         onPress={decrement}
         disabled={disabled}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel="Decrease target duration by 5 seconds"
+        accessibilityState={{ disabled }}
       >
-        <Text style={{ color: colors.text }}>-</Text>
+        <Text style={{ color: colors.text }} importantForAccessibility="no">
+          -
+        </Text>
       </TouchableOpacity>
 
       <Text
@@ -78,6 +89,10 @@ const NumericStepper: React.FC<NumericStepperProps> = ({
         ]}
         onPress={increment}
         disabled={disabled}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel="Increase target duration by 5 seconds"
+        accessibilityState={{ disabled }}
       >
         <Text style={{ color: colors.text, fontWeight: "bold" }}>+</Text>
       </TouchableOpacity>
@@ -308,6 +323,9 @@ export default function RecordActivity5() {
           onPress={changeTheme}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           style={{ alignSelf: "flex-end" }}
+          accessible={true}
+          accessibilityRole="none"
+          accessibilityLabel={`Toggle color theme`}
         >
           <MaterialIcons
             name={isDark ? "wb-sunny" : "nights-stay"}
@@ -325,7 +343,12 @@ export default function RecordActivity5() {
         styles={styles}
       />
       <View style={[styles.screen, { backgroundColor: colors.background }]}>
-        <Text style={[styles.timerText, { color: colors.text }]}>
+        <Text
+          style={[styles.timerText, { color: colors.text }]}
+          accessible={true}
+          accessibilityLiveRegion="polite"
+          accessibilityLabel={`Elapsed time: ${seconds} seconds out of a total target of ${targetSeconds} seconds.`}
+        >
           Recording: {seconds}s
         </Text>
 
@@ -335,8 +358,18 @@ export default function RecordActivity5() {
             { backgroundColor: isActive ? "#ff0000" : "#4cd964" },
           ]}
           onPress={() => handleToggleRecording()}
+          accessible={true}
+          accessibilityRole="none"
+          accessibilityHint={
+            isActive
+              ? "Stops saving sensor metric data steps and processes final entries"
+              : "Starts capturing real time accelerometer streams"
+          }
         >
-          <Text style={[styles.buttonText, { color: colors.text }]}>
+          <Text
+            style={[styles.buttonText, { color: colors.text }]}
+            importantForAccessibility="no"
+          >
             {isActive ? "Stop Recording" : "Start Recording"}
           </Text>
         </TouchableOpacity>
@@ -344,6 +377,10 @@ export default function RecordActivity5() {
           <TouchableOpacity
             style={[styles.button, { backgroundColor: "#ff9500" }]}
             onPress={cancelRecording}
+            accessible={true}
+            accessibilityRole="button"
+            accessibilityLabel="Cancel Recording"
+            accessibilityHint="Discards all currently tracked sensor data metrics without uploading."
           >
             <Text style={styles.buttonText}>Cancel</Text>
           </TouchableOpacity>
@@ -358,18 +395,21 @@ export default function RecordActivity5() {
               },
             ]}
           >
-            <Text style={[styles.header, { color: colors.text }]}>
+            <Text
+              style={[styles.header, { color: colors.text }]}
+              importantForAccessibility="no"
+            >
               Accelerometer Live Metrics
             </Text>
 
-            <Text style={{ color: colors.text }}>
-              X: {(acc.x * 9806.65).toFixed(2)} mm
+            <Text style={{ color: colors.text }} importantForAccessibility="no">
+              X: {(acc.x * 9806.65).toFixed(0)} mm/s²
             </Text>
-            <Text style={{ color: colors.text }}>
-              Y: {(acc.y * 9806.65).toFixed(2)} mm
+            <Text style={{ color: colors.text }} importantForAccessibility="no">
+              Y: {(acc.y * 9806.65).toFixed(0)} mm/s²
             </Text>
-            <Text style={{ color: colors.text }}>
-              Z: {(acc.z * 9806.65).toFixed(2)}mm
+            <Text style={{ color: colors.text }} importantForAccessibility="no">
+              Z: {(acc.z * 9806.65).toFixed(0)} mm/s²
             </Text>
           </View>
         ) : null}
@@ -378,19 +418,27 @@ export default function RecordActivity5() {
           Total Magnitude (g) over Time
         </Text>
         {chartPoints.length > 0 && (
-          <LineChart
-            data={chartData}
-            width={Dimensions.get("window").width - 32}
-            height={220}
-            chartConfig={{
-              backgroundColor: colors.background,
-              backgroundGradientFrom: colors.background,
-              backgroundGradientTo: colors.surface || colors.background,
-              color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
-              labelColor: (opacity = 1) => colors.text,
-            }}
-            style={styles.chart}
-          />
+          <View
+            accessible={true}
+            accessibilityRole="image"
+            accessibilityLabelledBy="chartTitle"
+            accessibilityLabel={`Line chart displaying sensor tracking history. Current real-time trailing value is ${chartPoints[chartPoints.length - 1]?.magnitude.toFixed(2) || 0} magnitude units.`}
+            style={{ width: "100%", alignItems: "center" }}
+          >
+            <LineChart
+              data={chartData}
+              width={Dimensions.get("window").width - 32}
+              height={220}
+              chartConfig={{
+                backgroundColor: colors.background,
+                backgroundGradientFrom: colors.background,
+                backgroundGradientTo: colors.surface || colors.background,
+                color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
+                labelColor: (opacity = 1) => colors.text,
+              }}
+              style={styles.chart}
+            />
+          </View>
         )}
       </View>
     </ScrollView>
