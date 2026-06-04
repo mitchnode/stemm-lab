@@ -555,6 +555,7 @@ export default function MeasureDropScreen() {
               {metrics.bounce}
             </Text>
           </View>
+          </View>
           {bounce && (
             <TouchableOpacity
               style={[styles.utilityBtn, { backgroundColor: "green" }]}
@@ -568,7 +569,7 @@ export default function MeasureDropScreen() {
               <Text style={styles.btnText}>Save</Text>
             </TouchableOpacity>
           )}
-        </View>
+        
       </View>
     </View>
   );
